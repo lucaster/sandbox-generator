@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sandbox Generator - Vue CDN</title>
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <h1>{{ message }}</h1>
+    </div>
+
+    <script
+      src="https://unpkg.com/vue@3/dist/vue.global.js"
+      onerror="document.getElementById('app').innerHTML = '<div class=\'error\'><strong>Error:</strong> Failed to load Vue.js. Please check your internet connection.</div>';"
+    ></script>
+
+    <script>
+      const { createApp, ref } = Vue;
+
+      const app = {
+        setup() {
+          const message = ref("Hello vue!");
+          return {
+            message,
+          };
+        },
+      };
+
+      createApp(app).mount("#app");
+    </script>
+  </body>
+</html>
