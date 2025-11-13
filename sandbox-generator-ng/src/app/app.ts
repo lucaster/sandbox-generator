@@ -1,9 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { GithubIconComponent } from './components/github-icon/github-icon.component';
+import { TwitterIcon } from './components/twitter-icon/twitter-icon';
+import { YoutubeIcon } from './components/youtube-icon/youtube-icon';
+import { AngularLogo } from './components/angular-logo/angular-logo';
+import { ExtLinkIcon } from './components/ext-link-icon/ext-link-icon';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, GithubIconComponent, TwitterIcon, YoutubeIcon, AngularLogo, ExtLinkIcon],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
