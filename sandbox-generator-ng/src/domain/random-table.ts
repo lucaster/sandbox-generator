@@ -1,5 +1,5 @@
 
-type Question = {
+type RandomTable = {
   id: number;
   title: string;
   options: Options;
@@ -11,10 +11,10 @@ type Options = {
 
 type OptionWithFollowUp = {
   text: string;
-  nextQuestion?: Options;
+  nextTable?: RandomTable;
 };
 
 // ... your existing code ...
 
-export { type Options, type OptionWithFollowUp, type Question };
+export { type Options, type OptionWithFollowUp, type RandomTable };
 

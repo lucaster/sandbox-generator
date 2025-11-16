@@ -1,8 +1,8 @@
 import { keyNum } from '../app/utils/object-utils';
 import { d } from '../dice/dice';
-import { Options, OptionWithFollowUp, type Question } from '../domain/questions';
+import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-table';
 
-const tableStartingHex: Question = {
+const tableStartingHex: RandomTable = {
   id: 0,
   title: 'Starting Hex Terrain',
   options: {
@@ -29,7 +29,7 @@ function calcStartingHex(rollFn: (faces: number) => number = d): string {
   return result.text;
 }
 
-const tableNextHex: Question = {
+const tableNextHex: RandomTable = {
   id: 1,
   title: 'Next Hex Terrain',
   options: {
@@ -48,6 +48,7 @@ const tableNextHex: Question = {
 
 // accept a roll function so tests can supply deterministic values
 function calcNextHex(previousHex: string, rollFn: (faces: number) => number = d): string {
+  const table = tableNextHex;
   const rolled = rollFn(10);
   if (rolled <= 5) {
     const nextHex = previousHex;
@@ -55,7 +56,7 @@ function calcNextHex(previousHex: string, rollFn: (faces: number) => number = d)
     return nextHex;
   }
   else {
-    const nextHex = tableNextHex.options[rolled];
+    const nextHex = table.options[rolled];
     console.info(`${previousHex} -> ${rolled} -> ${nextHex}`);
     return nextHex as string;
   }

@@ -1,4 +1,4 @@
-import { calcNextHex, nextHex, startingHex } from './data';
+import { calcNextHex, tableNextHex as nextHex, tableStartingHex as startingHex } from './data';
 
 describe('data.ts', () => {
   it('exports startingHex and nextHex with 10 options each and expected entries', () => {
