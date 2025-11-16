@@ -1,26 +1,20 @@
-type OptionWithFollowUp = {
-  text: string;
-  nextQuestion?: Question;
-};
 
 type Question = {
+  id: number;
+  title: string;
+  options: Options;
+};
+
+type Options = {
   [key: number]: string | OptionWithFollowUp;
 };
 
-const q1: Question = {
-  1: 'a',
-  2: 'b',
-  3: 'c',
+type OptionWithFollowUp = {
+  text: string;
+  nextQuestion?: Options;
 };
-
-const q1_3: Question = {
-  1: 'd',
-  2: 'e',
-};
-
-(q1[4] as OptionWithFollowUp).nextQuestion = q1_3;
 
 // ... your existing code ...
 
-export type { OptionWithFollowUp, Question };
-export { q1, q1_3 };
+export { type Options, type OptionWithFollowUp, type Question };
+

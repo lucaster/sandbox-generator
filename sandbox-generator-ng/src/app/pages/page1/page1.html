@@ -1,1 +1,8 @@
-<p>page1 works!</p>
+<p>
+  <button (click)="onSelectStartingHex()">{{ startingHex.title }}</button>
+  <span>{{ startingHexResult }}</span>
+</p>
+
+@if (startingHexResult) {
+<p>Second Hex: {{ calcNextHex(startingHexResult) }}</p>
+}
