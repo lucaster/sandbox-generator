@@ -1,28 +1,31 @@
 import { Component, Output } from '@angular/core';
-import { calcNextHex, startingHex } from '../../../data/data';
+import { calcNextHex, tableStartingHex, calcHexes, randomOption} from '../../../data/data';
 import { d } from '../../../dice/dice';
-import { Question } from '../../../domain/questions';
+import { Options, Question } from '../../../domain/questions';
+import { keyNum } from '../../utils/object-utils';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-page1',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './page1.html',
   styleUrl: './page1.scss',
 })
 export class Page1 {
 
-  @Output() startingHexResult: string = '';
-
-  readonly startingHex: Question = startingHex;
+  readonly tableStartingHex = tableStartingHex;
+  startingHexResult: string = '';
+  nextHexResult: string = '';
+  hexes: { [key: number]: string } = {};
 
   onSelectStartingHex() {
     this.startingHexResult = this.selectStartingHex();
+    this.nextHexResult = this.calcNextHex(this.startingHexResult);
   }
 
   selectStartingHex(): string {
-    const faces: number = this.keyNum(this.startingHex.options);
-    const key: number = d(faces);
-    const result = this.startingHex.options[key];
+    const options = tableStartingHex.options;
+    const result = randomOption(options);
     if (typeof result === 'string') {
       return result;
     }
@@ -31,11 +34,9 @@ export class Page1 {
     }
   }
 
-  calcNextHex(previousHex: string): string {
-    return calcNextHex(previousHex);
-  }
+  calcNextHex = calcNextHex;
 
-  private keyNum(obj: object): number {
-    return Object.keys(obj).length;
+  onCalcHexes() {
+    this.hexes = calcHexes();
   }
 }

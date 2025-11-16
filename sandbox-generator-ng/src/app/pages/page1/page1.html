@@ -1,8 +1,15 @@
-<p>
-  <button (click)="onSelectStartingHex()">{{ startingHex.title }}</button>
-  <span>{{ startingHexResult }}</span>
-</p>
+<div>
+  <p>
+    <button (click)="onSelectStartingHex()">{{ tableStartingHex.title }}</button>
+    <span>{{ startingHexResult }}</span>
+  </p>
 
-@if (startingHexResult) {
-<p>Second Hex: {{ calcNextHex(startingHexResult) }}</p>
-}
+  @if (startingHexResult) {
+  <p>Second Hex: {{ nextHexResult }}</p>
+  }
+</div>
+
+<div>
+  <button (click)="onCalcHexes()">Calculate Hexes</button>
+  <pre>{{ hexes | json }}</pre>
+</div>

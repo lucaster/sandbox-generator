@@ -1,7 +1,8 @@
+import { keyNum } from '../app/utils/object-utils';
 import { d } from '../dice/dice';
-import { type Question } from '../domain/questions';
+import { Options, OptionWithFollowUp, type Question } from '../domain/questions';
 
-const startingHex: Question = {
+const tableStartingHex: Question = {
   id: 0,
   title: 'Starting Hex Terrain',
   options: {
@@ -18,7 +19,17 @@ const startingHex: Question = {
   },
 };
 
-const nextHex: Question = {
+function calcStartingHex(rollFn: (faces: number) => number = d): string {
+  const faces: number = keyNum(tableStartingHex.options);
+  const key: number = rollFn(faces);
+  const result = tableStartingHex.options[key];
+  if (typeof result === 'string') {
+    return result;
+  }
+  return result.text;
+}
+
+const tableNextHex: Question = {
   id: 1,
   title: 'Next Hex Terrain',
   options: {
@@ -37,11 +48,17 @@ const nextHex: Question = {
 
 // accept a roll function so tests can supply deterministic values
 function calcNextHex(previousHex: string, rollFn: (faces: number) => number = d): string {
-  const sameHexChance = rollFn(10);
-  if (sameHexChance <= 5) {
-    return previousHex;
+  const rolled = rollFn(10);
+  if (rolled <= 5) {
+    const nextHex = previousHex;
+    console.info(`${previousHex} -> ${rolled} -> ${nextHex} (same)`);
+    return nextHex;
   }
-  return nextHex.options[sameHexChance] as string;
+  else {
+    const nextHex = tableNextHex.options[rolled];
+    console.info(`${previousHex} -> ${rolled} -> ${nextHex}`);
+    return nextHex as string;
+  }
 }
 
 const currHexNextHex = [
@@ -64,5 +81,30 @@ const currHexNextHex = [
   { cur: 16, next: 17 },
 ];
 
-export { calcNextHex, nextHex, startingHex };
+function calcHexes(rollFn: (faces: number) => number = d): { [key: number]: string } {
+  const result: { [key: number]: string } = {
+    1: calcStartingHex(),
+  }
+  for (const item of currHexNextHex) {
+    const nextHexResult = calcNextHex(result[item.cur], rollFn);
+    result[item.next] = nextHexResult;
+    console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
+  }
+  return result;
+}
 
+function randomOption(options: Options): string | OptionWithFollowUp {
+  const faces: number = keyNum(options);
+  const key: number = d(faces);
+  const result = options[key];
+  return result;
+}
+
+export {
+  tableStartingHex,
+  calcStartingHex,
+  tableNextHex,
+  calcNextHex,
+  calcHexes,
+  randomOption,
+};
