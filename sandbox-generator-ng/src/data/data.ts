@@ -109,23 +109,20 @@ function calcHexesTerrain(
   rollFn: (faces: number) => number = d
 ): { [key: number]: string } {
   return calcHexes(
-    calcStartingHexTerrain,
-    calcNextHexTerrain,
-    rollFn
+    () => calcStartingHexTerrain(rollFn),
+    (previousHex) => calcNextHexTerrain(previousHex, rollFn),
   );
 }
 
-
 function calcHexes(
-  calcStartingHexFn: (rollFn: (faces: number) => number) => string,
-  calcNextHexFn: (previousHex: string, rollFn: (faces: number) => number) => string,
-  rollFn: (faces: number) => number,
+  calcStartingHexFn: () => string,
+  calcNextHexFn: (previousHex: string) => string,
 ) {
   const result: { [key: number]: string; } = {
-    1: calcStartingHexFn(rollFn),
+    1: calcStartingHexFn(),
   };
   for (const item of currHexNextHex) {
-    const nextHexResult = calcNextHexFn(result[item.cur], rollFn);
+    const nextHexResult = calcNextHexFn(result[item.cur]);
     result[item.next] = nextHexResult;
     console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
   }
