@@ -111,15 +111,19 @@ function calcHexesTerrain(
   rollFn: (faces: number) => number = d
 ): Hexes {
   return calcHexes(
-    () => calcStartingHexTerrain(rollFn),
-    (previousHex) => calcNextHexTerrain(previousHex, rollFn),
+    tableStartingHexTerrain,
+    tableNextHexTerrain,
+    rollFn,
   );
 }
 
 function calcHexes(
-  calcStartingHexFn: () => string,
-  calcNextHexFn: (previousHex: string) => string,
-) {
+  tableStartingHex: RandomTable,
+  tableNextHex: RandomTable,
+  rollFn: (faces: number) => number = d,
+): Hexes {
+  var calcStartingHexFn = () => calcStartingHex(tableStartingHex, rollFn);
+  var calcNextHexFn = (previousHex: string) => calcNextHex(previousHex, tableNextHex, rollFn);
   const result: Hexes = {
     1: calcStartingHexFn(),
   };
@@ -129,21 +133,6 @@ function calcHexes(
     console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
   }
   return result;
-}
-
-function calcHexesGeneric(
-  tableStartingHexTerrain: RandomTable,
-  tableNextHexTerrain: RandomTable,
-  rollFn: (faces: number) => number = d,
-): Hexes {
-  var calcStartingHexTerrain = (rollFn: (faces: number) => number) => calcStartingHex(tableStartingHexTerrain, rollFn);
-  var calcNextHexTerrain = (previousHex: string, rollFn: (faces: number) => number) => calcNextHex(previousHex, tableNextHexTerrain, rollFn);
-  var calcStartingHexFn = () => calcStartingHexTerrain(rollFn);
-  var calcNextHexFn = (previousHex: string) => calcNextHexTerrain(previousHex, rollFn);
-  return calcHexes(
-    calcStartingHexFn,
-    calcNextHexFn,
-  );
 }
 
 function randomOption(
@@ -157,8 +146,11 @@ function randomOption(
 }
 
 export {
+  calcHexes,
   calcHexesTerrain,
+  calcNextHex,
   calcNextHexTerrain,
+  calcStartingHex,
   calcStartingHexTerrain,
   randomOption,
   tableNextHexTerrain,
