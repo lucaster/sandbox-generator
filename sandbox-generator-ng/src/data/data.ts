@@ -105,9 +105,11 @@ const currHexNextHex = [
   { cur: 16, next: 17 },
 ];
 
+type Hexes = { [key: number]: string; };
+
 function calcHexesTerrain(
   rollFn: (faces: number) => number = d
-): { [key: number]: string } {
+): Hexes {
   return calcHexes(
     () => calcStartingHexTerrain(rollFn),
     (previousHex) => calcNextHexTerrain(previousHex, rollFn),
@@ -118,7 +120,7 @@ function calcHexes(
   calcStartingHexFn: () => string,
   calcNextHexFn: (previousHex: string) => string,
 ) {
-  const result: { [key: number]: string; } = {
+  const result: Hexes = {
     1: calcStartingHexFn(),
   };
   for (const item of currHexNextHex) {
@@ -129,8 +131,23 @@ function calcHexes(
   return result;
 }
 
+function calcHexesGeneric(
+  tableStartingHexTerrain: RandomTable,
+  tableNextHexTerrain: RandomTable,
+  rollFn: (faces: number) => number = d,
+): Hexes {
+  var calcStartingHexTerrain = (rollFn: (faces: number) => number) => calcStartingHex(tableStartingHexTerrain, rollFn);
+  var calcNextHexTerrain = (previousHex: string, rollFn: (faces: number) => number) => calcNextHex(previousHex, tableNextHexTerrain, rollFn);
+  var calcStartingHexFn = () => calcStartingHexTerrain(rollFn);
+  var calcNextHexFn = (previousHex: string) => calcNextHexTerrain(previousHex, rollFn);
+  return calcHexes(
+    calcStartingHexFn,
+    calcNextHexFn,
+  );
+}
+
 function randomOption(
-  options: Options, 
+  options: Options,
   rollFn: (faces: number) => number = d
 ): string | OptionWithFollowUp {
   const faces: number = keyNum(options);
@@ -140,10 +157,12 @@ function randomOption(
 }
 
 export {
-  tableStartingHexTerrain,
-  calcStartingHexTerrain,
-  tableNextHexTerrain,
-  calcNextHexTerrain,
   calcHexesTerrain,
+  calcNextHexTerrain,
+  calcStartingHexTerrain,
   randomOption,
+  tableNextHexTerrain,
+  tableStartingHexTerrain,
+  type Hexes
 };
+
