@@ -17,7 +17,7 @@ export class Page1 {
   hexes: { [key: number]: string } = {};
 
   onSelectStartingHexTerrain() {
-    this.startingHexResult = calcStartingHexTerrain(this.tableStartingHexTerrain);
+    this.startingHexResult = calcStartingHexTerrain();
     this.nextHexResult = calcNextHexTerrain(this.startingHexResult);
   }
 

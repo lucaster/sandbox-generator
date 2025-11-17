@@ -20,7 +20,16 @@ const tableStartingHexTerrain: RandomTable = {
 };
 
 function calcStartingHexTerrain(
-  table: RandomTable = tableStartingHexTerrain,
+  rollFn: (faces: number) => number = d
+): string {
+  return calcStartingHex(
+    tableStartingHexTerrain,
+    rollFn
+  );
+}
+
+function calcStartingHex(
+  table: RandomTable,
   rollFn: (faces: number) => number = d
 ): string {
   const result = randomOption(table.options, rollFn);
@@ -47,9 +56,22 @@ const tableNextHexTerrain: RandomTable = {
   },
 };
 
-// accept a roll function so tests can supply deterministic values
-function calcNextHexTerrain(previousHex: string, rollFn: (faces: number) => number = d): string {
-  const table = tableNextHexTerrain;
+function calcNextHexTerrain(
+  previousHex: string,
+  rollFn: (faces: number) => number = d
+): string {
+  return calcNextHex(
+    previousHex,
+    tableNextHexTerrain,
+    rollFn
+  );
+}
+
+function calcNextHex(
+  previousHex: string,
+  table: RandomTable,
+  rollFn: (faces: number) => number = d
+): string {
   const rolled = rollFn(10);
   if (rolled <= 5) {
     const nextHex = previousHex;
@@ -83,12 +105,27 @@ const currHexNextHex = [
   { cur: 16, next: 17 },
 ];
 
-function calcHexesTerrain(rollFn: (faces: number) => number = d): { [key: number]: string } {
-  const result: { [key: number]: string } = {
-    1: calcStartingHexTerrain(),
-  }
+function calcHexesTerrain(
+  rollFn: (faces: number) => number = d
+): { [key: number]: string } {
+  return calcHexes(
+    calcStartingHexTerrain,
+    calcNextHexTerrain,
+    rollFn
+  );
+}
+
+
+function calcHexes(
+  calcStartingHexFn: (rollFn: (faces: number) => number) => string,
+  calcNextHexFn: (previousHex: string, rollFn: (faces: number) => number) => string,
+  rollFn: (faces: number) => number,
+) {
+  const result: { [key: number]: string; } = {
+    1: calcStartingHexFn(rollFn),
+  };
   for (const item of currHexNextHex) {
-    const nextHexResult = calcNextHexTerrain(result[item.cur], rollFn);
+    const nextHexResult = calcNextHexFn(result[item.cur], rollFn);
     result[item.next] = nextHexResult;
     console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
   }
