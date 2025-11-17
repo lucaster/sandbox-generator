@@ -129,7 +129,10 @@ function calcHexes(
   return result;
 }
 
-function randomOption(options: Options, rollFn: (faces: number) => number = d): string | OptionWithFollowUp {
+function randomOption(
+  options: Options, 
+  rollFn: (faces: number) => number = d
+): string | OptionWithFollowUp {
   const faces: number = keyNum(options);
   const key: number = rollFn(faces);
   const result = options[key];
