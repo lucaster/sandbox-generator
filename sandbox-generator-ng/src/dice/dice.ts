@@ -1,4 +1,3 @@
-
 function d(faces: number): number {
   return Math.floor(Math.random() * faces) + 1;
 }
@@ -28,4 +27,3 @@ const d3 = () => d(3);
 const d2 = () => d(2);
 
 export { d, d10, d12, d2, d20, d3, d4, d6, d8, dd, ddd };
-

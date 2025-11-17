@@ -1,35 +1,35 @@
-import { calcNextHex, tableNextHex as nextHex, tableStartingHex as startingHex } from './data';
+import { calcNextHexTerrain, tableNextHexTerrain, tableStartingHexTerrain } from './data';
 
 describe('data.ts', () => {
-  it('exports startingHex and nextHex with 10 options each and expected entries', () => {
-    expect(startingHex.id).toBe(0);
-    expect(startingHex.title).toBe('Starting Hex Terrain');
-    expect(Object.keys(startingHex.options).length).toBe(10);
-    expect(startingHex.options[1]).toBe('Grassland');
-    expect(startingHex.options[10]).toBe('Mountains');
+  it('exports tableStartingHexTerrain and tableNextHexTerrain with 10 options each and expected entries', () => {
+    expect(tableStartingHexTerrain.id).toBe(0);
+    expect(tableStartingHexTerrain.title).toBe('Starting Hex Terrain');
+    expect(Object.keys(tableStartingHexTerrain.options).length).toBe(10);
+    expect(tableStartingHexTerrain.options[1]).toBe('Grassland');
+    expect(tableStartingHexTerrain.options[10]).toBe('Mountains');
 
-    expect(nextHex.id).toBe(1);
-    expect(nextHex.title).toBe('Next Hex Terrain');
-    expect(Object.keys(nextHex.options).length).toBe(10);
-    expect(nextHex.options[6]).toBe('Grassland');
-    expect(nextHex.options[10]).toBe('Mountains');
+    expect(tableNextHexTerrain.id).toBe(1);
+    expect(tableNextHexTerrain.title).toBe('Next Hex Terrain');
+    expect(Object.keys(tableNextHexTerrain.options).length).toBe(10);
+    expect(tableNextHexTerrain.options[6]).toBe('Grassland');
+    expect(tableNextHexTerrain.options[10]).toBe('Mountains');
   });
 
   it('calcNextHex returns previousHex when roll <= 5', () => {
     const previous = 'CustomTerrain';
-    const result = calcNextHex(previous, () => 3);
+    const result = calcNextHexTerrain(previous, () => 3);
     expect(result).toBe(previous);
   });
 
-  it('calcNextHex returns mapped nextHex option when roll > 5', () => {
+  it('calcNextHex returns mapped tableNextHexTerrain option when roll > 5', () => {
     const previous = 'Whatever';
-    const result = calcNextHex(previous, () => 7);
-    expect(result).toBe(nextHex.options[7] as string);
+    const result = calcNextHexTerrain(previous, () => 7);
+    expect(result).toBe(tableNextHexTerrain.options[7] as string);
     expect(result).toBe('Forest');
   });
 
   it('calcNextHex handles boundary values (6 and 10)', () => {
-    expect(calcNextHex('X', () => 6)).toBe('Grassland');
-    expect(calcNextHex('X', () => 10)).toBe('Mountains');
+    expect(calcNextHexTerrain('X', () => 6)).toBe('Grassland');
+    expect(calcNextHexTerrain('X', () => 10)).toBe('Mountains');
   });
 });
