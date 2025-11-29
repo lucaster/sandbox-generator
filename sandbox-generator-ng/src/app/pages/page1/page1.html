@@ -1,15 +1,33 @@
-<div>
+<section>
+  <h2>Biome Tables</h2>
   <p>
-    <button (click)="onSelectStartingHexTerrain()">{{ tableStartingHexTerrain.title }}</button>
-    <span>{{ startingHexResult }}</span>
+    <button (click)="onSelectStartingHexBiome()">{{ tableStartingHexBiome.title }}</button>
+    <span>{{ startingHexBiomeResult }}</span>
   </p>
 
-  @if (startingHexResult) {
-  <p>Second Hex: {{ nextHexResult }}</p>
+  @if (startingHexBiomeResult) {
+  <p>Second Hex: {{ nextHexBiomeResult }}</p>
   }
-</div>
 
-<div>
-  <button (click)="onCalcHexesTerrain()">Calculate Hexes</button>
-  <pre>{{ hexes | json }}</pre>
-</div>
+  <div>
+    <button (click)="onCalcHexesBiome()">Calculate Hexes for Biomes</button>
+    <pre>{{ hexesBiome | json }}</pre>
+  </div>
+</section>
+
+<section>
+  <h2>Feature Tables</h2>
+  <p>
+    <button (click)="onSelectStartingHexFeature()">{{ tableStartingHexFeature.title }}</button>
+    <span>{{ startingHexFeatureResult }}</span>
+  </p>
+
+  @if (startingHexFeatureResult) {
+  <p>Second Hex: {{ nextHexFeatureResult }}</p>
+  }
+
+  <div>
+    <button (click)="onCalcHexesFeature()">Calculate Hexes for Features</button>
+    <pre>{{ hexesFeature | json }}</pre>
+  </div>
+</section>

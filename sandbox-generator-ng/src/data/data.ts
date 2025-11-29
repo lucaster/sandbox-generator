@@ -2,9 +2,9 @@ import { keyNum } from '../app/utils/object-utils';
 import { d } from '../dice/dice';
 import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-table';
 
-const tableStartingHexTerrain: RandomTable = {
+const tableStartingHexBiome: RandomTable = {
   id: 0,
-  title: 'Starting Hex Terrain',
+  title: 'Starting Hex Biome',
   options: {
     1: 'Grassland',
     2: 'Grassland',
@@ -19,11 +19,28 @@ const tableStartingHexTerrain: RandomTable = {
   },
 };
 
-function calcStartingHexTerrain(
+function calcStartingHexBiome(
   rollFn: (faces: number) => number = d
 ): string {
   return calcStartingHex(
-    tableStartingHexTerrain,
+    tableStartingHexBiome,
+    rollFn
+  );
+}
+
+const tableStartingHexFeature: RandomTable = {
+  id: 1,
+  title: 'Starting Hex Feature',
+  options: {
+    1: 'Village',
+  }
+};
+
+function calcStartingHexFeature(
+  rollFn: (faces: number) => number = d
+): string {
+  return calcStartingHex(
+    tableStartingHexFeature,
     rollFn
   );
 }
@@ -39,9 +56,9 @@ function calcStartingHex(
   return result.text;
 }
 
-const tableNextHexTerrain: RandomTable = {
-  id: 1,
-  title: 'Next Hex Terrain',
+const tableNextHexBiome: RandomTable = {
+  id: 2,
+  title: 'Next Hex Biome',
   options: {
     1: 'Same as previous hex',
     2: 'Same as previous hex',
@@ -56,13 +73,35 @@ const tableNextHexTerrain: RandomTable = {
   },
 };
 
-function calcNextHexTerrain(
+function calcNextHexBiome(
   previousHex: string,
   rollFn: (faces: number) => number = d
 ): string {
   return calcNextHex(
     previousHex,
-    tableNextHexTerrain,
+    tableNextHexBiome,
+    rollFn
+  );
+}
+
+const tableNextHexFeature: RandomTable = {
+  id: 3,
+  title: 'Next Hex Feature',
+  options: {
+    1: 'Landmark',
+    2: 'Landmark',
+    3: 'Landmark',
+    4: 'Settlement',
+    5: 'Lair',
+    6: 'Dungeon',
+  },
+};
+
+function calcNextHexFeature(
+  rollFn: (faces: number) => number = d
+): string | OptionWithFollowUp {
+  return calcNextHexIndependentFromPreviews(
+    tableNextHexFeature,
     rollFn
   );
 }
@@ -83,6 +122,14 @@ function calcNextHex(
     console.info(`${previousHex} -> ${rolled} -> ${nextHex}`);
     return nextHex as string;
   }
+}
+
+
+function calcNextHexIndependentFromPreviews(
+  table: RandomTable,
+  rollFn: (faces: number) => number = d
+): string | OptionWithFollowUp {
+  return randomOption(table.options, rollFn);
 }
 
 const currHexNextHex = [
@@ -107,12 +154,22 @@ const currHexNextHex = [
 
 type Hexes = { [key: number]: string; };
 
-function calcHexesTerrain(
+function calcHexesBiome(
   rollFn: (faces: number) => number = d
 ): Hexes {
   return calcHexes(
-    tableStartingHexTerrain,
-    tableNextHexTerrain,
+    tableStartingHexBiome,
+    tableNextHexBiome,
+    rollFn,
+  );
+}
+
+function calcHexesFeature(
+  rollFn: (faces: number) => number = d
+): Hexes {
+  return calcHexes(
+    tableStartingHexFeature,
+    tableNextHexFeature,
     rollFn,
   );
 }
@@ -147,14 +204,19 @@ function randomOption(
 
 export {
   calcHexes,
-  calcHexesTerrain,
+  calcHexesBiome,
+  calcHexesFeature,
   calcNextHex,
-  calcNextHexTerrain,
+  calcNextHexBiome,
+  calcNextHexFeature,
   calcStartingHex,
-  calcStartingHexTerrain,
+  calcStartingHexBiome,
+  calcStartingHexFeature,
   randomOption,
-  tableNextHexTerrain,
-  tableStartingHexTerrain,
+  tableNextHexBiome,
+  tableNextHexFeature,
+  tableStartingHexBiome,
+  tableStartingHexFeature,
   type Hexes
 };
 

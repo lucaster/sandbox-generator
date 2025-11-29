@@ -1,6 +1,16 @@
-import { Component, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { calcStartingHexTerrain, calcNextHexTerrain, tableStartingHexTerrain, calcHexesTerrain, randomOption} from '../../../data/data';
+import { Component } from '@angular/core';
+import {
+  calcHexesBiome,
+  calcHexesFeature,
+  calcNextHexBiome,
+  calcNextHexFeature,
+  calcStartingHexBiome,
+  calcStartingHexFeature,
+  tableStartingHexBiome,
+  tableStartingHexFeature,
+} from '../../../data/data';
+import { OptionWithFollowUp } from '../../../domain/random-table';
 
 @Component({
   selector: 'app-page1',
@@ -10,18 +20,33 @@ import { calcStartingHexTerrain, calcNextHexTerrain, tableStartingHexTerrain, ca
 })
 export class Page1 {
 
-  readonly tableStartingHexTerrain = tableStartingHexTerrain;
+  readonly tableStartingHexBiome = tableStartingHexBiome;
 
-  startingHexResult: string = '';
-  nextHexResult: string = '';
-  hexes: { [key: number]: string } = {};
+  startingHexBiomeResult: string = '';
+  nextHexBiomeResult: string = '';
+  hexesBiome: { [key: number]: string } = {};
 
-  onSelectStartingHexTerrain() {
-    this.startingHexResult = calcStartingHexTerrain();
-    this.nextHexResult = calcNextHexTerrain(this.startingHexResult);
+  onSelectStartingHexBiome() {
+    this.startingHexBiomeResult = calcStartingHexBiome();
+    this.nextHexBiomeResult = calcNextHexBiome(this.startingHexBiomeResult);
   }
 
-  onCalcHexesTerrain() {
-    this.hexes = calcHexesTerrain();
+  onCalcHexesBiome() {
+    this.hexesBiome = calcHexesBiome();
+  }
+
+  readonly tableStartingHexFeature = tableStartingHexFeature;
+
+  startingHexFeatureResult: string = '';
+  nextHexFeatureResult: string | OptionWithFollowUp = '';
+  hexesFeature: { [key: number]: string } = {};
+
+  onSelectStartingHexFeature() {
+    this.startingHexFeatureResult = calcStartingHexFeature();
+    this.nextHexFeatureResult = calcNextHexFeature();
+  }
+
+  onCalcHexesFeature() {
+    this.hexesFeature = calcHexesFeature();
   }
 }
