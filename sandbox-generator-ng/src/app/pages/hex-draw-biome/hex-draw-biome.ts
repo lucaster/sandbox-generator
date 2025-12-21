@@ -218,4 +218,11 @@ export class HexDrawBiome implements AfterViewInit {
     svgDrawer.drawTextAtPoint(center_18, 18);
     svgDrawer.drawTextAtPoint(center_19, 19);
   }
+
+  resetSvg(): void {
+    const svg = this.svgElement.nativeElement;
+    while (svg.firstChild) {
+      svg.removeChild(svg.firstChild);
+    }
+  }
 }
