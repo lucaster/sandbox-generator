@@ -119,9 +119,6 @@ function downLeft(center) {
   return { x: center.x - (3 / 2) * r, y: center.y + h };
 }
 
-const svg = document.getElementById("svg");
-
-
 const center_01 = { x: 250, y: 250 };
 const center_02 = up(center_01);
 const center_03 = upRight(center_01);
@@ -162,6 +159,8 @@ const points_17 = hexPoints(center_17, r);
 const points_18 = hexPoints(center_18, r);
 const points_19 = hexPoints(center_19, r);
 
+const svg = document.getElementById("svg");
+
 drawPolygon(svg, points_01);
 drawPolygon(svg, points_02);
 drawPolygon(svg, points_03);
@@ -181,7 +180,6 @@ drawPolygon(svg, points_16);
 drawPolygon(svg, points_17);
 drawPolygon(svg, points_18);
 drawPolygon(svg, points_19);
-
 
 const biomeOpts = { width: 2.45 * h, height: 2.45 * h };
 drawImageAtPoint(svg, center_01, "forest.png", biomeOpts);
