@@ -19,7 +19,7 @@ const tableStartingHexBiome: RandomTable = {
   },
 };
 
-function biomeToImage(biome: string): string {
+function biomeToImagePath(biome: string): string {
   switch (biome) {
     case 'Grassland':
       return '/assets/images/grassland.png';
@@ -220,7 +220,7 @@ function randomOption(
 }
 
 export {
-  biomeToImage,
+  biomeToImagePath,
   calcHexes,
   calcHexesBiome,
   calcHexesFeature,

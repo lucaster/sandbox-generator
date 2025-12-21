@@ -6,7 +6,7 @@ import {
   input,
   ViewChild
 } from '@angular/core';
-import { biomeToImage, calcHexesBiome, Hexes } from '../../../data/data';
+import { biomeToImagePath, calcHexesBiome, Hexes } from '../../../data/data';
 import { SvgDrawer } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
@@ -31,6 +31,7 @@ export class HexDrawBiome implements AfterViewInit {
 
   drawBiomePatch() {
     const biomes: Hexes = calcHexesBiome();
+    console.log('biomes', biomes);
     const center_01 = { x: this.width() / 2, y: this.height() / 2 };
     const r = 50;
     const svg = this.svgElement.nativeElement;
@@ -85,9 +86,9 @@ export class HexDrawBiome implements AfterViewInit {
       const center = hexCenters[i];
       const hexagon = hexagons[i];
       const biome = biomes[n];
-      const imagePath = biomeToImage(biome);
+      const biomeImagePath = biomeToImagePath(biome);
       svgDrawer.drawPolygon(hexagon);
-      svgDrawer.drawImageAtPoint(center, imagePath, biomeOpts);
+      svgDrawer.drawImageAtPoint(center, biomeImagePath, biomeOpts);
       svgDrawer.drawTextAtPoint(center, n);
     }
   }
