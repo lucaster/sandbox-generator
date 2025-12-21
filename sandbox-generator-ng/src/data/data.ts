@@ -19,6 +19,23 @@ const tableStartingHexBiome: RandomTable = {
   },
 };
 
+function biomeToImage(biome: string): string {
+  switch (biome) {
+    case 'Grassland':
+      return '/assets/images/grassland.png';
+    case 'Forest':
+      return '/assets/images/forest.png';
+    case 'Hills':
+      return '/assets/images/hills.png';
+    case 'Marsh':
+      return '/assets/images/marsh.png';
+    case 'Mountains':
+      return '/assets/images/mountains.png';
+    default:
+      return '/assets/images/grassland.png';
+  }
+}
+
 function calcStartingHexBiome(
   rollFn: (faces: number) => number = d
 ): string {
@@ -124,7 +141,6 @@ function calcNextHex(
   }
 }
 
-
 function calcNextHexIndependentFromPreviews(
   table: RandomTable,
   rollFn: (faces: number) => number = d
@@ -203,6 +219,7 @@ function randomOption(
 }
 
 export {
+  biomeToImage,
   calcHexes,
   calcHexesBiome,
   calcHexesFeature,
@@ -216,7 +233,6 @@ export {
   tableNextHexBiome,
   tableNextHexFeature,
   tableStartingHexBiome,
-  tableStartingHexFeature,
-  type Hexes
+  tableStartingHexFeature, type Hexes
 };
 
