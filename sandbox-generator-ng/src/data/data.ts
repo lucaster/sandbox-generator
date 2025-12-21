@@ -166,6 +166,7 @@ const currHexNextHex = [
   { cur: 12, next: 13 },
   { cur: 14, next: 15 },
   { cur: 16, next: 17 },
+  { cur: 18, next: 19 },
 ];
 
 type Hexes = { [key: number]: string; };
