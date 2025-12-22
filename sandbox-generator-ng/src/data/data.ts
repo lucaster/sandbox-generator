@@ -1,23 +1,7 @@
 import { keyNum } from '../app/utils/object-utils';
 import { d } from '../dice/dice';
 import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-table';
-
-const tableStartingHexBiome: RandomTable = {
-  id: 0,
-  title: 'Starting Hex Biome',
-  options: {
-    1: 'Grassland',
-    2: 'Grassland',
-    3: 'Grassland',
-    4: 'Grassland',
-    5: 'Forest',
-    6: 'Forest',
-    7: 'Hills',
-    8: 'Hills',
-    9: 'Marsh',
-    10: 'Mountains',
-  },
-};
+import { tableNextHexBiome, tableNextHexFeature, tableStartingHexBiome, tableStartingHexFeature } from './random-tables';
 
 function biomeToImagePath(biome: string): string {
   switch (biome) {
@@ -45,14 +29,6 @@ function calcStartingHexBiome(
   );
 }
 
-const tableStartingHexFeature: RandomTable = {
-  id: 1,
-  title: 'Starting Hex Feature',
-  options: {
-    1: 'Village',
-  }
-};
-
 function calcStartingHexFeature(
   rollFn: (faces: number) => number = d
 ): string {
@@ -73,46 +49,16 @@ function calcStartingHex(
   return result.text;
 }
 
-const tableNextHexBiome: RandomTable = {
-  id: 2,
-  title: 'Next Hex Biome',
-  options: {
-    1: 'Same as previous hex',
-    2: 'Same as previous hex',
-    3: 'Same as previous hex',
-    4: 'Same as previous hex',
-    5: 'Same as previous hex',
-    6: 'Grassland',
-    7: 'Forest',
-    8: 'Hills',
-    9: 'Marsh',
-    10: 'Mountains',
-  },
-};
-
 function calcNextHexBiome(
   previousHex: string,
   rollFn: (faces: number) => number = d
 ): string {
-  return calcNextHex(
+  return calcNextHexDependentFromPrevious(
     previousHex,
     tableNextHexBiome,
     rollFn
   );
 }
-
-const tableNextHexFeature: RandomTable = {
-  id: 3,
-  title: 'Next Hex Feature',
-  options: {
-    1: 'Landmark',
-    2: 'Landmark',
-    3: 'Landmark',
-    4: 'Settlement',
-    5: 'Lair',
-    6: 'Dungeon',
-  },
-};
 
 function calcNextHexFeature(
   rollFn: (faces: number) => number = d
@@ -123,11 +69,12 @@ function calcNextHexFeature(
   );
 }
 
-function calcNextHex(
+function calcNextHexDependentFromPrevious(
   previousHex: string,
   table: RandomTable,
   rollFn: (faces: number) => number = d
 ): string {
+  // 50% chance to stay the same
   const rolled = rollFn(10);
   if (rolled <= 5) {
     const nextHex = previousHex;
@@ -197,7 +144,7 @@ function calcHexes(
   rollFn: (faces: number) => number = d,
 ): Hexes {
   var calcStartingHexFn = () => calcStartingHex(tableStartingHex, rollFn);
-  var calcNextHexFn = (previousHex: string) => calcNextHex(previousHex, tableNextHex, rollFn);
+  var calcNextHexFn = (previousHex: string) => calcNextHexDependentFromPrevious(previousHex, tableNextHex, rollFn);
   const result: Hexes = {
     1: calcStartingHexFn(),
   };
@@ -219,21 +166,27 @@ function randomOption(
   return result;
 }
 
+function calcHexRecursively(
+  table: RandomTable,
+  rollFn: (faces: number) => number = d
+): string {
+  const result = randomOption(table.options, rollFn);
+  if (typeof result === 'string') {
+    return result;
+  }
+  else {
+    return calcHexRecursively(result.nextTable!, rollFn);
+  }
+}
+
 export {
   biomeToImagePath,
-  calcHexes,
   calcHexesBiome,
   calcHexesFeature,
-  calcNextHex,
   calcNextHexBiome,
   calcNextHexFeature,
-  calcStartingHex,
   calcStartingHexBiome,
   calcStartingHexFeature,
-  randomOption,
-  tableNextHexBiome,
-  tableNextHexFeature,
-  tableStartingHexBiome,
-  tableStartingHexFeature, type Hexes
+  type Hexes
 };
 

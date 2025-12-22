@@ -11,7 +11,7 @@ type Options = {
 
 type OptionWithFollowUp = {
   text: string;
-  nextTable?: RandomTable;
+  nextTable: RandomTable;
 };
 
 // ... your existing code ...
