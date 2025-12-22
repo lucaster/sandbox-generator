@@ -42,6 +42,19 @@ export const tableNextHexBiome: RandomTable = {
   },
 };
 
+const settlementTable: RandomTable = {
+  id: 4,
+  title: 'Settlement',
+  options: {
+    1: 'Hamlet',
+    2: 'Village',
+    3: 'City',
+    4: 'Castle',
+    5: 'Tower',
+    6: 'Abbey',
+  }
+}
+
 export const tableNextHexFeature: RandomTable = {
   id: 3,
   title: 'Next Hex Feature',
@@ -49,7 +62,10 @@ export const tableNextHexFeature: RandomTable = {
     1: 'Landmark',
     2: 'Landmark',
     3: 'Landmark',
-    4: 'Settlement',
+    4: {
+      text: 'Settlement',
+      nextTable: settlementTable,
+    },
     5: 'Lair',
     6: 'Dungeon',
   },
