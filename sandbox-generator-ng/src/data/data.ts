@@ -121,11 +121,19 @@ type Hexes = { [key: number]: string; };
 function calcHexesBiome(
   rollFn: (faces: number) => number = d
 ): Hexes {
-  return calcHexes(
-    tableStartingHexBiome,
-    tableNextHexBiome,
-    rollFn,
-  );
+  const tableStartingHex = tableStartingHexBiome;
+  const tableNextHex = tableNextHexBiome;
+  var calcStartingHexFn = () => calcStartingHex(tableStartingHex, rollFn);
+  var calcNextHexFn = (previousHex: string) => calcNextHexDependentFromPrevious(previousHex, tableNextHex, rollFn);
+  const result: Hexes = {
+    1: calcStartingHexFn(),
+  };
+  for (const item of currHexNextHex) {
+    const nextHexResult = calcNextHexFn(result[item.cur]);
+    result[item.next] = nextHexResult;
+    console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
+  }
+  return result;
 }
 
 function calcHexesFeature(
@@ -187,6 +195,8 @@ export {
   calcNextHexFeature,
   calcStartingHexBiome,
   calcStartingHexFeature,
+  tableNextHexBiome,
+  tableStartingHexBiome,
   type Hexes
 };
 
