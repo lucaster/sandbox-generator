@@ -183,8 +183,6 @@ export {
   calcNextHexFeature,
   calcStartingHexBiome,
   calcStartingHexFeature,
-  tableNextHexBiome,
-  tableStartingHexBiome,
   type Hexes
 };
 

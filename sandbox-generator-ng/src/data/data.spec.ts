@@ -1,4 +1,5 @@
-import { calcNextHexBiome, tableNextHexBiome, tableStartingHexBiome } from './data';
+import { calcNextHexBiome } from './data';
+import { tableNextHexBiome, tableStartingHexBiome } from './random-tables';
 
 describe('data.ts', () => {
   it('exports tableStartingHexBiome and tableNextHexBiome with 10 options each and expected entries', () => {
