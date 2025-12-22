@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { HelloAngular } from './components/hello-angular/hello-angular';
-import { HexDrawBiome } from './pages/hex-draw-biome/hex-draw-biome';
+import { HexDrawPatch } from './pages/hex-draw-patch/hex-draw-patch';
 import { HexDraw } from './pages/hex-draw/hex-draw';
 import { HoneycombSvg } from './pages/honeycomb-svg/honeycomb-svg';
 import { Honeycomb } from './pages/honeycomb/honeycomb';
@@ -38,7 +38,7 @@ export const routes: Routes = [
     component: HexDraw
   },
   {
-    path: 'hex-draw-biome',
-    component: HexDrawBiome
+    path: 'hex-draw-patch',
+    component: HexDrawPatch
   },
 ];

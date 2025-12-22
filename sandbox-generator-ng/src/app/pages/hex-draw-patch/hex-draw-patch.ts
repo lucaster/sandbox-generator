@@ -12,13 +12,13 @@ import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
 
 @Component({
-  selector: 'app-hex-draw-biome',
+  selector: 'app-hex-draw-patch',
   imports: [],
-  templateUrl: './hex-draw-biome.html',
-  styleUrl: './hex-draw-biome.scss',
+  templateUrl: './hex-draw-patch.html',
+  styleUrl: './hex-draw-patch.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HexDrawBiome implements AfterViewInit {
+export class HexDrawPatch implements AfterViewInit {
 
   width = input(500);
   height = input(500);
