@@ -6,7 +6,7 @@ import {
   input,
   ViewChild
 } from '@angular/core';
-import { biomeToImagePath, calcHexesBiome, Hexes } from '../../../data/data';
+import { calcHexesBiome, calcHexesFeature, Hexes, optionToImagePath } from '../../../data/data';
 import { SvgDrawer } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
@@ -35,16 +35,50 @@ export class HexDrawBiome implements AfterViewInit {
   }
 
   private drawBiomePatch() {
-    const biomes: Hexes = calcHexesBiome();
-    console.log('biomes', biomes);
-    const center_01 = { x: this.width() / 2, y: this.height() / 2 };
-    const r = 50;
     const svg = this.svgElement.nativeElement;
-
-    const hexOps = new HexOps(r);
-    const biomeOpts = { width: 2.45 * hexOps.h, height: 2.45 * hexOps.h };
     const svgDrawer = new SvgDrawer(svg);
+    const r = 50;
+    const hexOps = new HexOps(r);
+    const imageOpts = { width: 2.45 * hexOps.h, height: 2.45 * hexOps.h };
+    const hexes = calcHexesBiome();
+    this.asd(
+      svgDrawer,
+      hexOps,
+      optionToImagePath,
+      imageOpts,
+      hexes,
+    );
+  }
 
+  onDrawFeatureHexPatch() {
+    this.resetPatch();
+    this.drawFeatureHexPatch();
+  }
+
+  private drawFeatureHexPatch() {
+    const svg = this.svgElement.nativeElement;
+    const svgDrawer = new SvgDrawer(svg);
+    const r = 50;
+    const hexOps = new HexOps(r);
+    const imageOpts = { width: 50, height: 50 };
+    const hexes = calcHexesFeature();
+    this.asd(
+      svgDrawer,
+      hexOps,
+      optionToImagePath,
+      imageOpts,
+      hexes,
+    );
+  }
+
+  private asd(
+    svgDrawer: SvgDrawer,
+    hexOps: HexOps,
+    optionToImagePath: (option: string) => string,
+    imageOpts: { width: number; height: number; },
+    hexes: Hexes,
+  ) {
+    const center_01 = { x: this.width() / 2, y: this.height() / 2 };
     const center_02 = hexOps.up(center_01);
     const center_03 = hexOps.upRight(center_01);
     const center_04 = hexOps.downRight(center_01);
@@ -90,10 +124,11 @@ export class HexDrawBiome implements AfterViewInit {
       const n = i + 1;
       const center = hexCenters[i];
       const hexagon = hexagons[i];
-      const biome = biomes[n];
-      const biomeImagePath = biomeToImagePath(biome);
+      const option = hexes[n];
+      const imagePath = optionToImagePath(option);
+      console.log(`Hex ${n}: ${option} -> ${imagePath}`);
       svgDrawer.drawPolygon(hexagon);
-      svgDrawer.drawImageAtPoint(center, biomeImagePath, biomeOpts);
+      svgDrawer.drawImageAtPoint(center, imagePath, imageOpts);
       svgDrawer.drawTextAtPoint(center, n);
     }
   }
@@ -109,8 +144,8 @@ export class HexDrawBiome implements AfterViewInit {
     const svg = this.svgElement.nativeElement;
     const svgDrawer = new SvgDrawer(svg);
     const biomeOpts = { width: 2.45 * hexOps.h, height: 2.45 * hexOps.h };
-    const center_01 = { x: this.width() / 2, y: this.height() / 2 };
 
+    const center_01 = { x: this.width() / 2, y: this.height() / 2 };
     const center_02 = hexOps.up(center_01);
     const center_03 = hexOps.upRight(center_01);
     const center_04 = hexOps.downRight(center_01);
@@ -190,24 +225,26 @@ export class HexDrawBiome implements AfterViewInit {
     svgDrawer.drawImageAtPoint(center_18, '/assets/images/hills.png', biomeOpts);
     svgDrawer.drawImageAtPoint(center_19, '/assets/images/marsh.png', biomeOpts);
 
-    svgDrawer.drawImageAtPoint(center_01, '/assets/images/abbey.png');
-    svgDrawer.drawImageAtPoint(center_02, '/assets/images/castle.png');
-    svgDrawer.drawImageAtPoint(center_03, '/assets/images/city.png');
-    svgDrawer.drawImageAtPoint(center_04, '/assets/images/dungeon.png');
-    svgDrawer.drawImageAtPoint(center_05, '/assets/images/hamlet.png');
-    svgDrawer.drawImageAtPoint(center_06, '/assets/images/lair.png');
-    svgDrawer.drawImageAtPoint(center_07, '/assets/images/landmark.png');
-    svgDrawer.drawImageAtPoint(center_08, '/assets/images/tower.png');
-    svgDrawer.drawImageAtPoint(center_09, '/assets/images/village.png');
-    svgDrawer.drawImageAtPoint(center_11, '/assets/images/abbey.png');
-    svgDrawer.drawImageAtPoint(center_12, '/assets/images/castle.png');
-    svgDrawer.drawImageAtPoint(center_13, '/assets/images/city.png');
-    svgDrawer.drawImageAtPoint(center_14, '/assets/images/dungeon.png');
-    svgDrawer.drawImageAtPoint(center_15, '/assets/images/hamlet.png');
-    svgDrawer.drawImageAtPoint(center_16, '/assets/images/lair.png');
-    svgDrawer.drawImageAtPoint(center_17, '/assets/images/landmark.png');
-    svgDrawer.drawImageAtPoint(center_18, '/assets/images/tower.png');
-    svgDrawer.drawImageAtPoint(center_19, '/assets/images/village.png');
+    const featureOpts = { width: 50, height: 50 };
+
+    svgDrawer.drawImageAtPoint(center_01, '/assets/images/abbey.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_02, '/assets/images/castle.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_03, '/assets/images/city.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_04, '/assets/images/dungeon.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_05, '/assets/images/hamlet.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_06, '/assets/images/lair.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_07, '/assets/images/landmark.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_08, '/assets/images/tower.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_09, '/assets/images/village.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_11, '/assets/images/abbey.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_12, '/assets/images/castle.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_13, '/assets/images/city.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_14, '/assets/images/dungeon.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_15, '/assets/images/hamlet.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_16, '/assets/images/lair.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_17, '/assets/images/landmark.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_18, '/assets/images/tower.png', featureOpts);
+    svgDrawer.drawImageAtPoint(center_19, '/assets/images/village.png', featureOpts);
 
     svgDrawer.drawTextAtPoint(center_01, 1);
     svgDrawer.drawTextAtPoint(center_02, 2);

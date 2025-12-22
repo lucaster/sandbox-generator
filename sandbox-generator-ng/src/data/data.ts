@@ -3,22 +3,33 @@ import { d } from '../dice/dice';
 import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-table';
 import { tableNextHexBiome, tableNextHexFeature, tableStartingHexBiome, tableStartingHexFeature } from './random-tables';
 
-function biomeToImagePath(biome: string): string {
-  switch (biome) {
-    case 'Grassland':
-      return '/assets/images/grassland.png';
-    case 'Forest':
-      return '/assets/images/forest.png';
-    case 'Hills':
-      return '/assets/images/hills.png';
-    case 'Marsh':
-      return '/assets/images/marsh.png';
-    case 'Mountains':
-      return '/assets/images/mountains.png';
-    default:
-      return '/assets/images/grassland.png';
-  }
+function optionToImagePath(option: string): string {
+  const optionToImagePath: { [option: string]: string } = {
+    // Biome
+    'Grassland': '/assets/images/grassland.png',
+    'Forest': '/assets/images/forest.png',
+    'Hills': '/assets/images/hills.png',
+    'Marsh': '/assets/images/marsh.png',
+    'Mountains': '/assets/images/mountains.png',
+    // Landmarks
+    'Landmark': '/assets/images/landmark.png',
+    // Settlement
+    'Hamlet': '/assets/images/hamlet.png',
+    'Village': '/assets/images/village.png',
+    'City': '/assets/images/city.png',
+    'Castle': '/assets/images/castle.png',
+    'Tower': '/assets/images/tower.png',
+    'Abbey': '/assets/images/abbey.png',
+    // Lair
+    'Lair': '/assets/images/lair.png',
+    // Dungeon
+    'Dungeon': '/assets/images/dungeon.png',
+  };
+  const result = optionToImagePath[option];
+  return result;
 }
+
+
 
 function calcStartingHexBiome(
   rollFn: (faces: number) => number = d
@@ -76,7 +87,13 @@ function calcNextHexDependentFromPrevious(
     return previousHex;
   }
   else {
-    return calcHexRecursively(nextHexTable, rollFn);
+    const next = nextHexTable.options[rolled];
+    if (typeof next === 'string') {
+      return next;
+    }
+    else {
+      return calcHexRecursively(next.nextTable!, rollFn);
+    }
   }
 }
 
@@ -127,11 +144,23 @@ function calcHexesBiome(
 function calcHexesFeature(
   rollFn: (faces: number) => number = d
 ): Hexes {
-  return calcHexes(
-    tableStartingHexFeature,
-    tableNextHexFeature,
-    rollFn,
-  );
+  var calcStartingHexFn = () => calcStartingHex(tableStartingHexFeature, rollFn);
+  var calcNextHexFn = (previousHex: string) => calcNextHexIndependentFromPreviews(tableNextHexFeature, rollFn);
+  const result: Hexes = {
+    1: calcStartingHexFn(),
+  }
+  for (const item of currHexNextHex) {
+    const nextHexResult = calcNextHexFn(result[item.cur]);
+    result[item.next] = nextHexResult;
+    console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
+  }
+  return result;
+
+  // return calcHexes(
+  //   tableStartingHexFeature,
+  //   tableNextHexFeature,
+  //   rollFn,
+  // );
 }
 
 function calcHexes(
@@ -176,13 +205,13 @@ function randomOption(
 }
 
 export {
-  biomeToImagePath,
   calcHexesBiome,
   calcHexesFeature,
   calcNextHexBiome,
   calcNextHexFeature,
   calcStartingHexBiome,
   calcStartingHexFeature,
+  optionToImagePath,
   type Hexes
 };
 
