@@ -1,4 +1,4 @@
-import { type RandomTable } from '../domain/random-tables';
+import { type RandomTable } from '../domain/random-table';
 
 export const tableStartingHexBiome: RandomTable = {
   id: 0,

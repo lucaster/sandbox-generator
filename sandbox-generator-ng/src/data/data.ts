@@ -1,6 +1,6 @@
 import { keyNum } from '../app/utils/object-utils';
 import { d } from '../dice/dice';
-import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-tables';
+import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-table';
 import { tableNextHexBiome, tableNextHexFeature, tableStartingHexBiome, tableStartingHexFeature } from './random-tables';
 
 function biomeToImagePath(biome: string): string {

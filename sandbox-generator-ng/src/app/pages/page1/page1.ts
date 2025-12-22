@@ -9,7 +9,7 @@ import {
   calcStartingHexFeature,
 } from '../../../data/data';
 import { tableStartingHexBiome, tableStartingHexFeature } from '../../../data/random-tables';
-import { OptionWithFollowUp } from '../../../domain/random-tables';
+import { OptionWithFollowUp } from '../../../domain/random-table';
 
 @Component({
   selector: 'app-page1',
