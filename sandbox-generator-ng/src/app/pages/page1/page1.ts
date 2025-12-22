@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import {
-    calcHexesBiome,
-    calcHexesFeature,
-    calcNextHexBiome,
-    calcNextHexFeature,
-    calcStartingHexBiome,
-    calcStartingHexFeature,
+  calcHexesBiome,
+  calcHexesFeature,
+  calcNextHexBiome,
+  calcNextHexFeature,
+  calcStartingHexBiome,
+  calcStartingHexFeature,
 } from '../../../data/data';
 import { tableStartingHexBiome, tableStartingHexFeature } from '../../../data/random-tables';
-import { OptionWithFollowUp } from '../../../domain/random-table';
+import { OptionWithFollowUp } from '../../../domain/random-tables';
 
 @Component({
   selector: 'app-page1',
