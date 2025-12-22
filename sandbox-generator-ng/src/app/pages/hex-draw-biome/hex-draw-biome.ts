@@ -29,7 +29,12 @@ export class HexDrawBiome implements AfterViewInit {
     this.drawBiomePatch();
   }
 
-  drawBiomePatch() {
+  onDrawBiomePatch() {
+    this.resetPatch();
+    this.drawBiomePatch();
+  }
+
+  private drawBiomePatch() {
     const biomes: Hexes = calcHexesBiome();
     console.log('biomes', biomes);
     const center_01 = { x: this.width() / 2, y: this.height() / 2 };
@@ -93,7 +98,12 @@ export class HexDrawBiome implements AfterViewInit {
     }
   }
 
-  drawSampleHexPatch() {
+  onDrawSampleHexPatch() {
+    this.resetPatch();
+    this.drawSampleHexPatch();
+  }
+
+  private drawSampleHexPatch() {
     const r = 50;
     const hexOps = new HexOps(r);
     const svg = this.svgElement.nativeElement;
@@ -220,7 +230,11 @@ export class HexDrawBiome implements AfterViewInit {
     svgDrawer.drawTextAtPoint(center_19, 19);
   }
 
-  resetPatch() {
+  onResetPatch() {
+    this.resetPatch();
+  }
+
+  private resetPatch() {
     const svg = this.svgElement.nativeElement;
     while (svg.firstChild) {
       svg.removeChild(svg.firstChild);
