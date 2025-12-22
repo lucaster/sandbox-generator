@@ -126,6 +126,7 @@ const currHexNextHex = [
 ];
 
 type Hexes = { [key: number]: string; };
+type HexesDetailed = { [key: number]: string[]; };
 
 function calcHexesBiome(
   rollFn: (faces: number) => number = d
@@ -144,38 +145,47 @@ function calcHexesBiome(
 function calcHexesFeature(
   rollFn: (faces: number) => number = d
 ): Hexes {
-  var calcStartingHexFn = () => calcStartingHex(tableStartingHexFeature, rollFn);
-  var calcNextHexFn = (previousHex: string) => calcNextHexIndependentFromPreviews(tableNextHexFeature, rollFn);
-  const result: Hexes = {
-    1: calcStartingHexFn(),
-  }
-  for (const item of currHexNextHex) {
-    const nextHexResult = calcNextHexFn(result[item.cur]);
-    result[item.next] = nextHexResult;
-    console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
-  }
-  return result;
-
-  // return calcHexes(
-  //   tableStartingHexFeature,
-  //   tableNextHexFeature,
-  //   rollFn,
-  // );
+  return calcHexes(
+    tableStartingHexFeature,
+    tableNextHexFeature,
+    rollFn
+  );
 }
 
 function calcHexes(
   tableStartingHex: RandomTable,
   tableNextHex: RandomTable,
-  rollFn: (faces: number) => number = d,
+  rollFn: (faces: number) => number
 ): Hexes {
-  var calcStartingHexFn = () => calcStartingHex(tableStartingHex, rollFn);
-  var calcNextHexFn = (previousHex: string) => calcNextHexDependentFromPrevious(previousHex, tableNextHex, rollFn);
-  const result: Hexes = {
-    1: calcStartingHexFn(),
-  };
+  var hexesDetailed = calcHexesDetailed(
+    tableStartingHex,
+    tableNextHex,
+    rollFn
+  );
+  console.debug('Hexes Detailed:', hexesDetailed);
+  var hexes = fromHexesDetailedToHexes(hexesDetailed);
+  return hexes;
+}
+
+function fromHexesDetailedToHexes(hexesDetailed: HexesDetailed): Hexes {
+  const result: Hexes = {};
+  for (const key in hexesDetailed) {
+    const arr = hexesDetailed[key];
+    result[Number(key)] = arr[arr.length - 1];
+  }
+  return result;
+}
+
+function calcHexesDetailed(
+  tableStartingHex: RandomTable,
+  tableNextHex: RandomTable,
+  rollFn: (faces: number) => number = d
+): HexesDetailed {
+  const result: HexesDetailed = {
+    1: calcHexPathRecursivelyRec([], tableStartingHex, rollFn),
+  }
   for (const item of currHexNextHex) {
-    const nextHexResult = calcNextHexFn(result[item.cur]);
-    result[item.next] = nextHexResult;
+    result[item.next] = calcHexPathRecursivelyRec([],tableNextHex, rollFn);
     console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
   }
   return result;
@@ -185,12 +195,22 @@ function calcHexRecursively(
   table: RandomTable,
   rollFn: (faces: number) => number = d
 ): string {
+  var arr = calcHexPathRecursivelyRec([], table, rollFn);
+  console.debug(`calcHexRecursively: ${arr.join(' / ')}`);
+  return arr[arr.length - 1];
+}
+
+function calcHexPathRecursivelyRec(
+  curr: string[],
+  table: RandomTable,
+  rollFn: (faces: number) => number = d
+): string[] {
   const result = randomOption(table.options, rollFn);
   if (typeof result === 'string') {
-    return result;
+    return [...curr, result];
   }
   else {
-    return calcHexRecursively(result.nextTable!, rollFn);
+    return calcHexPathRecursivelyRec([...curr, result.text], result.nextTable!, rollFn);
   }
 }
 
@@ -206,6 +226,7 @@ function randomOption(
 
 export {
   calcHexesBiome,
+  calcHexesDetailed,
   calcHexesFeature,
   calcNextHexBiome,
   calcNextHexFeature,

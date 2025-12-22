@@ -26,7 +26,7 @@ export class HexDrawPatch implements AfterViewInit {
   @ViewChild('svg') svgElement!: ElementRef<SVGElement>;
 
   ngAfterViewInit() {
-    this.drawBiomePatch();
+    this.drawFeatureHexPatch();
   }
 
   onDrawBiomePatch() {
@@ -41,7 +41,7 @@ export class HexDrawPatch implements AfterViewInit {
     const hexOps = new HexOps(r);
     const imageOpts = { width: 2.45 * hexOps.h, height: 2.45 * hexOps.h };
     const hexes = calcHexesBiome();
-    this.asd(
+    this.drawPatch(
       svgDrawer,
       hexOps,
       optionToImagePath,
@@ -62,7 +62,7 @@ export class HexDrawPatch implements AfterViewInit {
     const hexOps = new HexOps(r);
     const imageOpts = { width: 50, height: 50 };
     const hexes = calcHexesFeature();
-    this.asd(
+    this.drawPatch(
       svgDrawer,
       hexOps,
       optionToImagePath,
@@ -71,7 +71,7 @@ export class HexDrawPatch implements AfterViewInit {
     );
   }
 
-  private asd(
+  private drawPatch(
     svgDrawer: SvgDrawer,
     hexOps: HexOps,
     optionToImagePath: (option: string) => string,
@@ -120,6 +120,7 @@ export class HexDrawPatch implements AfterViewInit {
     ];
     const hexagons: Point[][] = hexCenters.map(center => hexOps.hexPoints(center));
 
+    // Draw hexagons
     for (let i = 0; i < hexagons.length; i++) {
       const n = i + 1;
       const center = hexCenters[i];
@@ -128,8 +129,35 @@ export class HexDrawPatch implements AfterViewInit {
       const imagePath = optionToImagePath(option);
       console.log(`Hex ${n}: ${option} -> ${imagePath}`);
       svgDrawer.drawPolygon(hexagon);
-      svgDrawer.drawImageAtPoint(center, imagePath, imageOpts);
-      svgDrawer.drawTextAtPoint(center, n);
+    }
+
+    // Draw images or text
+    for (let i = 0; i < hexagons.length; i++) {
+      const n = i + 1;
+      const center = hexCenters[i];
+      const option = hexes[n];
+      const imagePath = optionToImagePath(option);
+      console.log(`Hex ${n}: ${option} -> ${imagePath}`);
+      if (!!imagePath) {
+        svgDrawer.drawImageAtPoint(center, imagePath, imageOpts);
+      }
+      else {
+        svgDrawer.drawTextAtPoint(center, option, { fontSize: '15' });
+      }
+    }
+
+    // Draw hex numbers
+    for (let i = 0; i < hexagons.length; i++) {
+      const n = i + 1;
+      const center = hexCenters[i];
+      const option = hexes[n];
+      const imagePath = optionToImagePath(option);
+      console.log(`Hex ${n}: ${option} -> ${imagePath}`);
+      svgDrawer.drawTextAtPoint(
+        { x: center.x, y: center.y - 25 },
+        n,
+        { fontSize: '20' }
+      );
     }
   }
 
