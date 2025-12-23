@@ -1,14 +1,41 @@
 <button (click)="onResetPatch()">Reset SVG</button>
 <button (click)="onDrawBiomePatch()">Draw Biome Patch</button>
 <button (click)="onDrawFeatureHexPatch()">Draw Feature Hex Patch</button>
+<button (click)="onDrawContentHexPatch()">Draw Content Patch</button>
 <button (click)="onDrawSampleHexPatch()">Draw Sample Hex Patch</button>
+
 <section>
   <h3>Dynamic SVG polygon with JavaScript</h3>
-  <svg
-    #svg
-    id="svg"
-    [attr.width]="width()"
-    [attr.height]="height()"
-    style="border: 1px solid black"
-  ></svg>
+  <table>
+    <thead></thead>
+    <tbody>
+      <tr>
+        <td>
+          <svg
+            #svg
+            id="svg"
+            [attr.width]="width()"
+            [attr.height]="height()"
+            style="border: 1px solid black"
+          ></svg>
+        </td>
+        <td>
+          <ol>
+            @for (a of hexDetailList(); track a.hexNum) {
+              <li>
+                @for (detail of a.details; let last = $last; track detail) {
+                  @if (last) {
+                    <strong>{{ detail }}</strong>
+                  }
+                  @else {
+                    {{ detail }} /
+                  }
+                }
+              </li>
+            }
+          </ol>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </section>

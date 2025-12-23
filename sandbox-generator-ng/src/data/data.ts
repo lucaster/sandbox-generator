@@ -1,7 +1,7 @@
 import { keyNum } from '../app/utils/object-utils';
 import { d } from '../dice/dice';
 import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-table';
-import { tableNextHexBiome, tableNextHexFeature, tableStartingHexBiome, tableStartingHexFeature } from './random-tables';
+import { tableContent, tableNextHexBiome, tableNextHexFeature, tableStartingHexBiome, tableStartingHexFeature } from './random-tables';
 
 function optionToImagePath(option: string): string {
   const optionToImagePath: { [option: string]: string } = {
@@ -28,8 +28,6 @@ function optionToImagePath(option: string): string {
   const result = optionToImagePath[option];
   return result;
 }
-
-
 
 function calcStartingHexBiome(
   rollFn: (faces: number) => number = d
@@ -152,6 +150,36 @@ function calcHexesFeature(
   );
 }
 
+function calcHexesDetailedFeature(
+  rollFn: (faces: number) => number = d
+): HexesDetailed {
+  return calcHexesDetailed(
+    tableStartingHexFeature,
+    tableNextHexFeature,
+    rollFn
+  );
+}
+
+function calcHexesContent(
+  rollFn: (faces: number) => number = d
+): Hexes {
+  return calcHexes(
+    tableContent,
+    tableContent,
+    rollFn
+  );
+}
+
+function calcHexesDetailedContent(
+  rollFn: (faces: number) => number = d
+): HexesDetailed {
+  return calcHexesDetailed(
+    tableContent,
+    tableContent,
+    rollFn
+  );
+}
+
 function calcHexes(
   tableStartingHex: RandomTable,
   tableNextHex: RandomTable,
@@ -185,7 +213,7 @@ function calcHexesDetailed(
     1: calcHexPathRecursivelyRec([], tableStartingHex, rollFn),
   }
   for (const item of currHexNextHex) {
-    result[item.next] = calcHexPathRecursivelyRec([],tableNextHex, rollFn);
+    result[item.next] = calcHexPathRecursivelyRec([], tableNextHex, rollFn);
     console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
   }
   return result;
@@ -224,15 +252,49 @@ function randomOption(
   return result;
 }
 
+function randomOptionEntry(
+  table: RandomTable,
+  rollFn: (faces: number) => number = d
+) {
+  const options = table.options;
+  const faces: number = keyNum(options);
+  const key: number = rollFn(faces);
+  const result = options[key];
+  return {
+    key,
+    result: result as string,
+  };
+}
+
+function oppositeOptionEntry(key: number, table: RandomTable) {
+  const keys = Array.from({ length: keyNum(table.options) }, (_, i) => i);
+  const keyIndex = keys.indexOf(key);
+  const oppositeKeyIndex = keys.length - 1 - keyIndex;
+  const oppositeKey = keys[oppositeKeyIndex];
+  const oppositeResult = table.options[oppositeKey];
+  return {
+    key: oppositeKey,
+    result: oppositeResult,
+  };
+}
+
 export {
   calcHexesBiome,
+  calcHexesContent,
   calcHexesDetailed,
+  calcHexesDetailedContent,
+  calcHexesDetailedFeature,
   calcHexesFeature,
   calcNextHexBiome,
   calcNextHexFeature,
   calcStartingHexBiome,
   calcStartingHexFeature,
+  fromHexesDetailedToHexes,
+  oppositeOptionEntry,
   optionToImagePath,
-  type Hexes
+  randomOption,
+  randomOptionEntry,
+  type Hexes,
+  type HexesDetailed
 };
 

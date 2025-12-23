@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -6,14 +7,14 @@ import {
   input,
   ViewChild
 } from '@angular/core';
-import { calcHexesBiome, calcHexesFeature, Hexes, optionToImagePath } from '../../../data/data';
+import { calcHexesBiome, calcHexesDetailedContent, calcHexesDetailedFeature, fromHexesDetailedToHexes, Hexes, HexesDetailed, optionToImagePath } from '../../../data/data';
 import { SvgDrawer } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
 
 @Component({
   selector: 'app-hex-draw-patch',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './hex-draw-patch.html',
   styleUrl: './hex-draw-patch.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +25,8 @@ export class HexDrawPatch implements AfterViewInit {
   height = input(500);
 
   @ViewChild('svg') svgElement!: ElementRef<SVGElement>;
+
+  hexesDetailed: HexesDetailed | null = null;
 
   ngAfterViewInit() {
     this.drawFeatureHexPatch();
@@ -45,8 +48,8 @@ export class HexDrawPatch implements AfterViewInit {
       svgDrawer,
       hexOps,
       optionToImagePath,
-      imageOpts,
       hexes,
+      imageOpts,
     );
   }
 
@@ -61,12 +64,33 @@ export class HexDrawPatch implements AfterViewInit {
     const r = 50;
     const hexOps = new HexOps(r);
     const imageOpts = { width: 50, height: 50 };
-    const hexes = calcHexesFeature();
+    this.hexesDetailed = calcHexesDetailedFeature();
+    const hexes = fromHexesDetailedToHexes(this.hexesDetailed);
     this.drawPatch(
       svgDrawer,
       hexOps,
       optionToImagePath,
+      hexes,
       imageOpts,
+    );
+  }
+
+  onDrawContentHexPatch() {
+    this.resetPatch();
+    this.drawContentHexPatch();
+  }
+
+  private drawContentHexPatch() {
+    const svg = this.svgElement.nativeElement;
+    const svgDrawer = new SvgDrawer(svg);
+    const r = 50;
+    const hexOps = new HexOps(r);
+    this.hexesDetailed = calcHexesDetailedContent();
+    const hexes = fromHexesDetailedToHexes(this.hexesDetailed);
+    this.drawPatch(
+      svgDrawer,
+      hexOps,
+      optionToImagePath,
       hexes,
     );
   }
@@ -75,8 +99,8 @@ export class HexDrawPatch implements AfterViewInit {
     svgDrawer: SvgDrawer,
     hexOps: HexOps,
     optionToImagePath: (option: string) => string,
-    imageOpts: { width: number; height: number; },
     hexes: Hexes,
+    imageOpts?: { width: number; height: number; },
   ) {
     const center_01 = { x: this.width() / 2, y: this.height() / 2 };
     const center_02 = hexOps.up(center_01);
@@ -120,19 +144,37 @@ export class HexDrawPatch implements AfterViewInit {
     ];
     const hexagons: Point[][] = hexCenters.map(center => hexOps.hexPoints(center));
 
-    // Draw hexagons
+    this.drawHexagons(svgDrawer, optionToImagePath, hexagons, hexes);
+
+    this.drawImagesOrText(svgDrawer, optionToImagePath, hexCenters, hexes, imageOpts);
+
+    this.drawHexNumbers(svgDrawer, optionToImagePath, hexCenters, hexes);
+  }
+
+  private drawHexagons(
+    svgDrawer: SvgDrawer,
+    optionToImagePath: (option: string) => string,
+    hexagons: Point[][],
+    hexes: Hexes,
+  ) {
     for (let i = 0; i < hexagons.length; i++) {
       const n = i + 1;
-      const center = hexCenters[i];
       const hexagon = hexagons[i];
       const option = hexes[n];
       const imagePath = optionToImagePath(option);
       console.log(`Hex ${n}: ${option} -> ${imagePath}`);
       svgDrawer.drawPolygon(hexagon);
     }
+  }
 
-    // Draw images or text
-    for (let i = 0; i < hexagons.length; i++) {
+  private drawImagesOrText(
+    svgDrawer: SvgDrawer,
+    optionToImagePath: (option: string) => string,
+    hexCenters: Point[],
+    hexes: Hexes,
+    imageOpts?: { width: number; height: number; },
+  ) {
+    for (let i = 0; i < hexCenters.length; i++) {
       const n = i + 1;
       const center = hexCenters[i];
       const option = hexes[n];
@@ -145,9 +187,15 @@ export class HexDrawPatch implements AfterViewInit {
         svgDrawer.drawTextAtPoint(center, option, { fontSize: '15' });
       }
     }
+  }
 
-    // Draw hex numbers
-    for (let i = 0; i < hexagons.length; i++) {
+  private drawHexNumbers(
+    svgDrawer: SvgDrawer,
+    optionToImagePath: (option: string) => string,
+    hexCenters: Point[],
+    hexes: Hexes,
+  ) {
+    for (let i = 0; i < hexCenters.length; i++) {
       const n = i + 1;
       const center = hexCenters[i];
       const option = hexes[n];
@@ -300,9 +348,18 @@ export class HexDrawPatch implements AfterViewInit {
   }
 
   private resetPatch() {
+    this.hexesDetailed = null;
     const svg = this.svgElement.nativeElement;
     while (svg.firstChild) {
       svg.removeChild(svg.firstChild);
     }
+  }
+
+  hexDetailList() {
+    return Object.keys(this.hexesDetailed || {}).map(key => {
+      const hexNum = +(key);
+      const details = this.hexesDetailed ? this.hexesDetailed[hexNum] : null;
+      return { hexNum, details };
+    });
   }
 }

@@ -5,6 +5,7 @@ import { HexDraw } from './pages/hex-draw/hex-draw';
 import { HoneycombSvg } from './pages/honeycomb-svg/honeycomb-svg';
 import { Honeycomb } from './pages/honeycomb/honeycomb';
 import { Page1 } from './pages/page1/page1';
+import { Settlements } from './pages/settlements/settlements';
 import { Summary } from './pages/summary/summary';
 
 export const routes: Routes = [
@@ -40,5 +41,9 @@ export const routes: Routes = [
   {
     path: 'hex-draw-patch',
     component: HexDrawPatch
+  },
+  {
+    path: 'settlements',
+    component: Settlements
   },
 ];
