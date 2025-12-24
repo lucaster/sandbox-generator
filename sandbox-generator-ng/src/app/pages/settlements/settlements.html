@@ -1,10 +1,84 @@
 <section>
   <header>Hamlet</header>
   <button (click)="onCalcHamlet()">Generate Hamlet</button>
-  <pre>{{ hamlet | json }}</pre>
+  <!-- <pre>{{ hamlet | json }}</pre> -->
+  @if (hamlet) {
+  <ul>
+    <li>Name: {{ hamlet.name }}</li>
+    <li>Main Building: {{ hamlet.buildings.mainBuilding.result }}</li>
+    <li>Houses: {{ hamlet.buildings.peasantHouses }}</li>
+    <li>Layout: {{ hamlet.layout.result }}</li>
+    <li>Disposition: {{ hamlet.disposition.result }}</li>
+    <li>Secret: {{ hamlet.secret.result }}</li>
+  </ul>
+  }
 </section>
 <section>
   <header>Village</header>
   <button (click)="onCalcVillage()">Generate Village</button>
-  <pre>{{ village | json }}</pre>
+  <!-- <pre>{{ village | json }}</pre> -->
+  @if (village) {
+    <ul>
+      <li>Name: {{ village.name }}</li>
+      <li>Size: {{ village.size.result }}</li>
+      <li>Population: {{ village.population }}</li>
+      <li>Occupation: {{ village.occupation?.result || '(none)' }}</li>
+      <li>Layout: {{ village.layout.result }}</li>
+      <li>Points of Interest:
+        @if (village.pointsOfInterest.length) {
+        <ul>
+          @for (poi of village.pointsOfInterest; track $index) {
+          <li>{{ poi.result }}</li>
+          }
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>Defenses:
+        @if (village.defenses.length) {
+        <ul>
+          @for (def of village.defenses; track $index) {
+          <li>{{ def.result }}</li>
+          }
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>Disposition:
+        <ul>
+          <li>People's: {{ village.disposition.villageDisposition.result }}</li>
+          <li>Ruler's: {{ village.disposition.rulerDisposition.result }}</li>
+        </ul>
+      </li>
+      <li>Notable NPCs:
+        @if (village.people.notableNpcs) {
+        <ul>
+          @for (npc of village.people.notableNpcs; track $index) {
+          <li>{{ npc.result }}</li>
+          }
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>Ruler: {{ village.people.ruler.result }}</li>
+      <li>Secret: {{ village.secret?.result || '(none)' }}</li>
+      <li>Event:
+        @if (village.event.hasEvent) {
+        <ul>
+          <li>{{ village.event.eventNature?.result }}</li>
+          <li>{{ village.event.whenEventHappens?.result }}</li>
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+    </ul>
+  }
 </section>

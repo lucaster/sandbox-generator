@@ -1,6 +1,7 @@
 import { d } from '../dice/dice';
 import { RandomTable } from '../domain/random-table';
 import { oppositeOptionEntry, randomOptionEntry } from './data';
+import { generateRandomName } from './names';
 
 const tableHamletMainBuilding: RandomTable = {
   id: 51,
@@ -69,6 +70,7 @@ const tableHamletSecret: RandomTable = {
 };
 function calcHamlet() {
   return {
+    name: generateRandomName(),
     buildings: {
       mainBuilding: randomOptionEntry(tableHamletMainBuilding),
       peasantHouses: d(6) - 1,
@@ -338,12 +340,13 @@ const tableVillageEventNature: RandomTable = {
   },
 };
 function calcVillage() {
+  const name = generateRandomName();
   const size = randomOptionEntry(tableVillageSize);
   const sizeFactor = {
     'Small': 1,
     'Medium': 2,
     'Big': 3,
-  }[size.result] || 1;
+  }[size.result] || 0;
   const population = 50 * sizeFactor;
   const hasOccupation = randomOptionEntry(tableVillageHasOccupation).result === 'Yes';
   const occupation =
@@ -351,6 +354,7 @@ function calcVillage() {
     ? randomOptionEntry(tableVillageOccupation)
     : null
   const layout = randomOptionEntry(tableVillageLayout);
+  // FIXME: evita ripetizioni in Points of Interest etc
   const pointsOfInterest = new Array(sizeFactor).fill(0).map(it => randomOptionEntry(tableVillagePointsOfInterest));
   const defenses = new Array(sizeFactor).fill(0).map(it => randomOptionEntry(tableVillageDefenses));
   const villageDisposition = randomOptionEntry(tableVillageDisposition);
@@ -377,6 +381,7 @@ function calcVillage() {
     ? randomOptionEntry(tableVillageEventNature)
     : null;
   return {
+    name,
     size,
     population,
     occupation,
