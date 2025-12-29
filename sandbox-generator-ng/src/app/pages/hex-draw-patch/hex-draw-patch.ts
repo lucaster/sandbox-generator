@@ -5,6 +5,7 @@ import {
   Component,
   ElementRef,
   input,
+  signal,
   ViewChild
 } from '@angular/core';
 import { calcHexesBiome, calcHexesDetailedContent, calcHexesDetailedFeature, fromHexesDetailedToHexes, fromHexesToHexesDetailed, Hexes, HexesDetailed, optionToImagePath } from '../../../data/data';
@@ -23,18 +24,18 @@ export class HexDrawPatch implements AfterViewInit {
 
   width = input(500);
   height = input(500);
-
   @ViewChild('svg') svgElement!: ElementRef<SVGElement>;
-
-  hexesDetailed: HexesDetailed | null = null;
+  hexDetailList = signal<{ hexNum: number; details: string[] | null; }[]>([]);
+  private hexesDetailed: HexesDetailed | null = null;
 
   ngAfterViewInit() {
-    this.drawFeatureHexPatch();
+    this.onDrawFeatureHexPatch();
   }
 
   onDrawBiomePatch() {
     this.resetPatch();
     this.drawBiomePatch();
+    this.updateHexDetailList();
   }
 
   private drawBiomePatch() {
@@ -57,6 +58,7 @@ export class HexDrawPatch implements AfterViewInit {
   onDrawFeatureHexPatch() {
     this.resetPatch();
     this.drawFeatureHexPatch();
+    this.updateHexDetailList();
   }
 
   private drawFeatureHexPatch() {
@@ -79,6 +81,7 @@ export class HexDrawPatch implements AfterViewInit {
   onDrawContentHexPatch() {
     this.resetPatch();
     this.drawContentHexPatch();
+    this.updateHexDetailList();
   }
 
   private drawContentHexPatch() {
@@ -213,6 +216,7 @@ export class HexDrawPatch implements AfterViewInit {
   onDrawSampleHexPatch() {
     this.resetPatch();
     this.drawSampleHexPatch();
+    this.updateHexDetailList();
   }
 
   private drawSampleHexPatch() {
@@ -356,11 +360,12 @@ export class HexDrawPatch implements AfterViewInit {
     }
   }
 
-  hexDetailList() {
-    return Object.keys(this.hexesDetailed || {}).map(key => {
+  private updateHexDetailList() {
+    const hexDetailList = Object.keys(this.hexesDetailed || {}).map(key => {
       const hexNum = +(key);
       const details = this.hexesDetailed ? this.hexesDetailed[hexNum] : null;
       return { hexNum, details };
     });
+    this.hexDetailList.set(hexDetailList);
   }
 }
