@@ -3,7 +3,7 @@ import { d } from '../dice/dice';
 import { RandomTable } from '../domain/random-table';
 import { randomOptionEntry } from './data';
 
-const tableNamesA: RandomTable = {
+const tableNamesA: RandomTable = { 
   id: 70,
   title: 'A) Buildings, Outdoors',
   options: {

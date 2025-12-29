@@ -1,0 +1,29 @@
+<table>
+  <thead>
+    <button (click)="onCalcLairs()">Calc Lairs</button>
+  </thead>
+  <tbody>
+    <tr>
+      @for (lair of lairs; track $index) {
+      <td>
+        <ng-container *ngTemplateOutlet="biomeLair; context: { lair }"></ng-container>
+      </td>
+      }
+    </tr>
+  </tbody>
+</table>
+
+<ng-template #biomeLair let-lair="lair">
+  <section>
+    <h3>{{ lair.biome }} Lair</h3>
+    <ul>
+      <li>
+        Lair Inhabitants: <strong>{{ lair.inhabitants }}</strong>
+      </li>
+      <li>Lair Layout: {{ lair.layout }}</li>
+      <li>Inside lair: {{ lair.percInsideLair }}%</li>
+      <li>Outside lair: {{ lair.percOutsideLair }}%</li>
+      <li>Occupied hexes: {{ lair.outsideHexes | json }}</li>
+    </ul>
+  </section>
+</ng-template>
