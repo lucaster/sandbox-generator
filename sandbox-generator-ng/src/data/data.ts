@@ -204,6 +204,14 @@ function fromHexesDetailedToHexes(hexesDetailed: HexesDetailed): Hexes {
   return result;
 }
 
+function fromHexesToHexesDetailed(hexes: Hexes): HexesDetailed {
+  const result: HexesDetailed = {};
+  for (const key in hexes) {
+    result[Number(key)] = [hexes[key]];
+  }
+  return result;
+}
+
 function calcHexesDetailed(
   tableStartingHex: RandomTable,
   tableNextHex: RandomTable,
@@ -290,6 +298,7 @@ export {
   calcStartingHexBiome,
   calcStartingHexFeature,
   fromHexesDetailedToHexes,
+  fromHexesToHexesDetailed,
   oppositeOptionEntry,
   optionToImagePath,
   randomOption,

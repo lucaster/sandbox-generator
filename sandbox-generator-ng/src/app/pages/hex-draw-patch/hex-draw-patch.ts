@@ -7,7 +7,7 @@ import {
   input,
   ViewChild
 } from '@angular/core';
-import { calcHexesBiome, calcHexesDetailedContent, calcHexesDetailedFeature, fromHexesDetailedToHexes, Hexes, HexesDetailed, optionToImagePath } from '../../../data/data';
+import { calcHexesBiome, calcHexesDetailedContent, calcHexesDetailedFeature, fromHexesDetailedToHexes, fromHexesToHexesDetailed, Hexes, HexesDetailed, optionToImagePath } from '../../../data/data';
 import { SvgDrawer } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
@@ -44,6 +44,7 @@ export class HexDrawPatch implements AfterViewInit {
     const hexOps = new HexOps(r);
     const imageOpts = { width: 2.45 * hexOps.h, height: 2.45 * hexOps.h };
     const hexes = calcHexesBiome();
+    this.hexesDetailed = fromHexesToHexesDetailed(hexes);
     this.drawPatch(
       svgDrawer,
       hexOps,
