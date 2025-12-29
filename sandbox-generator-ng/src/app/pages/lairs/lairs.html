@@ -5,7 +5,7 @@
   <tbody>
     <tr>
       @for (lair of lairs; track $index) {
-      <td style="vertical-align: top;">
+      <td style="vertical-align: top">
         <ng-container *ngTemplateOutlet="biomeLair; context: { lair }"></ng-container>
       </td>
       }
@@ -17,10 +17,8 @@
   <section>
     <h3>{{ lair.biome }} Lair</h3>
     <ul>
-      <li>
-        Lair Inhabitants: <strong>{{ lair.inhabitants }}</strong>
-      </li>
-      <li>Lair Layout: {{ lair.layout }}</li>
+      <li>Inhabitants: <strong>{{ lair.inhabitants }}</strong></li>
+      <li>Layout: {{ lair.layout }}</li>
       <li>Inside lair: {{ lair.percInsideLair }}%</li>
       <li>Outside lair: {{ lair.percOutsideLair }}%</li>
       <li>Occupied hexes: {{ lair.outsideHexes | json }}</li>
