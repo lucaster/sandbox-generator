@@ -687,11 +687,11 @@ export const tableContent: RandomTable = {
       nextTable: tableContentHazard,
     },
     2: {
-      text: 'Empty (Learnable info)',
+      text: 'Empty', // (Learnable info)
       nextTable: tableContentEmpty,
     },
     3: {
-      text: 'Empty (Learnable info)',
+      text: 'Empty', // (Learnable info)
       nextTable: tableContentEmpty,
     },
     4: {

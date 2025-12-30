@@ -3,31 +3,43 @@ import { d } from '../dice/dice';
 import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-table';
 import { tableContent, tableNextHexBiome, tableNextHexFeature, tableStartingHexBiome, tableStartingHexFeature } from './random-tables';
 
+const optionAndImagePath: { [option: string]: string } = {
+  // Biome
+  'Grassland': '/assets/images/grassland.png',
+  'Forest': '/assets/images/forest.png',
+  'Hills': '/assets/images/hills.png',
+  'Marsh': '/assets/images/marsh.png',
+  'Mountains': '/assets/images/mountains.png',
+  // Landmarks
+  'Landmark': '/assets/images/landmark.png',
+  // Settlement
+  'Hamlet': '/assets/images/hamlet.png',
+  'Village': '/assets/images/village.png',
+  'City': '/assets/images/city.png',
+  'Castle': '/assets/images/castle.png',
+  'Tower': '/assets/images/tower.png',
+  'Abbey': '/assets/images/abbey.png',
+  // Lair
+  'Lair': '/assets/images/lair.png',
+  // Dungeon
+  'Dungeon': '/assets/images/dungeon.png',
+};
+
 function optionToImagePath(option: string): string {
-  const optionToImagePath: { [option: string]: string } = {
-    // Biome
-    'Grassland': '/assets/images/grassland.png',
-    'Forest': '/assets/images/forest.png',
-    'Hills': '/assets/images/hills.png',
-    'Marsh': '/assets/images/marsh.png',
-    'Mountains': '/assets/images/mountains.png',
-    // Landmarks
-    'Landmark': '/assets/images/landmark.png',
-    // Settlement
-    'Hamlet': '/assets/images/hamlet.png',
-    'Village': '/assets/images/village.png',
-    'City': '/assets/images/city.png',
-    'Castle': '/assets/images/castle.png',
-    'Tower': '/assets/images/tower.png',
-    'Abbey': '/assets/images/abbey.png',
-    // Lair
-    'Lair': '/assets/images/lair.png',
-    // Dungeon
-    'Dungeon': '/assets/images/dungeon.png',
-  };
-  const result = optionToImagePath[option];
+  const result = optionAndImagePath[option];
   return result;
 }
+
+function optionsToImagePath(options: string[]): string {
+  // from more specific to less specific:
+  for (let i = options.length - 1; i >= 0; i--) {
+    const imagePath = optionToImagePath(options[i]);
+    if (imagePath) {
+      return imagePath;
+    }
+  }
+  return '';
+};
 
 function calcStartingHexBiome(
   rollFn: (faces: number) => number = d
@@ -204,6 +216,16 @@ function fromHexesDetailedToHexes(hexesDetailed: HexesDetailed): Hexes {
   return result;
 }
 
+function fromHexesDetailedToImagePathHexes(hexesDetailed: HexesDetailed): Hexes {
+  const result: Hexes = {};
+  for (const key in hexesDetailed) {
+    const arr = hexesDetailed[key];
+    const imagePath = optionsToImagePath(arr);
+    result[Number(key)] = imagePath;
+  }
+  return result;
+}
+
 function fromHexesToHexesDetailed(hexes: Hexes): HexesDetailed {
   const result: HexesDetailed = {};
   for (const key in hexes) {
@@ -298,8 +320,10 @@ export {
   calcStartingHexBiome,
   calcStartingHexFeature,
   fromHexesDetailedToHexes,
+  fromHexesDetailedToImagePathHexes,
   fromHexesToHexesDetailed,
   oppositeOptionEntry,
+  optionsToImagePath,
   optionToImagePath,
   randomOption,
   randomOptionEntry,
