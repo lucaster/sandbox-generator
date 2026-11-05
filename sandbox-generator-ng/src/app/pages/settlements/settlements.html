@@ -9,7 +9,7 @@
     <li>Houses: {{ hamlet.buildings.peasantHouses }}</li>
     <li>Layout: {{ hamlet.layout.result }}</li>
     <li>Disposition: {{ hamlet.disposition.result }}</li>
-    <li>Secret: {{ hamlet.secret.result }}</li>
+    <li>Secret: {{ hamlet.secret?.result || '(none)' }}</li>
   </ul>
   }
 </section>

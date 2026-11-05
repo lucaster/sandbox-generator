@@ -33,27 +33,19 @@ const tableHamletLayout: RandomTable = {
 const tableHamletDisposition: RandomTable = {
   id: 53,
   title: 'Hamlet Disposition',
+  dice: '2d6',
   options: {
-    1: 'Attack on sight',
-    2: 'Hostile',
+    2: 'Attack on sight',
     3: 'Hostile',
     4: 'Hostile',
     5: 'Hostile',
-    6: 'Hostile',
+    6: 'Neutral',
     7: 'Neutral',
     8: 'Neutral',
-    9: 'Neutral',
-    10: 'Neutral',
-    11: 'Neutral',
-    12: 'Neutral',
-    13: 'Neutral',
-    14: 'Neutral',
-    15: 'Welcoming',
-    16: 'Welcoming',
-    17: 'Welcoming',
-    18: 'Welcoming',
-    19: 'Welcoming',
-    20: 'Enthusiastic',
+    9: 'Welcoming',
+    10: 'Welcoming',
+    11: 'Welcoming',
+    12: 'Enthusiastic',
   },
 };
 const tableHamletSecret: RandomTable = {
@@ -68,17 +60,29 @@ const tableHamletSecret: RandomTable = {
     6: 'Lycanthropes/Vampires',
   },
 };
-function calcHamlet() {
-  return {
-    name: generateRandomName(),
-    buildings: {
-      mainBuilding: randomOptionEntry(tableHamletMainBuilding),
-      peasantHouses: d(6) - 1,
-    },
-    layout: randomOptionEntry(tableHamletLayout),
-    disposition: randomOptionEntry(tableHamletDisposition),
-    secret: randomOptionEntry(tableHamletSecret),
+const tableHamletHasSecret: RandomTable = {
+  id: 541,
+  title: 'Hamlet has Secret',
+  options: {
+    1: 'Yes',
+    2: 'No',
+    3: 'No',
+    4: 'No',
+    5: 'No',
+    6: 'No',
+  },
+};
+function calcHamlet(rollFn: (faces: number) => number = d) {
+  const name = generateRandomName();
+  const buildings = {
+    mainBuilding: randomOptionEntry(tableHamletMainBuilding, rollFn),
+    peasantHouses: rollFn(6) - 1,
   };
+  const layout = randomOptionEntry(tableHamletLayout, rollFn);
+  const disposition = randomOptionEntry(tableHamletDisposition, rollFn);
+  const hasSecret = randomOptionEntry(tableHamletHasSecret, rollFn).result === 'Yes';
+  const secret = hasSecret ? randomOptionEntry(tableHamletSecret, rollFn) : null;
+  return { name, buildings, layout, disposition, secret };
 }
 
 /**

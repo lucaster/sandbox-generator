@@ -25,14 +25,14 @@ Coverage is concentrated in the first part of that pipeline.
 |---|---|---|
 | Hex Map | **Partial** | Biomes and feature outline work. Biome encounter tables match the 2023 edition and every entry is reachable. Factions and random encounters are absent. |
 | Landmarks | **Mostly complete** | Natural, artificial, and magic tables match the 2023 edition. The content tables exist, but treasure chance and information delivery are not used. |
-| Settlements | **Partial** | Names are complete. Hamlet and village generators exist but have rule and logic errors. Cities, castles, towers, and abbeys are absent. |
+| Settlements | **Partial** | Names and hamlets are complete. The village generator exists but has rule and logic errors. Cities, castles, towers, and abbeys are absent. |
 | Lairs | **Partial** | Inhabitants, outside percentage, outside hexes, and layout are generated. Monster count, treasure, and per-room distribution are missing. |
 | Dungeons | **Not implemented** | No cross-section, levels, structure, special rooms, or dungeon example logic. |
 | Generators | **Not implemented** | No coat of arms, criminal organization, dragon, guild, house, NPC, tavern, or wizard generator. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
-Counting generation subsections (examples excluded): **5 of 31 are complete,
-6 are partial, and 20 are absent.** Roughly one third of the book's generation
+Counting generation subsections (examples excluded): **6 of 31 are complete,
+5 are partial, and 20 are absent.** Roughly one third of the book's generation
 content is represented in code, and about two thirds is missing. The implemented
 tables are faithful to the 2023 edition; the gaps are mostly missing sections and
 generator logic.
@@ -65,7 +65,7 @@ The tables for all three landmark families match the 2023 edition.
 | Subsection | Status | Notes |
 |---|---|---|
 | Names | **Done** | All 30 patterns and component tables A–H are present, including the `†`/`‡` variants. |
-| Hamlets | **Partial** | Main building, peasant houses, layout, and secret table match the 2023 edition. Disposition uses `1d20` instead of `2d6`. Secret is always generated instead of only on a `1` on `1d6`. |
+| Hamlets | **Done** | Main building, peasant houses, layout, `2d6` disposition, and the `1d6` secret check match the 2023 edition. |
 | Villages | **Partial** | Size, occupation, layout, special locations, defenses, disposition, notable NPCs, ruler, secret, and event exist. Missing general locations (blacksmith, market, tavern, well), guards (`1d3+3 × size`), duplicate rerolls for defenses, and correct disposition dice. |
 | Cities | **Not implemented** | No size, occupations, characteristics, appearance, locations, people, or city-specific rules. |
 | Castles | **Not implemented** | No castle generation. |
@@ -134,13 +134,11 @@ Nothing is implemented:
 These are correctness problems in implemented code. The table data itself matches
 the 2023 edition.
 
-- **Hamlet and village disposition** roll `1d20` with grouped results. The 2023
-  book rolls `2d6`, which has a different probability curve.
+- **Village disposition** rolls `1d20` with grouped results. The 2023 book rolls
+  `2d6`, which has a different probability curve.
 - **Village ruler disposition when villagers are neutral** rolls `1d2`
   (`1 Hostile`, `2 Welcoming`). The book rolls `1d6` (`1–3 Hostile`,
   `4–6 Welcoming`).
-- **Hamlet secret** is always generated. The book generates one only when `1d6`
-  returns `1`.
 - **Village points of interest** only roll special locations. The book also
   guarantees a blacksmith, market, tavern, and well.
 - **Village defenses** do not reroll duplicates, although the book requires it
@@ -162,9 +160,8 @@ the 2023 edition.
 
 If the goal is to match the book's core hexcrawl loop, the highest-value order is:
 
-1. **Fix the generator logic** (disposition dice, hamlet secret check, village
-   general locations, guards, rerolls, biome table keys). The table data is
-   already correct for the 2023 edition.
+1. **Fix the village generator logic** (disposition dice, general locations,
+   guards, rerolls). The table data is already correct for the 2023 edition.
 2. **Finish the content layer**: treasure chance and information delivery.
 3. **Finish lairs**: monster count, treasure, room distribution, and the
    patrol/lair distinction.
