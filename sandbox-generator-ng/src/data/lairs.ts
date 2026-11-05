@@ -170,6 +170,7 @@ function dExcept(die: number, except: number): number {
 }
 
 export {
+  biomeEncountersMarsh,
   calcLair
 };
 

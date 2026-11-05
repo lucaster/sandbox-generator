@@ -272,12 +272,23 @@ function calcHexPathRecursivelyRec(
   }
 }
 
+function randomKey(
+  options: Options,
+  rollFn: (faces: number) => number = d
+): number {
+  const keys = Object.keys(options).map(Number);
+  const min = Math.min(...keys);
+  const max = Math.max(...keys);
+  const rolled = rollFn(max);
+  // Tables keyed 2..12 (e.g. 2d6) have no key 1: clamp into the valid range.
+  return Math.min(Math.max(rolled, min), max);
+}
+
 function randomOption(
   options: Options,
   rollFn: (faces: number) => number = d
 ): string | OptionWithFollowUp {
-  const faces: number = keyNum(options);
-  const key: number = rollFn(faces);
+  const key = randomKey(options, rollFn);
   const result = options[key];
   return result;
 }
@@ -287,8 +298,7 @@ function randomOptionEntry(
   rollFn: (faces: number) => number = d
 ) {
   const options = table.options;
-  const faces: number = keyNum(options);
-  const key: number = rollFn(faces);
+  const key = randomKey(options, rollFn);
   const result = options[key];
   return {
     key,
