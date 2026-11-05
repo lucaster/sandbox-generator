@@ -21,6 +21,7 @@ const lairLayout: RandomTable = {
 const biomeEncountersGrassland: RandomTable = {
   id: 81,
   title: 'Biome Encounter Grassland',
+  dice: '2d6',
   options: {
     2: 'Dinosaurs',
     3: 'Ogres',
@@ -39,6 +40,7 @@ const biomeEncountersGrassland: RandomTable = {
 const biomeEncountersMarsh: RandomTable = {
   id: 82,
   title: 'Biome Encounter Marsh',
+  dice: '2d6',
   options: {
     2: 'Moth-men',
     3: 'Mushroom-men',
@@ -57,6 +59,7 @@ const biomeEncountersMarsh: RandomTable = {
 const biomeEncountersForest: RandomTable = {
   id: 83,
   title: 'Biome Encounter Forest',
+  dice: '2d6',
   options: {
     2: 'Ents',
     3: 'Giant spiders',
@@ -75,6 +78,7 @@ const biomeEncountersForest: RandomTable = {
 const biomeEncountersMountains: RandomTable = {
   id: 84,
   title: 'Biome Encounter Mountains',
+  dice: '2d6',
   options: {
     2: 'Giants',
     3: 'Griffins',
@@ -93,6 +97,7 @@ const biomeEncountersMountains: RandomTable = {
 const biomeEncountersHills: RandomTable = {
   id: 85,
   title: 'Biome Encounter Hills',
+  dice: '2d6',
   options: {
     2: 'Manticores',
     3: 'Basilisks',
@@ -119,7 +124,7 @@ function calcLair(biome: string) {
     'Hills': biomeEncountersHills,
   };
   const biomeInhabitantsTable = biomesAndItsInhabitants[biome];
-  const inhabitants = randomOption(biomeInhabitantsTable.options);
+  const inhabitants = randomOption(biomeInhabitantsTable);
   // 2. roll for number of inhabitants
   // 3. roll for treasure
   // 4. roll 1d6 * 10% proportions of inhabitants who are outside the lair

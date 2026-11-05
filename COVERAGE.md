@@ -44,7 +44,7 @@ generator logic.
 | Subsection | Status | What exists | What is missing / wrong |
 |---|---|---|---|
 | Biomes | **Done** | `tableStartingHexBiome`, `tableNextHexBiome`, `calcHexesBiome` | `calcHexesBiome` does not forward `rollFn` to the starting-hex roll, so tests cannot control that roll. |
-| Encounters per Biome | **Partial** | Five biome tables in `src/data/lairs.ts`, matching the 2023 edition | Tables use keys `2..12`; the roller now uses the highest key as the die size, so all entries are reachable and no roll returns `undefined`. It is still a flat roll rather than the book's `2d6` curve. No standalone encounter generator. |
+| Encounters per Biome | **Partial** | Five biome tables in `src/data/lairs.ts`, matching the 2023 edition | Tables use keys `2..12` and roll `2d6`, so all entries are reachable and no roll returns `undefined`. No standalone encounter generator. |
 | Features | **Partial** | `tableNextHexFeature`, settlement sub-table, feature map drawing | The book's "first hex = village, second hex = dungeon" rule is not enforced; the starting table only contains `Village`, and hex 2 is rolled normally. |
 | Factions | **Not implemented** | — | No faction creation, political map, domains, tithes, magical enslavement, parish links, lair alliances, relationships, or faction events. |
 | Random Encounters | **Not implemented** | — | No 2d6 wilderness encounter table, contested-hex faction count, or Dragon/Wizard/NPC/Biome routing. |
@@ -146,10 +146,6 @@ the 2023 edition.
 - **Village defenses** do not reroll duplicates, although the book requires it
   and the code comment says to.
 - **Village guards** are not generated (`1d3 + 3` multiplied by size).
-- **Biome encounter tables** are keyed `2..12`. The roller now uses the highest key
-  (`12`) as the die size and clamps into the table's range, so `Hydras` is reachable
-  and no result is `undefined`. The book rolls `2d6`, though, so the probability
-  curve is still flat instead of bell-shaped.
 - **`calcHexesBiome`** calls `calcStartingHexBiome()` without passing `rollFn`.
 - **`calcHexesDetailed`** does not enforce the book's fixed starting features
   (village in hex 1, dungeon in hex 2).

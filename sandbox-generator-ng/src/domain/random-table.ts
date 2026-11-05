@@ -2,6 +2,7 @@
 type RandomTable = {
   id: number;
   title: string;
+  dice?: string; // '1d6', '2d6', '1d20', ...
   options: Options;
 };
 
