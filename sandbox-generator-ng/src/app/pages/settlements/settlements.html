@@ -90,3 +90,106 @@
     </ul>
   }
 </section>
+<section>
+  <header>City</header>
+  <button (click)="onCalcCity()">Generate City</button>
+  <!-- <pre>{{ city | json }}</pre> -->
+  @if (city) {
+    <ul>
+      <li>Name: {{ city.name }}</li>
+      <li>Size: {{ city.size.result }}</li>
+      <li>Population: {{ city.population }}</li>
+      <li>Main occupations:
+        @if (city.occupations.length) {
+        <ul>
+          @for (occupation of city.occupations; track $index) {
+          <li>{{ occupation.result }}</li>
+          }
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>Characteristics: {{ city.characteristics.length ? city.characteristics.join(', ') : '(none)' }}</li>
+      <li>Appearance: {{ city.appearance.result }}</li>
+      <li>General locations:
+        <ul>
+          @for (location of city.generalLocations; track $index) {
+          <li>{{ location }}</li>
+          }
+        </ul>
+      </li>
+      <li>Special locations:
+        @if (city.specialLocations.length) {
+        <ul>
+          @for (location of city.specialLocations; track $index) {
+          <li>{{ location.result }}</li>
+          }
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>Buildings of interest:
+        @if (city.buildingsOfInterest.length) {
+        <ul>
+          @for (building of city.buildingsOfInterest; track $index) {
+          <li>{{ building.type }}: {{ building.name }}</li>
+          }
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>Defense:
+        <ul>
+          <li>Walled: {{ city.defense.walled ? 'Yes' : 'No' }}</li>
+          @if (city.defense.walled) {
+          <li>Entrances:
+            <ul>
+              @for (entrance of city.defense.entrances; track $index) {
+              <li>{{ entrance.direction }} - {{ entrance.closure }} ({{ entrance.towers }} towers)</li>
+              }
+            </ul>
+          </li>
+          <li>Siege supplies: {{ city.defense.siegeSuppliesMonths }} months</li>
+          }
+          <li>Guards: {{ city.defense.guards }}</li>
+        </ul>
+      </li>
+      <li>Disposition:
+        <ul>
+          <li>Citizens': {{ city.disposition.cityDisposition.result }}</li>
+          <li>Ruler's: {{ city.disposition.rulerDisposition.result }}</li>
+        </ul>
+      </li>
+      <li>Notable NPCs:
+        @if (city.people.notableNpcs.length) {
+        <ul>
+          @for (npc of city.people.notableNpcs; track $index) {
+          <li>{{ npc.result }}</li>
+          }
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>Ruler: {{ city.people.ruler.result }}</li>
+      <li>Event:
+        @if (city.event.hasEvent) {
+        <ul>
+          <li>{{ city.event.eventNature?.result }}</li>
+          <li>{{ city.event.whenEventHappens?.result }}</li>
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+    </ul>
+  }
+</section>
