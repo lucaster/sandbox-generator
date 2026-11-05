@@ -1,4 +1,3 @@
-import { keyNum } from '../app/utils/object-utils';
 import { d } from '../dice/dice';
 import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-table';
 import { tableContent, tableNextHexBiome, tableNextHexFeature, tableStartingHexBiome, tableStartingHexFeature } from './random-tables';
@@ -319,10 +318,9 @@ function randomOptionEntry(
 }
 
 function oppositeOptionEntry(key: number, table: RandomTable) {
-  const keys = Array.from({ length: keyNum(table.options) }, (_, i) => i);
+  const keys = Object.keys(table.options).map(Number).sort((a, b) => a - b);
   const keyIndex = keys.indexOf(key);
-  const oppositeKeyIndex = keys.length - 1 - keyIndex;
-  const oppositeKey = keys[oppositeKeyIndex];
+  const oppositeKey = keys[keys.length - 1 - keyIndex];
   const oppositeResult = table.options[oppositeKey];
   return {
     key: oppositeKey,

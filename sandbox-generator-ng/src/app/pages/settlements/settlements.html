@@ -24,6 +24,13 @@
       <li>Population: {{ village.population }}</li>
       <li>Occupation: {{ village.occupation?.result || '(none)' }}</li>
       <li>Layout: {{ village.layout.result }}</li>
+      <li>General locations:
+        <ul>
+          @for (location of village.generalLocations; track $index) {
+          <li>{{ location }}</li>
+          }
+        </ul>
+      </li>
       <li>Points of Interest:
         @if (village.pointsOfInterest.length) {
         <ul>
@@ -48,6 +55,7 @@
         <span>(none)</span>
         }
       </li>
+      <li>Guards: {{ village.guards }}</li>
       <li>Disposition:
         <ul>
           <li>People's: {{ village.disposition.villageDisposition.result }}</li>

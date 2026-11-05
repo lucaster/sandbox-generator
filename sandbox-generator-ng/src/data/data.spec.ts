@@ -1,4 +1,4 @@
-import { calcNextHexBiome } from './data';
+import { calcNextHexBiome, oppositeOptionEntry } from './data';
 import { tableNextHexBiome, tableStartingHexBiome } from './random-tables';
 
 describe('data.ts', () => {
@@ -32,5 +32,17 @@ describe('data.ts', () => {
   it('calcNextHex handles boundary values (6 and 10)', () => {
     expect(calcNextHexBiome('X', () => 6)).toBe('Grassland');
     expect(calcNextHexBiome('X', () => 10)).toBe('Mountains');
+  });
+
+  it('oppositeOptionEntry mirrors the actual keys', () => {
+    const table = {
+      id: 0,
+      title: 'Test',
+      options: { 2: 'A', 3: 'B', 4: 'C' },
+    };
+
+    expect(oppositeOptionEntry(2, table)).toEqual({ key: 4, result: 'C' });
+    expect(oppositeOptionEntry(3, table)).toEqual({ key: 3, result: 'B' });
+    expect(oppositeOptionEntry(4, table)).toEqual({ key: 2, result: 'A' });
   });
 });

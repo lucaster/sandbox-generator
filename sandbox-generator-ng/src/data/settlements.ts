@@ -135,6 +135,7 @@ const tableVillageLayout: RandomTable = {
     3: 'Row',
   },
 };
+const villageGeneralLocations = ['Blacksmith', 'Market', 'Tavern', 'Well'];
 /**
  * Roll 1d20 as many times as the village size
  */
@@ -185,27 +186,19 @@ const tableVillageDefenses: RandomTable = {
 const tableVillageDisposition: RandomTable = {
   id: 60,
   title: 'Village Disposition',
+  dice: '2d6',
   options: {
-    1: 'Attack on sight',
-    2: 'Hostile',
+    2: 'Attack on sight',
     3: 'Hostile',
     4: 'Hostile',
     5: 'Hostile',
-    6: 'Hostile',
+    6: 'Neutral',
     7: 'Neutral',
     8: 'Neutral',
-    9: 'Neutral',
-    10: 'Neutral',
-    11: 'Neutral',
-    12: 'Neutral',
-    13: 'Neutral',
-    14: 'Neutral',
-    15: 'Welcoming',
-    16: 'Welcoming',
-    17: 'Welcoming',
-    18: 'Welcoming',
-    19: 'Welcoming',
-    20: 'Enthusiastic'
+    9: 'Welcoming',
+    10: 'Welcoming',
+    11: 'Welcoming',
+    12: 'Enthusiastic',
   },
 };
 const tableVillageRulerDisposition: RandomTable = {
@@ -221,11 +214,15 @@ const tableVillageRulerDisposition: RandomTable = {
   },
 };
 const tableVillageRulerDispositionIfVillageDispositionNeutral: RandomTable = {
-  id: 61,
+  id: 611,
   title: 'Village Ruler\'s Disposition if Village Disposition is Neutral',
   options: {
     1: 'Hostile',
-    2: 'Welcoming',
+    2: 'Hostile',
+    3: 'Hostile',
+    4: 'Welcoming',
+    5: 'Welcoming',
+    6: 'Welcoming',
   },
 };
 /**
@@ -343,46 +340,62 @@ const tableVillageEventNature: RandomTable = {
     12: 'Visit of a notable (lord, etc.)',
   },
 };
-function calcVillage() {
+function rollUniqueEntries(
+  table: RandomTable,
+  count: number,
+  rollFn: (faces: number) => number = d
+) {
+  const results: { key: number; result: string }[] = [];
+  while (results.length < count) {
+    const entry = randomOptionEntry(table, rollFn);
+    if (!results.some((result) => result.result === entry.result)) {
+      results.push(entry);
+    }
+  }
+  return results;
+}
+
+function calcVillage(rollFn: (faces: number) => number = d) {
   const name = generateRandomName();
-  const size = randomOptionEntry(tableVillageSize);
+  const size = randomOptionEntry(tableVillageSize, rollFn);
   const sizeFactor = {
     'Small': 1,
     'Medium': 2,
     'Big': 3,
   }[size.result] || 0;
   const population = 50 * sizeFactor;
-  const hasOccupation = randomOptionEntry(tableVillageHasOccupation).result === 'Yes';
+  const hasOccupation = randomOptionEntry(tableVillageHasOccupation, rollFn).result === 'Yes';
   const occupation =
     hasOccupation
-    ? randomOptionEntry(tableVillageOccupation)
+    ? randomOptionEntry(tableVillageOccupation, rollFn)
     : null
-  const layout = randomOptionEntry(tableVillageLayout);
-  // FIXME: evita ripetizioni in Points of Interest etc
-  const pointsOfInterest = new Array(sizeFactor).fill(0).map(it => randomOptionEntry(tableVillagePointsOfInterest));
-  const defenses = new Array(sizeFactor).fill(0).map(it => randomOptionEntry(tableVillageDefenses));
-  const villageDisposition = randomOptionEntry(tableVillageDisposition);
+  const layout = randomOptionEntry(tableVillageLayout, rollFn);
+  const generalLocations = [...villageGeneralLocations];
+  const pointsOfInterest = new Array(sizeFactor).fill(0).map(() => randomOptionEntry(tableVillagePointsOfInterest, rollFn));
+  const defenses = rollUniqueEntries(tableVillageDefenses, sizeFactor, rollFn);
+  const guards = (rollFn(3) + 3) * sizeFactor;
+  const villageDisposition = randomOptionEntry(tableVillageDisposition, rollFn);
   const rulerDisposition =
     villageDisposition.result === 'Neutral'
-    ? randomOptionEntry(tableVillageRulerDispositionIfVillageDispositionNeutral)
-    : randomOptionEntry(tableVillageRulerDisposition).key <= 4
+    ? randomOptionEntry(tableVillageRulerDispositionIfVillageDispositionNeutral, rollFn)
+    : randomOptionEntry(tableVillageRulerDisposition, rollFn).key <= 4
       ? villageDisposition // Same as villagers
       : oppositeOptionEntry(villageDisposition.key, tableVillageDisposition); // Opposite (to as villagers)
-  const notableNpcs = new Array(sizeFactor).fill(0).map(it => randomOptionEntry(tableVillageNotableNpcs));
-  const ruler = randomOptionEntry(tableVillageRuler);
-  const villageHasSecret = randomOptionEntry(tableVillageHasSecret);
+  const notableNpcs = new Array(sizeFactor).fill(0).map(() => randomOptionEntry(tableVillageNotableNpcs, rollFn));
+  const ruler = randomOptionEntry(tableVillageRuler, rollFn);
+  const villageHasSecret = randomOptionEntry(tableVillageHasSecret, rollFn);
   const secret =
     villageHasSecret.result === 'Yes'
-    ? randomOptionEntry(tableVillageSecret)
+    ? randomOptionEntry(tableVillageSecret, rollFn)
     : null;
-  const hasEvent = randomOptionEntry(tableVillageHasEvent).result === 'Yes';
+  const hasEvent = randomOptionEntry(tableVillageHasEvent, rollFn).result === 'Yes';
   const whenEventHappens =
     hasEvent
-    ? randomOptionEntry(tableVillageWhenEventHappens)
+    ? randomOptionEntry(tableVillageWhenEventHappens, rollFn)
     : null;
   const eventNature =
     hasEvent
-    ? randomOptionEntry(tableVillageEventNature)
+    ? randomOptionEntry(tableVillageEventNature, rollFn)
     : null;
   return {
     name,
@@ -390,8 +403,10 @@ function calcVillage() {
     population,
     occupation,
     layout,
+    generalLocations,
     pointsOfInterest,
     defenses,
+    guards,
     disposition: {
       villageDisposition,
       rulerDisposition,
