@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { calcCastle, calcCity, calcHamlet, calcVillage } from '../../../data/settlements';
+import { calcCastle, calcCity, calcHamlet, calcTower, calcVillage } from '../../../data/settlements';
 
 @Component({
   selector: 'app-settlements',
@@ -14,12 +14,14 @@ export class Settlements implements OnInit {
   village?: ReturnType<typeof calcVillage>;
   city?: ReturnType<typeof calcCity>;
   castle?: ReturnType<typeof calcCastle>;
+  tower?: ReturnType<typeof calcTower>;
 
   ngOnInit(): void {
     this.onCalcHamlet();
     this.onCalcVillage();
     this.onCalcCity();
     this.onCalcCastle();
+    this.onCalcTower();
   }
 
   onCalcHamlet() {
@@ -36,5 +38,9 @@ export class Settlements implements OnInit {
 
   onCalcCastle() {
     this.castle = calcCastle();
+  }
+
+  onCalcTower() {
+    this.tower = calcTower();
   }
 }

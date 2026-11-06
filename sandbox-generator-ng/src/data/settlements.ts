@@ -1456,6 +1456,392 @@ function calcCastle(rollFn: (faces: number) => number = d) {
   };
 }
 
+const tableTowerWizardLevel: RandomTable = {
+  id: 103,
+  title: 'Wizard Level',
+  dice: '2d6',
+  options: {
+    2: '7',
+    3: '8',
+    4: '8',
+    5: '8',
+    6: '9',
+    7: '9',
+    8: '9',
+    9: '10',
+    10: '10',
+    11: '10',
+    12: '11',
+  },
+};
+const tableTowerAbovegroundLevels: RandomTable = {
+  id: 104,
+  title: 'Tower Aboveground Levels',
+  options: {
+    1: 'One',
+    2: 'Two',
+    3: 'Two',
+    4: 'Three',
+    5: 'Three',
+    6: 'Three',
+    7: 'Four',
+    8: 'Four',
+    9: 'Four',
+    10: 'Five',
+    11: 'Five',
+    12: 'Six',
+  },
+};
+const tableTowerUndergroundLevels: RandomTable = {
+  id: 105,
+  title: 'Tower Underground Levels',
+  options: {
+    1: 'Zero',
+    2: 'Zero',
+    3: 'Zero',
+    4: 'Zero',
+    5: 'Zero',
+    6: 'Zero',
+    7: 'One',
+    8: 'One',
+    9: 'Two',
+    10: 'Two',
+    11: 'Three',
+    12: 'Four',
+  },
+};
+const towerAbovegroundLevelCounts: { [key: string]: number } = {
+  One: 1,
+  Two: 2,
+  Three: 3,
+  Four: 4,
+  Five: 5,
+  Six: 6,
+};
+const towerUndergroundLevelCounts: { [key: string]: number } = {
+  Zero: 0,
+  One: 1,
+  Two: 2,
+  Three: 3,
+  Four: 4,
+};
+const tableTowerConnection: RandomTable = {
+  id: 106,
+  title: 'Tower Levels Connection',
+  options: {
+    1: 'Staircase',
+    2: 'Staircase',
+    3: 'Staircase',
+    4: 'Spiral staircase',
+    5: 'Spiral staircase',
+    6: 'Spiral staircase',
+    7: 'Ladder',
+    8: 'Ladder',
+    9: 'Elevator',
+    10: 'Elevator',
+    11: 'Magic elevator',
+    12: 'Teleportation portals',
+  },
+};
+const tableTowerMaterial: RandomTable = {
+  id: 107,
+  title: 'Tower Material Used',
+  options: {
+    1: 'Cobblestone',
+    2: 'Cobblestone',
+    3: 'Cobblestone',
+    4: 'Cobblestone',
+    5: 'Cobblestone',
+    6: 'Wood',
+    7: 'Wood',
+    8: 'Wood',
+    9: 'Wood',
+    10: 'Wood',
+    11: 'Bricks',
+    12: 'Bricks',
+    13: 'Bricks',
+    14: 'Sandstone',
+    15: 'Sandstone',
+    16: 'Sandstone',
+    17: 'Limestone',
+    18: 'Limestone',
+    19: 'Marble',
+    20: 'Metal',
+  },
+};
+const tableTowerShape: RandomTable = {
+  id: 108,
+  title: 'Tower Shape',
+  options: {
+    1: 'Square',
+    2: 'Square',
+    3: 'Square',
+    4: 'Square',
+    5: 'Square',
+    6: 'Round',
+    7: 'Round',
+    8: 'Round',
+    9: 'Round',
+    10: 'Round',
+    11: 'Conical',
+    12: 'Conical',
+    13: 'Conical',
+    14: 'Tilted',
+    15: 'Tilted',
+    16: 'Tilted',
+    17: 'Asymmetrical',
+    18: 'S-shaped',
+    19: 'Stacked',
+    20: 'Twisted',
+  },
+};
+const tableTowerDetails: RandomTable = {
+  id: 109,
+  title: 'Tower Details',
+  options: {
+    1: 'Nothing',
+    2: 'Nothing',
+    3: 'Nothing',
+    4: 'Nothing',
+    5: 'Nothing',
+    6: 'Nothing',
+    7: 'Nothing',
+    8: 'Nothing',
+    9: 'Nothing',
+    10: 'Nothing',
+    11: 'Balcony',
+    12: 'Banners',
+    13: 'Battlements',
+    14: 'Climbing plants',
+    15: 'Flags',
+    16: 'Moldings',
+    17: 'Porch',
+    18: 'Stained glass',
+    19: 'Statues/Gargoyles',
+    20: 'Turrets',
+  },
+};
+const tableTowerInsideAppearance: RandomTable = {
+  id: 110,
+  title: 'Tower Inside Appearance',
+  options: {
+    1: 'Colorful',
+    2: 'Cozy',
+    3: 'Dark',
+    4: 'Dusty',
+    5: 'Extravagant',
+    6: 'Luxurious',
+    7: 'Moldy',
+    8: 'Old fashioned',
+    9: 'Stark',
+    10: 'Well decorated',
+  },
+};
+const tableTowerSpecialEquipment: RandomTable = {
+  id: 111,
+  title: 'Tower Special Equipment',
+  options: {
+    1: 'Nothing',
+    2: 'Nothing',
+    3: 'Nothing',
+    4: 'Nothing',
+    5: 'Nothing',
+    6: 'Nothing',
+    7: 'Nothing',
+    8: 'Nothing',
+    9: 'Nothing',
+    10: 'Nothing',
+    11: 'Acoustic tube',
+    12: 'Alarm system',
+    13: 'Dumbwaiter',
+    14: 'Emergency ladder/stairs',
+    15: 'Garbage chute',
+    16: 'Oversized pet doors',
+    17: 'Pneumatic tubes',
+    18: 'Secret passage',
+    19: 'Slide',
+    20: 'Ventilation system',
+  },
+};
+const tableTowerGroundLevel: RandomTable = {
+  id: 112,
+  title: 'Tower Ground Level',
+  options: {
+    1: 'Empty and dusty',
+    2: 'Fortified room',
+    3: 'Hallway',
+    4: 'Reception desk',
+    5: 'Ruined room',
+    6: 'Shop/Tavern',
+    7: 'Trapped room',
+    8: 'Unloading room',
+  },
+};
+const tableTowerAbovegroundUsage: RandomTable = {
+  id: 113,
+  title: 'Tower Aboveground Levels Usage',
+  options: {
+    1: 'Abandoned/Cursed level',
+    2: 'Archives',
+    3: 'Armory',
+    4: 'Bedroom(s)',
+    5: 'Kitchen and dining room',
+    6: 'Laboratory',
+    7: 'Library',
+    8: 'Meeting room',
+    9: 'Museum',
+    10: 'Music room/Art room',
+    11: 'Office/Study',
+    12: 'Storage room',
+  },
+};
+const tableTowerTopLevel: RandomTable = {
+  id: 114,
+  title: 'Tower Top Level',
+  options: {
+    1: 'Aviary',
+    2: 'Beacon',
+    3: 'Duel platform',
+    4: 'Foghorn',
+    5: 'Golden apple tree',
+    6: 'Greenhouse',
+    7: 'High security prison',
+    8: 'Landing platform',
+    9: 'Lightning rod',
+    10: 'Lookout post',
+    11: 'Magic searchlight',
+    12: 'Monster nest',
+    13: 'Observatory',
+    14: 'Panic room',
+    15: 'Ruined/Overgrown',
+    16: 'Siege engine',
+    17: 'Throne room',
+    18: 'Treasure room',
+    19: 'Weather station',
+    20: 'Windmill',
+  },
+};
+const tableTowerUndergroundUsage: RandomTable = {
+  id: 115,
+  title: 'Tower Underground Levels Usage',
+  options: {
+    1: 'Abandoned/Cursed level',
+    2: 'Alchemy lab',
+    3: 'Cellar',
+    4: 'Chapel',
+    5: 'Forge',
+    6: 'Menagerie',
+    7: 'Mushroom cave',
+    8: 'Prison',
+    9: 'Rituals room',
+    10: 'Storage',
+    11: 'Torture room',
+    12: 'Wine cellar',
+  },
+};
+const tableTowerBottomLevel: RandomTable = {
+  id: 116,
+  title: 'Tower Bottom Level',
+  options: {
+    1: 'Abyss',
+    2: 'Ancient ruins',
+    3: 'Arena',
+    4: 'Boudoir',
+    5: 'Creature mouth',
+    6: 'Excavation site',
+    7: 'Flesh pit',
+    8: 'Flooded pit',
+    9: 'Gambling den',
+    10: 'Magic portal',
+    11: 'Magic well',
+    12: 'Mine',
+    13: 'Oubliette',
+    14: 'Tunnel to the center of the planet',
+    15: 'Secret society headquarters',
+    16: 'Tomb',
+    17: 'Tunnel to a lair',
+    18: 'Tunnel to the surface',
+    19: 'Vault',
+    20: 'Well',
+  },
+};
+
+/**
+ * Wizard level table from the 2023 edition (p. 147). Towers require a wizard
+ * of at least level 9, so lower results are raised to 9.
+ */
+function calcTowerWizard(rollFn: (faces: number) => number = d) {
+  const rolled = randomOptionEntry(tableTowerWizardLevel, rollFn);
+  const hasApprentice = rollFn(4) === 1;
+  return {
+    level: Math.max(9, Number(rolled.result)),
+    apprentice: hasApprentice ? { level: rollFn(6) } : null,
+  };
+}
+
+function calcTower(rollFn: (faces: number) => number = d) {
+  const wizard = calcTowerWizard(rollFn);
+  const abovegroundLevels =
+    towerAbovegroundLevelCounts[
+      randomOptionEntry(tableTowerAbovegroundLevels, rollFn).result
+    ];
+  const undergroundLevels =
+    towerUndergroundLevelCounts[
+      randomOptionEntry(tableTowerUndergroundLevels, rollFn).result
+    ];
+  const connection = randomOptionEntry(tableTowerConnection, rollFn);
+  const material = randomOptionEntry(tableTowerMaterial, rollFn);
+  const shape = randomOptionEntry(tableTowerShape, rollFn);
+  const detailCount = rollFn(3);
+  const details = new Array(detailCount)
+    .fill(0)
+    .map(() => randomOptionEntry(tableTowerDetails, rollFn))
+    .filter((detail) => detail.result !== 'Nothing');
+  const insideAppearance = randomOptionEntry(tableTowerInsideAppearance, rollFn);
+  const specialEquipment = randomOptionEntry(tableTowerSpecialEquipment, rollFn);
+  const ground = randomOptionEntry(tableTowerGroundLevel, rollFn);
+  const aboveground = new Array(abovegroundLevels)
+    .fill(0)
+    .map(() => randomOptionEntry(tableTowerAbovegroundUsage, rollFn));
+  const top = randomOptionEntry(tableTowerTopLevel, rollFn);
+  const underground = new Array(undergroundLevels)
+    .fill(0)
+    .map(() => randomOptionEntry(tableTowerUndergroundUsage, rollFn));
+  const bottom =
+    undergroundLevels > 0
+      ? randomOptionEntry(tableTowerBottomLevel, rollFn)
+      : null;
+  const totalLevels =
+    1 +
+    abovegroundLevels +
+    1 +
+    undergroundLevels +
+    (undergroundLevels > 0 ? 1 : 0);
+  return {
+    wizard,
+    levels: {
+      aboveground: abovegroundLevels,
+      underground: undergroundLevels,
+      total: totalLevels,
+    },
+    connection,
+    outside: {
+      material,
+      shape,
+      details,
+    },
+    insideAppearance,
+    specialEquipment,
+    levelUsage: {
+      ground,
+      aboveground,
+      top,
+      underground,
+      bottom,
+    },
+  };
+}
+
 export {
   calcCastle,
   calcCastleDefense,
@@ -1472,6 +1858,8 @@ export {
   calcCityDefense,
   calcCityDisposition,
   calcHamlet,
+  calcTower,
+  calcTowerWizard,
   calcVillage,
   tableCastleCondition,
   tableCastleDefensiveStructures,
@@ -1482,6 +1870,19 @@ export {
   tableHamletDisposition,
   tableHamletLayout,
   tableHamletMainBuilding,
-  tableHamletSecret
+  tableHamletSecret,
+  tableTowerAbovegroundLevels,
+  tableTowerBottomLevel,
+  tableTowerConnection,
+  tableTowerDetails,
+  tableTowerGroundLevel,
+  tableTowerInsideAppearance,
+  tableTowerMaterial,
+  tableTowerShape,
+  tableTowerSpecialEquipment,
+  tableTowerTopLevel,
+  tableTowerUndergroundLevels,
+  tableTowerUndergroundUsage,
+  tableTowerWizardLevel
 };
 

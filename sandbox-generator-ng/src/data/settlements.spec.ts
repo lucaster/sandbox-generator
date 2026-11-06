@@ -14,6 +14,8 @@ import {
   calcCityDefense,
   calcCityDisposition,
   calcHamlet,
+  calcTower,
+  calcTowerWizard,
   calcVillage,
   tableCastleCondition,
   tableCastleDefensiveStructures,
@@ -21,6 +23,11 @@ import {
   tableCityBuildingType,
   tableCitySize,
   tableHamletDisposition,
+  tableTowerAbovegroundLevels,
+  tableTowerConnection,
+  tableTowerDetails,
+  tableTowerUndergroundLevels,
+  tableTowerWizardLevel,
 } from './settlements';
 
 function sequence(values: number[], fallback = 1) {
@@ -603,5 +610,184 @@ describe('settlements.ts calcCastle', () => {
       castle.garrison.composition.reduce((sum, entry) => sum + entry.count, 0)
     ).toBe(castle.garrison.total);
     expect(castle.garrison.lord.level).toBeGreaterThanOrEqual(9);
+  });
+});
+
+describe('settlements.ts tower tables', () => {
+  it('uses 2d6 for the wizard level table', () => {
+    expect(tableTowerWizardLevel.dice).toBe('2d6');
+    expect(tableTowerWizardLevel.options[2]).toBe('7');
+    expect(tableTowerWizardLevel.options[6]).toBe('9');
+    expect(tableTowerWizardLevel.options[12]).toBe('11');
+  });
+
+  it('groups the aboveground and underground level counts', () => {
+    expect(tableTowerAbovegroundLevels.options[1]).toBe('One');
+    expect(tableTowerAbovegroundLevels.options[2]).toBe('Two');
+    expect(tableTowerAbovegroundLevels.options[4]).toBe('Three');
+    expect(tableTowerAbovegroundLevels.options[7]).toBe('Four');
+    expect(tableTowerAbovegroundLevels.options[10]).toBe('Five');
+    expect(tableTowerAbovegroundLevels.options[12]).toBe('Six');
+
+    expect(tableTowerUndergroundLevels.options[1]).toBe('Zero');
+    expect(tableTowerUndergroundLevels.options[6]).toBe('Zero');
+    expect(tableTowerUndergroundLevels.options[7]).toBe('One');
+    expect(tableTowerUndergroundLevels.options[9]).toBe('Two');
+    expect(tableTowerUndergroundLevels.options[11]).toBe('Three');
+    expect(tableTowerUndergroundLevels.options[12]).toBe('Four');
+  });
+
+  it('groups the level connections', () => {
+    expect(tableTowerConnection.options[1]).toBe('Staircase');
+    expect(tableTowerConnection.options[3]).toBe('Staircase');
+    expect(tableTowerConnection.options[4]).toBe('Spiral staircase');
+    expect(tableTowerConnection.options[6]).toBe('Spiral staircase');
+    expect(tableTowerConnection.options[7]).toBe('Ladder');
+    expect(tableTowerConnection.options[9]).toBe('Elevator');
+    expect(tableTowerConnection.options[11]).toBe('Magic elevator');
+    expect(tableTowerConnection.options[12]).toBe('Teleportation portals');
+  });
+
+  it('groups the details table', () => {
+    expect(tableTowerDetails.options[1]).toBe('Nothing');
+    expect(tableTowerDetails.options[10]).toBe('Nothing');
+    expect(tableTowerDetails.options[11]).toBe('Balcony');
+    expect(tableTowerDetails.options[13]).toBe('Battlements');
+    expect(tableTowerDetails.options[20]).toBe('Turrets');
+  });
+});
+
+describe('settlements.ts calcTowerWizard', () => {
+  it('raises low wizard rolls to level 9', () => {
+    expect(calcTowerWizard(sequence([1, 1, 2]))).toEqual({
+      level: 9,
+      apprentice: null,
+    });
+  });
+
+  it('keeps higher wizard levels', () => {
+    expect(calcTowerWizard(sequence([6, 6, 2]))).toEqual({
+      level: 11,
+      apprentice: null,
+    });
+  });
+
+  it('adds an apprentice on a 25% chance', () => {
+    expect(calcTowerWizard(sequence([3, 3, 1, 5]))).toEqual({
+      level: 9,
+      apprentice: { level: 5 },
+    });
+  });
+});
+
+describe('settlements.ts calcTower', () => {
+  it('generates the tower from the 2023 edition example', () => {
+    const tower = calcTower(
+      sequence([
+        3, 3,
+        1, 2,
+        4,
+        7,
+        1,
+        17,
+        6,
+        1, 13,
+        3,
+        1,
+        7,
+        6, 8, 11,
+        9,
+        4,
+        5,
+      ])
+    );
+
+    expect(tower.wizard).toEqual({ level: 9, apprentice: { level: 2 } });
+    expect(tower.levels).toEqual({
+      aboveground: 3,
+      underground: 1,
+      total: 7,
+    });
+    expect(tower.connection.result).toBe('Staircase');
+    expect(tower.outside.material.result).toBe('Limestone');
+    expect(tower.outside.shape.result).toBe('Round');
+    expect(tower.outside.details.map((detail) => detail.result)).toEqual([
+      'Battlements',
+    ]);
+    expect(tower.insideAppearance.result).toBe('Dark');
+    expect(tower.specialEquipment.result).toBe('Nothing');
+    expect(tower.levelUsage.ground.result).toBe('Trapped room');
+    expect(
+      tower.levelUsage.aboveground.map((usage) => usage.result)
+    ).toEqual(['Laboratory', 'Meeting room', 'Office/Study']);
+    expect(tower.levelUsage.top.result).toBe('Lightning rod');
+    expect(tower.levelUsage.underground.map((usage) => usage.result)).toEqual([
+      'Chapel',
+    ]);
+    expect(tower.levelUsage.bottom?.result).toBe('Creature mouth');
+  });
+
+  it('handles a tower with no apprentice and no underground levels', () => {
+    const tower = calcTower(
+      sequence([
+        3, 3,
+        2,
+        1,
+        1,
+        12,
+        20,
+        20,
+        3, 1, 11, 20,
+        10,
+        20,
+        1,
+        1,
+        1,
+      ])
+    );
+
+    expect(tower.wizard).toEqual({ level: 9, apprentice: null });
+    expect(tower.levels).toEqual({
+      aboveground: 1,
+      underground: 0,
+      total: 3,
+    });
+    expect(tower.connection.result).toBe('Teleportation portals');
+    expect(tower.outside.details.map((detail) => detail.result)).toEqual([
+      'Balcony',
+      'Turrets',
+    ]);
+    expect(tower.insideAppearance.result).toBe('Well decorated');
+    expect(tower.specialEquipment.result).toBe('Ventilation system');
+    expect(tower.levelUsage.ground.result).toBe('Empty and dusty');
+    expect(
+      tower.levelUsage.aboveground.map((usage) => usage.result)
+    ).toEqual(['Abandoned/Cursed level']);
+    expect(tower.levelUsage.top.result).toBe('Aviary');
+    expect(tower.levelUsage.underground).toEqual([]);
+    expect(tower.levelUsage.bottom).toBeNull();
+  });
+
+  it('always produces a plausible tower for arbitrary rolls', () => {
+    const tower = calcTower(seeded(11));
+
+    expect(tower.wizard.level).toBeGreaterThanOrEqual(9);
+    expect(tower.wizard.level).toBeLessThanOrEqual(11);
+    expect(tower.levels.aboveground).toBeGreaterThanOrEqual(1);
+    expect(tower.levels.aboveground).toBeLessThanOrEqual(6);
+    expect(tower.levels.underground).toBeGreaterThanOrEqual(0);
+    expect(tower.levels.underground).toBeLessThanOrEqual(4);
+    expect(tower.levels.total).toBe(
+      2 +
+        tower.levels.aboveground +
+        tower.levels.underground +
+        (tower.levels.underground > 0 ? 1 : 0)
+    );
+    expect(tower.levelUsage.aboveground.length).toBe(tower.levels.aboveground);
+    expect(tower.levelUsage.underground.length).toBe(tower.levels.underground);
+    expect(tower.levelUsage.bottom === null).toBe(
+      tower.levels.underground === 0
+    );
+    expect(tower.outside.details.length).toBeLessThanOrEqual(3);
   });
 });

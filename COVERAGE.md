@@ -25,14 +25,14 @@ Coverage is concentrated in the first part of that pipeline.
 |---|---|---|
 | Hex Map | **Partial** | Biomes and feature outline work. Biome encounter tables match the 2023 edition and every entry is reachable. Factions and random encounters are absent. |
 | Landmarks | **Mostly complete** | Natural, artificial, and magic tables match the 2023 edition. The content tables exist, but treasure chance and information delivery are not used. |
-| Settlements | **Partial** | Names, hamlets, villages, cities, and castles are complete. Towers and abbeys are absent. |
+| Settlements | **Partial** | Names, hamlets, villages, cities, castles, and towers are complete. Abbeys are absent. |
 | Lairs | **Partial** | Inhabitants, outside percentage, outside hexes, and layout are generated. Monster count, treasure, and per-room distribution are missing. |
 | Dungeons | **Not implemented** | No cross-section, levels, structure, special rooms, or dungeon example logic. |
 | Generators | **Not implemented** | No coat of arms, criminal organization, dragon, guild, house, NPC, tavern, or wizard generator. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
-Counting generation subsections (examples excluded): **9 of 31 are complete,
-4 are partial, and 18 are absent.** Roughly one third of the book's generation
+Counting generation subsections (examples excluded): **10 of 31 are complete,
+4 are partial, and 17 are absent.** Roughly one third of the book's generation
 content is represented in code, and about two thirds is missing. The implemented
 tables are faithful to the 2023 edition; the gaps are mostly missing sections and
 generator logic.
@@ -69,7 +69,7 @@ The tables for all three landmark families match the 2023 edition.
 | Villages | **Done** | Size, occupation, layout, general locations (blacksmith, market, tavern, well), special locations, unique defenses, guards (`1d3+3 × size`), `2d6` disposition, neutral-ruler `1d6` disposition, notable NPCs, ruler, secret, and event match the 2023 edition. |
 | Cities | **Done** | Size/population, main occupations, characteristics, appearance (including color scheme), general and special locations, buildings of interest, walls, entrances, guards, siege supplies, notable NPCs, rulers, disposition, and events match the 2023 edition. Housing uses the 1d20 all-types option. |
 | Castles | **Done** | Name, condition, keep (shape, levels, features, jails, supplies, treasure), defensive structures, towers and walls, gatehouse, moat encounters, garrison composition and command levels, `2d6` disposition, and events match the 2023 edition. The book's moat table says `1d6` but lists eight results, so `1d8` is used. |
-| Towers | **Not implemented** | No tower generation. |
+| Towers | **Done** | Wizard level (at least 9, with a 25% chance of a `1d6` apprentice), aboveground and underground level counts, level connections, material, shape, `1d3` details, inside appearance, special equipment, and ground/aboveground/top/underground/bottom level usage match the 2023 edition. The wizard level uses the book's `2d6` wizard table, raised to the tower minimum of 9. |
 | Abbeys | **Not implemented** | No abbey generation. |
 
 ### Lairs
@@ -155,7 +155,7 @@ If the goal is to match the book's core hexcrawl loop, the highest-value order i
    patrol/lair distinction.
 3. **Add factions and wilderness random encounters**, since they tie the hex map
    together.
-4. **Add towers and abbeys** to complete the Settlements chapter.
+4. **Add abbeys** to complete the Settlements chapter.
 5. **Add dungeons**, which is the largest single missing subsystem.
 6. **Add the Generators chapter** and **Adventures at sea** last; they are
    detail layers rather than prerequisites for the core loop.

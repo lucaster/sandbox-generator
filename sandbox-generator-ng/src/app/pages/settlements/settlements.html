@@ -277,3 +277,74 @@
     </ul>
   }
 </section>
+<section>
+  <header>Tower</header>
+  <button (click)="onCalcTower()">Generate Tower</button>
+  <!-- <pre>{{ tower | json }}</pre> -->
+  @if (tower) {
+    <ul>
+      <li>Wizard: level {{ tower.wizard.level }}</li>
+      <li>Apprentice:
+        @if (tower.wizard.apprentice) {
+        <span>level {{ tower.wizard.apprentice.level }}</span>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>Levels:
+        <ul>
+          <li>Aboveground: {{ tower.levels.aboveground }}</li>
+          <li>Underground: {{ tower.levels.underground }}</li>
+          <li>Total: {{ tower.levels.total }}</li>
+        </ul>
+      </li>
+      <li>Levels connection: {{ tower.connection.result }}</li>
+      <li>Outside appearance:
+        <ul>
+          <li>Material: {{ tower.outside.material.result }}</li>
+          <li>Shape: {{ tower.outside.shape.result }}</li>
+          <li>Details:
+            @if (tower.outside.details.length) {
+            <ul>
+              @for (detail of tower.outside.details; track $index) {
+              <li>{{ detail.result }}</li>
+              }
+            </ul>
+            }
+            @else {
+            <span>(none)</span>
+            }
+          </li>
+        </ul>
+      </li>
+      <li>Inside appearance: {{ tower.insideAppearance.result }}</li>
+      <li>Special equipment: {{ tower.specialEquipment.result }}</li>
+      <li>Level usage:
+        <ul>
+          <li>Ground: {{ tower.levelUsage.ground.result }}</li>
+          <li>Aboveground:
+            <ul>
+              @for (usage of tower.levelUsage.aboveground; track $index) {
+              <li>{{ usage.result }}</li>
+              }
+            </ul>
+          </li>
+          <li>Top: {{ tower.levelUsage.top.result }}</li>
+          @if (tower.levelUsage.underground.length) {
+          <li>Underground:
+            <ul>
+              @for (usage of tower.levelUsage.underground; track $index) {
+              <li>{{ usage.result }}</li>
+              }
+            </ul>
+          </li>
+          }
+          @if (tower.levelUsage.bottom; as bottom) {
+          <li>Bottom: {{ bottom.result }}</li>
+          }
+        </ul>
+      </li>
+    </ul>
+  }
+</section>
