@@ -348,3 +348,80 @@
     </ul>
   }
 </section>
+<section>
+  <header>Abbey</header>
+  <button (click)="onCalcAbbey()">Generate Abbey</button>
+  <!-- <pre>{{ abbey | json }}</pre> -->
+  @if (abbey) {
+    <ul>
+      <li>Name: {{ abbey.name }}</li>
+      <li>Size: {{ abbey.size.result }}</li>
+      <li>Monks/Nuns: {{ abbey.monks }}</li>
+      <li>Abbot/Abbess: level {{ abbey.abbot.level }} cleric</li>
+      <li>Structure &amp; land:
+        <ul>
+          <li>Wall: {{ abbey.structure.wall }}</li>
+          <li>Outside the walls: {{ abbey.structure.outsideWalls }}</li>
+          <li>Inside the walls: {{ abbey.structure.insideWallsAcres }} acres</li>
+        </ul>
+      </li>
+      <li>Core locations:
+        <ul>
+          @for (location of abbey.coreLocations; track $index) {
+          <li>{{ location }}</li>
+          }
+        </ul>
+      </li>
+      <li>Additional locations:
+        <ul>
+          <li>Garden: {{ abbey.additionalLocations.garden.result }}</li>
+          <li>Infirmary: {{ abbey.additionalLocations.infirmary.result }}</li>
+          <li>Religious buildings: {{ abbey.additionalLocations.religiousBuildings.result }}</li>
+          <li>Other: {{ abbey.additionalLocations.other.result }}</li>
+        </ul>
+      </li>
+      <li>Activities:
+        <ul>
+          <li>Farming:
+            <ul>
+              @for (activity of abbey.activities.farming; track $index) {
+              <li>{{ activity.result }}</li>
+              }
+            </ul>
+          </li>
+          <li>Workshop: {{ abbey.activities.workshop.result }}</li>
+          <li>Other: {{ abbey.activities.other.result }}</li>
+        </ul>
+      </li>
+      @if (abbey.fame; as fame) {
+      <li>Fame: {{ fame.fame.result }}
+        @if (fame.artifact) {
+        <ul>
+          <li>Religious artifact: {{ fame.artifact.nature.result }}</li>
+          @if (fame.artifact.relic) {
+          <li>Relic: {{ fame.artifact.relic.type.result }} of Saint {{ fame.artifact.relic.saint.result }}</li>
+          <li>Spell level: {{ fame.artifact.relic.spellLevel.result }}</li>
+          }
+        </ul>
+        }
+      </li>
+      }
+      <li>Event:
+        @if (abbey.event.hasEvent) {
+        <ul>
+          <li>{{ abbey.event.when?.result }}</li>
+          <li>{{ abbey.event.nature?.result }}</li>
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>History: {{ abbey.history.history.result }}
+        @if (abbey.history.foundedYearsAgo !== null) {
+        <span>({{ abbey.history.foundedYearsAgo }} years ago)</span>
+        }
+      </li>
+    </ul>
+  }
+</section>

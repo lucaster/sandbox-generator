@@ -1842,7 +1842,440 @@ function calcTower(rollFn: (faces: number) => number = d) {
   };
 }
 
+const tableAbbeyName: RandomTable = {
+  id: 117,
+  title: 'Abbey Name',
+  options: {
+    1: 'Blessed-Land',
+    2: 'Clear-Water',
+    3: 'Fruitful-Garden',
+    4: 'Good-...',
+    5: 'Peaceful-Soul',
+    6: 'Sacred-Heart',
+    7: 'Our-Lady-of-...',
+    8: 'Saint-...',
+    9: 'Saint-...',
+    10: 'Saint-...',
+  },
+};
+const tableAbbeyNameGood: RandomTable = {
+  id: 118,
+  title: 'Abbey Name (Good-...)',
+  options: {
+    1: 'Help',
+    2: 'Hope',
+    3: 'Relief',
+  },
+};
+const tableAbbeyNameOurLady: RandomTable = {
+  id: 119,
+  title: 'Abbey Name (Our-Lady-of-...)',
+  options: {
+    1: 'Chastity',
+    2: 'Mercy',
+    3: 'the Poor',
+  },
+};
+const tableAbbeySaints: RandomTable = {
+  id: 120,
+  title: 'Abbey Saints',
+  options: {
+    1: 'Adélie',
+    2: 'Agath',
+    3: 'Alexia',
+    4: 'Aubreda',
+    5: 'Bardolphus',
+    6: 'Barthélemy',
+    7: 'Beatrix',
+    8: 'Bérengérius',
+    9: 'Bernard(us)',
+    10: 'Cecilia',
+    11: 'Cédany',
+    12: 'Émelote',
+    13: 'Gaufridus',
+    14: 'Geffrey',
+    15: 'Géroldin',
+    16: 'Guillotin',
+    17: 'Jaclyn',
+    18: 'Jacomus',
+    19: 'Madeleine',
+    20: 'Marion',
+    21: 'Mariorie',
+    22: 'Martin',
+    23: 'Mary',
+    24: 'Melchior',
+    25: 'Paul',
+    26: 'Pétasse',
+    27: 'Peter',
+    28: 'Remy',
+    29: 'Thomasse',
+    30: 'Victor',
+  },
+};
+const tableAbbeySize: RandomTable = {
+  id: 121,
+  title: 'Abbey Size',
+  options: {
+    1: 'Small',
+    2: 'Small',
+    3: 'Small',
+    4: 'Small',
+    5: 'Small',
+    6: 'Major',
+  },
+};
+const tableAbbeyGarden: RandomTable = {
+  id: 122,
+  title: 'Abbey Garden',
+  options: {
+    1: 'Flower garden',
+    2: 'Fountain',
+    3: 'Kitchen garden',
+    4: 'Physic garden (medicine)',
+  },
+};
+const tableAbbeyInfirmary: RandomTable = {
+  id: 123,
+  title: 'Abbey Infirmary',
+  options: {
+    1: 'Bloodletting & purging room',
+    2: 'Drugstore',
+    3: "Physician's residence",
+    4: 'Room for critical patients',
+  },
+};
+const tableAbbeyReligiousBuildings: RandomTable = {
+  id: 124,
+  title: 'Abbey Religious Buildings',
+  options: {
+    1: 'Chapter house (for meetings)',
+    2: 'Parlour',
+    3: 'School',
+    4: 'Scriptorium and library',
+  },
+};
+const tableAbbeyOtherLocations: RandomTable = {
+  id: 125,
+  title: 'Abbey Other Locations',
+  options: {
+    1: "Abbot's gateway",
+    2: 'Barns and stables',
+    3: 'Guest rooms',
+    4: 'Vestarium (clothing storage)',
+    5: 'Washhouse',
+    6: 'Watchtower',
+  },
+};
+const tableAbbeyFarming: RandomTable = {
+  id: 126,
+  title: 'Abbey Farming Activities',
+  options: {
+    1: 'Barley (beer)',
+    2: 'Chickens (meat)',
+    3: 'Cotton',
+    4: 'Cows (meat, milk and cheese)',
+    5: 'Goats (meat, milk and cheese)',
+    6: 'Grapes (wine)',
+    7: 'Hops (beer)',
+    8: 'Orchard (fruits and preserves)',
+    9: 'Pigs (meat)',
+    10: 'Sheeps (meat and wool)',
+    11: 'Vegetables',
+    12: 'Wheat (flour and bread)',
+  },
+};
+const tableAbbeyWorkshop: RandomTable = {
+  id: 127,
+  title: 'Abbey Workshop Activities',
+  options: {
+    1: 'Candle makers',
+    2: 'Cutlers',
+    3: 'Potters',
+    4: 'Shoemakers',
+    5: 'Smiths',
+    6: 'Tanners',
+  },
+};
+const tableAbbeyOtherActivities: RandomTable = {
+  id: 128,
+  title: 'Abbey Other Activities',
+  options: {
+    1: 'Bee keeping',
+    2: 'Bookshop',
+    3: 'Catering',
+    4: 'Copy & translation',
+    5: 'Exorcism',
+    6: 'Guided tour',
+  },
+};
+const tableAbbeyFame: RandomTable = {
+  id: 129,
+  title: 'Abbey Fame',
+  options: {
+    1: 'Age',
+    2: 'Architecture',
+    3: 'Cattle baptism',
+    4: 'Curative (hot) springs',
+    5: 'Domain and landscapes',
+    6: 'Grave of well known bishop',
+    7: 'Key religious celebration',
+    8: 'Meals served to travelers',
+    9: 'Pilgrimage',
+    10: 'Power',
+    11: 'Quality of products',
+    12: 'Religious artifact',
+    13: 'Religious artifact',
+    14: 'Religious artifact',
+    15: 'Religious artifact',
+    16: 'Religious artifact',
+    17: 'Religious artifact',
+    18: 'Religious artifact',
+    19: 'Religious artifact',
+    20: 'Religious artifact',
+  },
+};
+const tableAbbeyArtifactNature: RandomTable = {
+  id: 130,
+  title: 'Abbey Religious Artifact',
+  options: {
+    1: 'Ancient parchment',
+    2: 'Art piece',
+    3: 'Crown',
+    4: 'Holy sword',
+    5: 'Precious book',
+    6: 'Relic',
+  },
+};
+const tableAbbeyRelicType: RandomTable = {
+  id: 131,
+  title: 'Abbey Relic Type',
+  options: {
+    1: 'Arm',
+    2: 'Blood',
+    3: 'Bones (vertebra, phalanx)',
+    4: 'Eye',
+    5: 'Flesh',
+    6: 'Head',
+    7: 'Heart',
+    8: 'Item that killed the saint',
+    9: 'Leg',
+    10: 'Piece of clothing',
+    11: 'Prayer book',
+    12: 'Religious symbol',
+    13: 'Ring',
+    14: 'Sandals',
+    15: 'Scalp',
+    16: 'Shroud',
+    17: 'Skin',
+    18: 'Tongue',
+    19: 'Tooth',
+    20: 'Walking stick',
+  },
+};
+const tableAbbeyRelicSpellLevel: RandomTable = {
+  id: 132,
+  title: 'Abbey Relic Spell Level',
+  options: {
+    1: 'Level 1',
+    2: 'Level 1',
+    3: 'Level 1',
+    4: 'Level 1',
+    5: 'Level 1',
+    6: 'Level 1',
+    7: 'Level 1',
+    8: 'Level 1',
+    9: 'Level 2',
+    10: 'Level 2',
+    11: 'Level 2',
+    12: 'Level 2',
+    13: 'Level 2',
+    14: 'Level 2',
+    15: 'Level 3',
+    16: 'Level 3',
+    17: 'Level 3',
+    18: 'Level 4',
+    19: 'Level 4',
+    20: 'Level 5',
+  },
+};
+const tableAbbeyEventWhen: RandomTable = {
+  id: 133,
+  title: 'Abbey Event When',
+  options: {
+    1: 'Ended earlier',
+    2: 'Is happening now',
+    3: 'Is happening now',
+    4: 'Is happening now',
+    5: 'Will take place in the future',
+    6: 'Will take place in the future',
+  },
+};
+const tableAbbeyEventNature: RandomTable = {
+  id: 134,
+  title: 'Abbey Event Nature',
+  options: {
+    1: 'Broken device',
+    2: 'Cowls shrunken/dyed in red',
+    3: 'Demonic corruption',
+    4: 'Disappearance of the abbot',
+    5: 'Drought/Flood',
+    6: 'Festival/Fair',
+    7: 'Fire',
+    8: 'Looting',
+    9: 'Moles/Rats infestation',
+    10: 'Plague',
+    11: 'Scandal',
+    12: 'Visit of a notable person',
+  },
+};
+const tableAbbeyHistory: RandomTable = {
+  id: 135,
+  title: 'Abbey History',
+  options: {
+    1: 'Abandoned then used again',
+    2: 'Changed confession',
+    3: 'Claimed its autonomy',
+    4: 'Destroyed then rebuilt',
+    5: 'Founded 2d10 x10 years ago',
+    6: 'Has seen better days',
+    7: 'Only one original building remains',
+    8: 'Sponsored by a rich patron',
+    9: 'Started as a knight hermitage',
+    10: 'Used to be a boarding school',
+    11: 'Was relocated',
+    12: 'Was under a spell',
+  },
+};
+
+const abbeyCoreLocations = [
+  "Abbot's room",
+  'Cellars',
+  'Cemetery',
+  'Church',
+  'Cloisters and garden',
+  'Infirmary',
+  'Kitchen and refectory',
+  'Monks cells',
+  'Necessarium (latrines)',
+  'Servants, laborers and tradesmen quarters',
+  'Storehouses',
+];
+
+const abbeyStructure = {
+  wall: 'Stone wall with a large gate',
+  outsideWalls: 'Fields and farming buildings (barns, mills, etc.)',
+  insideWallsAcres: '3-4',
+};
+
+function calcAbbeyName(rollFn: (faces: number) => number = d) {
+  const name = randomOptionEntry(tableAbbeyName, rollFn);
+  if (name.key === 4) {
+    return `Good-${randomOptionEntry(tableAbbeyNameGood, rollFn).result}`;
+  }
+  if (name.key === 7) {
+    return `Our-Lady-of-${randomOptionEntry(tableAbbeyNameOurLady, rollFn).result}`;
+  }
+  if (name.key >= 8) {
+    return `Saint-${randomOptionEntry(tableAbbeySaints, rollFn).result}`;
+  }
+  return name.result;
+}
+
+function calcAbbeyAdditionalLocations(rollFn: (faces: number) => number = d) {
+  return {
+    garden: randomOptionEntry(tableAbbeyGarden, rollFn),
+    infirmary: randomOptionEntry(tableAbbeyInfirmary, rollFn),
+    religiousBuildings: randomOptionEntry(tableAbbeyReligiousBuildings, rollFn),
+    other: randomOptionEntry(tableAbbeyOtherLocations, rollFn),
+  };
+}
+
+function calcAbbeyActivities(rollFn: (faces: number) => number = d) {
+  return {
+    farming: rollUniqueEntries(tableAbbeyFarming, 2, rollFn),
+    workshop: randomOptionEntry(tableAbbeyWorkshop, rollFn),
+    other: randomOptionEntry(tableAbbeyOtherActivities, rollFn),
+  };
+}
+
+function calcAbbeyFame(size: string, rollFn: (faces: number) => number = d) {
+  if (size !== 'Major') {
+    return null;
+  }
+  const fame = randomOptionEntry(tableAbbeyFame, rollFn);
+  if (fame.key < 12) {
+    return { fame, artifact: null };
+  }
+  const artifact = randomOptionEntry(tableAbbeyArtifactNature, rollFn);
+  if (artifact.key !== 6) {
+    return { fame, artifact: { nature: artifact, relic: null } };
+  }
+  return {
+    fame,
+    artifact: {
+      nature: artifact,
+      relic: {
+        type: randomOptionEntry(tableAbbeyRelicType, rollFn),
+        saint: randomOptionEntry(tableAbbeySaints, rollFn),
+        spellLevel: randomOptionEntry(tableAbbeyRelicSpellLevel, rollFn),
+      },
+    },
+  };
+}
+
+function calcAbbeyEvent(rollFn: (faces: number) => number = d) {
+  const hasEvent = rollFn(6) === 1;
+  return {
+    hasEvent,
+    when: hasEvent ? randomOptionEntry(tableAbbeyEventWhen, rollFn) : null,
+    nature: hasEvent ? randomOptionEntry(tableAbbeyEventNature, rollFn) : null,
+  };
+}
+
+function calcAbbeyHistory(rollFn: (faces: number) => number = d) {
+  const history = randomOptionEntry(tableAbbeyHistory, rollFn);
+  return {
+    history,
+    foundedYearsAgo:
+      history.key === 5 ? (rollFn(10) + rollFn(10)) * 10 : null,
+  };
+}
+
+function calcAbbey(rollFn: (faces: number) => number = d) {
+  const name = calcAbbeyName(rollFn);
+  const size = randomOptionEntry(tableAbbeySize, rollFn);
+  const monks =
+    size.result === 'Small' ? rollFn(4) * 10 + 20 : rollFn(24) * 10 + 90;
+  const abbotLevel =
+    9 +
+    (size.result === 'Small'
+      ? monks >= 50
+        ? 1
+        : 0
+      : Math.floor(monks / 100));
+  return {
+    name,
+    size,
+    monks,
+    abbot: { level: abbotLevel },
+    structure: abbeyStructure,
+    coreLocations: abbeyCoreLocations,
+    additionalLocations: calcAbbeyAdditionalLocations(rollFn),
+    activities: calcAbbeyActivities(rollFn),
+    fame: calcAbbeyFame(size.result, rollFn),
+    event: calcAbbeyEvent(rollFn),
+    history: calcAbbeyHistory(rollFn),
+  };
+}
+
 export {
+  calcAbbey,
+  calcAbbeyActivities,
+  calcAbbeyAdditionalLocations,
+  calcAbbeyEvent,
+  calcAbbeyFame,
+  calcAbbeyHistory,
+  calcAbbeyName,
   calcCastle,
   calcCastleDefense,
   calcCastleDisposition,
@@ -1861,6 +2294,17 @@ export {
   calcTower,
   calcTowerWizard,
   calcVillage,
+  tableAbbeyArtifactNature,
+  tableAbbeyEventNature,
+  tableAbbeyEventWhen,
+  tableAbbeyFame,
+  tableAbbeyFarming,
+  tableAbbeyHistory,
+  tableAbbeyName,
+  tableAbbeyRelicSpellLevel,
+  tableAbbeyRelicType,
+  tableAbbeySaints,
+  tableAbbeySize,
   tableCastleCondition,
   tableCastleDefensiveStructures,
   tableCastleDisposition,

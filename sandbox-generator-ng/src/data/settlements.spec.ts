@@ -1,4 +1,9 @@
 import {
+  calcAbbey,
+  calcAbbeyEvent,
+  calcAbbeyFame,
+  calcAbbeyHistory,
+  calcAbbeyName,
   calcCastle,
   calcCastleDefense,
   calcCastleDisposition,
@@ -23,6 +28,10 @@ import {
   tableCityBuildingType,
   tableCitySize,
   tableHamletDisposition,
+  tableAbbeyEventWhen,
+  tableAbbeyFame,
+  tableAbbeyRelicSpellLevel,
+  tableAbbeySize,
   tableTowerAbovegroundLevels,
   tableTowerConnection,
   tableTowerDetails,
@@ -789,5 +798,255 @@ describe('settlements.ts calcTower', () => {
       tower.levels.underground === 0
     );
     expect(tower.outside.details.length).toBeLessThanOrEqual(3);
+  });
+});
+
+describe('settlements.ts calcAbbeyName', () => {
+  it('uses the fixed names', () => {
+    expect(calcAbbeyName(sequence([1]))).toBe('Blessed-Land');
+    expect(calcAbbeyName(sequence([5]))).toBe('Peaceful-Soul');
+    expect(calcAbbeyName(sequence([6]))).toBe('Sacred-Heart');
+  });
+
+  it('fills in the Good- and Our-Lady-of- names', () => {
+    expect(calcAbbeyName(sequence([4, 1]))).toBe('Good-Help');
+    expect(calcAbbeyName(sequence([4, 2]))).toBe('Good-Hope');
+    expect(calcAbbeyName(sequence([4, 3]))).toBe('Good-Relief');
+    expect(calcAbbeyName(sequence([7, 1]))).toBe('Our-Lady-of-Chastity');
+    expect(calcAbbeyName(sequence([7, 3]))).toBe('Our-Lady-of-the Poor');
+  });
+
+  it('fills in the Saint- names from the saint table', () => {
+    expect(calcAbbeyName(sequence([8, 1]))).toBe('Saint-Adélie');
+    expect(calcAbbeyName(sequence([9, 14]))).toBe('Saint-Geffrey');
+    expect(calcAbbeyName(sequence([10, 30]))).toBe('Saint-Victor');
+  });
+});
+
+describe('settlements.ts abbey tables', () => {
+  it('groups the abbey sizes', () => {
+    expect(tableAbbeySize.options[1]).toBe('Small');
+    expect(tableAbbeySize.options[5]).toBe('Small');
+    expect(tableAbbeySize.options[6]).toBe('Major');
+  });
+
+  it('treats 12-20 as a religious artifact', () => {
+    expect(tableAbbeyFame.options[1]).toBe('Age');
+    expect(tableAbbeyFame.options[11]).toBe('Quality of products');
+    expect(tableAbbeyFame.options[12]).toBe('Religious artifact');
+    expect(tableAbbeyFame.options[20]).toBe('Religious artifact');
+  });
+
+  it('groups the event timing', () => {
+    expect(tableAbbeyEventWhen.options[1]).toBe('Ended earlier');
+    expect(tableAbbeyEventWhen.options[2]).toBe('Is happening now');
+    expect(tableAbbeyEventWhen.options[4]).toBe('Is happening now');
+    expect(tableAbbeyEventWhen.options[5]).toBe('Will take place in the future');
+    expect(tableAbbeyEventWhen.options[6]).toBe('Will take place in the future');
+  });
+
+  it('groups the relic spell levels', () => {
+    expect(tableAbbeyRelicSpellLevel.options[1]).toBe('Level 1');
+    expect(tableAbbeyRelicSpellLevel.options[8]).toBe('Level 1');
+    expect(tableAbbeyRelicSpellLevel.options[9]).toBe('Level 2');
+    expect(tableAbbeyRelicSpellLevel.options[14]).toBe('Level 2');
+    expect(tableAbbeyRelicSpellLevel.options[15]).toBe('Level 3');
+    expect(tableAbbeyRelicSpellLevel.options[17]).toBe('Level 3');
+    expect(tableAbbeyRelicSpellLevel.options[18]).toBe('Level 4');
+    expect(tableAbbeyRelicSpellLevel.options[19]).toBe('Level 4');
+    expect(tableAbbeyRelicSpellLevel.options[20]).toBe('Level 5');
+  });
+});
+
+describe('settlements.ts calcAbbeyFame', () => {
+  it('returns null for a small abbey without rolling', () => {
+    let rolls = 0;
+    const fame = calcAbbeyFame('Small', (faces) => {
+      rolls++;
+      return Math.min(1, faces);
+    });
+    expect(fame).toBeNull();
+    expect(rolls).toBe(0);
+  });
+
+  it('returns a non-artifact fame reason', () => {
+    expect(calcAbbeyFame('Major', sequence([5]))).toEqual({
+      fame: { key: 5, result: 'Domain and landscapes' },
+      artifact: null,
+    });
+  });
+
+  it('returns a non-relic artifact', () => {
+    expect(calcAbbeyFame('Major', sequence([20, 4]))).toEqual({
+      fame: { key: 20, result: 'Religious artifact' },
+      artifact: {
+        nature: { key: 4, result: 'Holy sword' },
+        relic: null,
+      },
+    });
+  });
+
+  it('returns a relic with its saint and spell level', () => {
+    expect(calcAbbeyFame('Major', sequence([12, 6, 9, 14, 1]))).toEqual({
+      fame: { key: 12, result: 'Religious artifact' },
+      artifact: {
+        nature: { key: 6, result: 'Relic' },
+        relic: {
+          type: { key: 9, result: 'Leg' },
+          saint: { key: 14, result: 'Geffrey' },
+          spellLevel: { key: 1, result: 'Level 1' },
+        },
+      },
+    });
+  });
+});
+
+describe('settlements.ts calcAbbeyHistory', () => {
+  it('leaves the founding date empty for other histories', () => {
+    expect(calcAbbeyHistory(sequence([2]))).toEqual({
+      history: { key: 2, result: 'Changed confession' },
+      foundedYearsAgo: null,
+    });
+  });
+
+  it('rolls 2d10 x10 years for a founded abbey', () => {
+    expect(calcAbbeyHistory(sequence([5, 3, 4]))).toEqual({
+      history: { key: 5, result: 'Founded 2d10 x10 years ago' },
+      foundedYearsAgo: 70,
+    });
+  });
+});
+
+describe('settlements.ts calcAbbeyEvent', () => {
+  it('produces no event on a roll other than 1', () => {
+    expect(calcAbbeyEvent(sequence([2]))).toEqual({
+      hasEvent: false,
+      when: null,
+      nature: null,
+    });
+  });
+
+  it('produces an event with timing and nature on a 1', () => {
+    expect(calcAbbeyEvent(sequence([1, 5, 10]))).toEqual({
+      hasEvent: true,
+      when: { key: 5, result: 'Will take place in the future' },
+      nature: { key: 10, result: 'Plague' },
+    });
+  });
+});
+
+describe('settlements.ts calcAbbey', () => {
+  it('generates the abbey from the 2023 edition example', () => {
+    const abbey = calcAbbey(
+      sequence([
+        1,
+        6,
+        12,
+        1, 2, 4, 2,
+        5, 6,
+        1,
+        4,
+        12, 6, 9, 14, 1,
+        2,
+        8,
+      ])
+    );
+
+    expect(abbey.name).toBe('Blessed-Land');
+    expect(abbey.size.result).toBe('Major');
+    expect(abbey.monks).toBe(210);
+    expect(abbey.abbot.level).toBe(11);
+    expect(abbey.coreLocations.length).toBe(11);
+    expect(abbey.coreLocations).toContain('Church');
+    expect(abbey.additionalLocations.garden.result).toBe('Flower garden');
+    expect(abbey.additionalLocations.infirmary.result).toBe('Drugstore');
+    expect(abbey.additionalLocations.religiousBuildings.result).toBe(
+      'Scriptorium and library'
+    );
+    expect(abbey.additionalLocations.other.result).toBe('Barns and stables');
+    expect(abbey.activities.farming.map((entry) => entry.result)).toEqual([
+      'Goats (meat, milk and cheese)',
+      'Grapes (wine)',
+    ]);
+    expect(abbey.activities.workshop.result).toBe('Candle makers');
+    expect(abbey.activities.other.result).toBe('Copy & translation');
+    expect(abbey.fame?.fame.result).toBe('Religious artifact');
+    expect(abbey.fame?.artifact?.nature.result).toBe('Relic');
+    expect(abbey.fame?.artifact?.relic?.type.result).toBe('Leg');
+    expect(abbey.fame?.artifact?.relic?.saint.result).toBe('Geffrey');
+    expect(abbey.fame?.artifact?.relic?.spellLevel.result).toBe('Level 1');
+    expect(abbey.event.hasEvent).toBe(false);
+    expect(abbey.history.history.result).toBe('Sponsored by a rich patron');
+    expect(abbey.history.foundedYearsAgo).toBeNull();
+  });
+
+  it('generates a small abbey with an event and a founding date', () => {
+    const abbey = calcAbbey(
+      sequence([
+        2,
+        1,
+        4,
+        1, 1, 1, 1,
+        1, 2,
+        2,
+        2,
+        1, 1, 12,
+        5, 3, 4,
+      ])
+    );
+
+    expect(abbey.name).toBe('Clear-Water');
+    expect(abbey.size.result).toBe('Small');
+    expect(abbey.monks).toBe(60);
+    expect(abbey.abbot.level).toBe(10);
+    expect(abbey.fame).toBeNull();
+    expect(abbey.event.hasEvent).toBe(true);
+    expect(abbey.event.when?.result).toBe('Ended earlier');
+    expect(abbey.event.nature?.result).toBe('Visit of a notable person');
+    expect(abbey.history.history.result).toBe('Founded 2d10 x10 years ago');
+    expect(abbey.history.foundedYearsAgo).toBe(70);
+  });
+
+  it('keeps a small abbey abbot at level 9 below 50 monks', () => {
+    const abbey = calcAbbey(
+      sequence([3, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1])
+    );
+
+    expect(abbey.monks).toBe(40);
+    expect(abbey.abbot.level).toBe(9);
+  });
+
+  it('always produces a plausible abbey for arbitrary rolls', () => {
+    const abbey = calcAbbey(seeded(23));
+
+    expect(abbey.name.length).toBeGreaterThan(0);
+    expect(['Small', 'Major']).toContain(abbey.size.result);
+    if (abbey.size.result === 'Small') {
+      expect(abbey.monks).toBeGreaterThanOrEqual(30);
+      expect(abbey.monks).toBeLessThanOrEqual(60);
+      expect(abbey.fame).toBeNull();
+    } else {
+      expect(abbey.monks).toBeGreaterThanOrEqual(100);
+      expect(abbey.monks).toBeLessThanOrEqual(330);
+      expect(abbey.fame).not.toBeNull();
+    }
+    expect(abbey.abbot.level).toBeGreaterThanOrEqual(9);
+    expect(abbey.coreLocations.length).toBe(11);
+    expect(abbey.activities.farming.length).toBe(2);
+    expect(
+      new Set(abbey.activities.farming.map((entry) => entry.result)).size
+    ).toBe(2);
+    if (abbey.event.hasEvent) {
+      expect(abbey.event.when).not.toBeNull();
+      expect(abbey.event.nature).not.toBeNull();
+    } else {
+      expect(abbey.event.when).toBeNull();
+      expect(abbey.event.nature).toBeNull();
+    }
+    if (abbey.history.foundedYearsAgo !== null) {
+      expect(abbey.history.foundedYearsAgo % 10).toBe(0);
+      expect(abbey.history.foundedYearsAgo).toBeGreaterThanOrEqual(20);
+      expect(abbey.history.foundedYearsAgo).toBeLessThanOrEqual(200);
+    }
   });
 });
