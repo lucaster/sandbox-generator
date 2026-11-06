@@ -368,7 +368,7 @@ export class HexDrawPatch implements AfterViewInit {
               treasure:
                 content.treasure.chance === null
                   ? 'Variable (chosen by the DM)'
-                  : `${content.treasure.hasTreasure ? 'Yes' : 'No'} (${content.treasure.roll} on 1d100 vs ${Math.round(content.treasure.chance * 100)}%)`,
+                  : `${content.treasure.hasTreasure ? 'Yes' : 'No'}`,
               convey: content.convey ? content.convey.result : null,
             }
           : null,
