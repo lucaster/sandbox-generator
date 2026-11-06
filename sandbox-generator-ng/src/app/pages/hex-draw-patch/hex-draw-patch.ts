@@ -8,7 +8,8 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import { calcHexesBiome, calcHexesDetailedContent, calcHexesDetailedFeature, fromHexesDetailedToImagePathHexes, fromHexesToHexesDetailed, Hexes, HexesDetailed } from '../../../data/data';
+import { calcContentWithPath, calcHexesDetailedContentWithDetails } from '../../../data/content';
+import { calcHexesBiome, calcHexesDetailedFeature, fromHexesDetailedToImagePathHexes, fromHexesToHexesDetailed, Hexes, HexesDetailed } from '../../../data/data';
 import { SvgDrawer } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
@@ -25,8 +26,15 @@ export class HexDrawPatch implements AfterViewInit {
   width = input(500);
   height = input(500);
   @ViewChild('svg') svgElement!: ElementRef<SVGElement>;
-  hexDetailList = signal<{ hexNum: number; details: string[] | null; }[]>([]);
+  hexDetailList = signal<{
+    hexNum: number;
+    details: string[] | null;
+    content: { treasure: string; convey: string | null; } | null;
+  }[]>([]);
   private hexesDetailed: HexesDetailed | null = null;
+  private contentDetails: {
+    [hexNum: number]: ReturnType<typeof calcContentWithPath>;
+  } = {};
 
   ngAfterViewInit() {
     this.onDrawFeatureHexPatch();
@@ -88,7 +96,9 @@ export class HexDrawPatch implements AfterViewInit {
     const svgDrawer = new SvgDrawer(svg);
     const r = 50;
     const hexOps = new HexOps(r);
-    this.hexesDetailed = calcHexesDetailedContent();
+    const { hexesDetailed, contents } = calcHexesDetailedContentWithDetails();
+    this.hexesDetailed = hexesDetailed;
+    this.contentDetails = contents;
     const imagePathHexes = fromHexesDetailedToImagePathHexes(this.hexesDetailed);
     this.drawPatch(
       svgDrawer,
@@ -338,6 +348,7 @@ export class HexDrawPatch implements AfterViewInit {
 
   private resetPatch() {
     this.hexesDetailed = null;
+    this.contentDetails = {};
     const svg = this.svgElement.nativeElement;
     while (svg.firstChild) {
       svg.removeChild(svg.firstChild);
@@ -348,7 +359,20 @@ export class HexDrawPatch implements AfterViewInit {
     const hexDetailList = Object.keys(this.hexesDetailed || {}).map(key => {
       const hexNum = +(key);
       const details = this.hexesDetailed ? this.hexesDetailed[hexNum] : null;
-      return { hexNum, details };
+      const content = this.contentDetails[hexNum];
+      return {
+        hexNum,
+        details,
+        content: content
+          ? {
+              treasure:
+                content.treasure.chance === null
+                  ? 'Variable (chosen by the DM)'
+                  : `${content.treasure.hasTreasure ? 'Yes' : 'No'} (${content.treasure.roll} on 1d100 vs ${Math.round(content.treasure.chance * 100)}%)`,
+              convey: content.convey ? content.convey.result : null,
+            }
+          : null,
+      };
     });
     this.hexDetailList.set(hexDetailList);
   }

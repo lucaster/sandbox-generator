@@ -31,6 +31,12 @@
                     {{ detail }} |
                   }
                 }
+                @if (a.content) {
+                  <div>Treasure: {{ a.content.treasure }}</div>
+                  @if (a.content.convey) {
+                    <div>Information conveyed by: {{ a.content.convey }}</div>
+                  }
+                }
               </li>
             }
           </ol>

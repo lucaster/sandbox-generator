@@ -339,6 +339,7 @@ export {
   calcNextHexFeature,
   calcStartingHexBiome,
   calcStartingHexFeature,
+  currHexNextHex,
   fromHexesDetailedToHexes,
   fromHexesDetailedToImagePathHexes,
   fromHexesToHexesDetailed,

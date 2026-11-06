@@ -1,4 +1,8 @@
-import { calcContent } from './content';
+import {
+  calcContent,
+  calcContentWithPath,
+  calcHexesDetailedContentWithDetails,
+} from './content';
 import {
   tableContentConvey,
   tableContentTreasureChance,
@@ -33,6 +37,59 @@ describe('random-tables.ts content tables', () => {
     expect(tableContentConvey.options[6]).toBe(
       'Written in a book or on a scroll'
     );
+  });
+});
+
+describe('content.ts calcContentWithPath', () => {
+  it('returns the table path alongside the content result', () => {
+    const content = calcContentWithPath(sequence([4, 10, 4, 3]));
+
+    expect(content.path).toEqual([
+      'Special',
+      'Related to landmark',
+      'Uncover a mystery',
+      'Curse',
+    ]);
+    expect(content.type).toBe('Special');
+    expect(content.detail).toBe(
+      'Related to landmark: Uncover a mystery: Curse'
+    );
+  });
+
+  it('returns a single-element path for monsters', () => {
+    const content = calcContentWithPath(sequence([5, 11]));
+
+    expect(content.path).toEqual(['Monsters']);
+    expect(content.detail).toBeNull();
+  });
+});
+
+describe('content.ts calcHexesDetailedContentWithDetails', () => {
+  it('returns one content result per hex, matching the drawn path', () => {
+    const { hexesDetailed, contents } = calcHexesDetailedContentWithDetails(
+      sequence([], 1)
+    );
+
+    expect(Object.keys(hexesDetailed).length).toBe(19);
+    expect(Object.keys(hexesDetailed)).toEqual(Object.keys(contents));
+    expect(hexesDetailed[1]).toEqual(['Hazard', 'Acid pits']);
+    expect(contents[1]).toEqual({
+      path: ['Hazard', 'Acid pits'],
+      type: 'Hazard',
+      detail: 'Acid pits',
+      treasure: { chance: 0.25, roll: 1, hasTreasure: true },
+      convey: null,
+    });
+  });
+
+  it('keeps the treasure and convey rolls for each hex', () => {
+    const { contents } = calcHexesDetailedContentWithDetails(
+      sequence([2, 19, 52, 3])
+    );
+
+    expect(contents[1].type).toBe('Empty');
+    expect(contents[1].treasure.hasTreasure).toBe(false);
+    expect(contents[1].convey?.result).toBe('Etched/Drawn on something');
   });
 });
 
