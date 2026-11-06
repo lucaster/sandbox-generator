@@ -1,0 +1,29 @@
+<section>
+  <header>Landmark Content</header>
+  <button (click)="onCalcContent()">Generate Content</button>
+  @if (content) {
+    <ul>
+      <li>Type: {{ content.type }}</li>
+      <li>Detail:
+        @if (content.detail) {
+        <span>{{ content.detail }}</span>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+      <li>Treasure:
+        @if (content.treasure.chance === null) {
+        <span>Variable (chosen by the DM)</span>
+        }
+        @else {
+        <span>{{ content.treasure.hasTreasure ? 'Yes' : 'No' }}
+          ({{ content.treasure.roll }} on 1d100 vs {{ content.treasure.chance * 100 }}%)</span>
+        }
+      </li>
+      @if (content.convey) {
+      <li>Information conveyed by: {{ content.convey.result }}</li>
+      }
+    </ul>
+  }
+</section>

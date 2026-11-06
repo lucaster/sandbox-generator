@@ -467,17 +467,21 @@ const tableLandmark: RandomTable = {
 /**
  * p17
  */
-const tableContentTreasureChance = {
+export const tableContentTreasureChance: {
+  id: number;
+  title: string;
+  options: { [key: string]: number | null; };
+} = {
   id: 7,
   title: 'Content and Treasure Chance',
   options: {
     'Hazard': 0.25,
     'Empty': 0.15,
-    'Special': 0.50, // variable (TODO)
+    'Special': null, // variable: the DM chooses the reward
     'Monsters': 0.50,
   },
 };
-const tableContentConvey: RandomTable = {
+export const tableContentConvey: RandomTable = {
   id: 30,
   title: 'Content Convey',
   options: {

@@ -8,8 +8,8 @@ The project is based on the 2023 edition. A 2024 edition PDF is also present in 
 repo, but its tables differ, so it should not be used to verify the current code.
 
 The comparison is based on the book's table of contents and its tables, matched
-against `src/data/random-tables.ts`, `src/data/data.ts`, `src/data/settlements.ts`,
-`src/data/lairs.ts`, and `src/data/names.ts`.
+against `src/data/random-tables.ts`, `src/data/data.ts`, `src/data/content.ts`,
+`src/data/settlements.ts`, `src/data/lairs.ts`, and `src/data/names.ts`.
 
 ## At a glance
 
@@ -24,15 +24,15 @@ Coverage is concentrated in the first part of that pipeline.
 | Book chapter | Status | Notes |
 |---|---|---|
 | Hex Map | **Partial** | Biomes and feature outline work. Biome encounter tables match the 2023 edition and every entry is reachable. Factions and random encounters are absent. |
-| Landmarks | **Mostly complete** | Natural, artificial, and magic tables match the 2023 edition. The content tables exist, but treasure chance and information delivery are not used. |
+| Landmarks | **Done** | Natural, artificial, and magic tables match the 2023 edition. Content, treasure chance, and information delivery are implemented. |
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
 | Lairs | **Partial** | Inhabitants, outside percentage, outside hexes, and layout are generated. Monster count, treasure, and per-room distribution are missing. |
 | Dungeons | **Not implemented** | No cross-section, levels, structure, special rooms, or dungeon example logic. |
 | Generators | **Not implemented** | No coat of arms, criminal organization, dragon, guild, house, NPC, tavern, or wizard generator. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
-Counting generation subsections (examples excluded): **11 of 31 are complete,
-4 are partial, and 16 are absent.** Roughly one third of the book's generation
+Counting generation subsections (examples excluded): **12 of 31 are complete,
+3 are partial, and 16 are absent.** Roughly one third of the book's generation
 content is represented in code, and about two thirds is missing. The implemented
 tables are faithful to the 2023 edition; the gaps are mostly missing sections and
 generator logic.
@@ -58,7 +58,7 @@ The tables for all three landmark families match the 2023 edition.
 | Natural Landmarks | **Done** | Fauna, Geological A/B, Vegetal A/B, and Water tables match the 2023 edition. |
 | Artificial Landmarks | **Done** | Labor, Mysterious, Religious, Ruin, Small structure, and Travel tables match the 2023 edition. |
 | Magic Landmarks | **Done** | Area under a spell, Enchanted item, Magic path, Magic remains, Place of power, and Strange phenomenon tables match the 2023 edition. |
-| Content | **Partial** | Hazard, Empty, Special, and Convey tables exist. `tableContentTreasureChance` is defined but never used. No treasure is generated. `tableContentConvey` is never used, so "how the information is learned" is not produced. |
+| Content | **Done** | `calcContent` rolls the content type and nested detail, checks the type's treasure chance on `1d100` (Hazard 25%, Empty 15%, Monsters 50%), and rolls how Empty information is conveyed. Special rewards are variable and left to the DM. |
 
 ### Settlements
 
@@ -137,9 +137,6 @@ the 2023 edition.
 - **`calcHexesBiome`** calls `calcStartingHexBiome()` without passing `rollFn`.
 - **`calcHexesDetailed`** does not enforce the book's fixed starting features
   (village in hex 1, dungeon in hex 2).
-- **`tableContentTreasureChance`** is unused; treasure is never rolled.
-- **`tableContentConvey`** is unused; the "how the information is conveyed"
-  result is never produced.
 - **`lairLayout`** is unused; `d(5)` is used instead.
 - **Lair generation** does not roll monster count, treasure, or room distribution.
 - `src/data/data.ts` and `src/data/names.ts` still contain `console.info`,
@@ -150,11 +147,10 @@ the 2023 edition.
 
 If the goal is to match the book's core hexcrawl loop, the highest-value order is:
 
-1. **Finish the content layer**: treasure chance and information delivery.
-2. **Finish lairs**: monster count, treasure, room distribution, and the
+1. **Finish lairs**: monster count, treasure, room distribution, and the
    patrol/lair distinction.
-3. **Add factions and wilderness random encounters**, since they tie the hex map
+2. **Add factions and wilderness random encounters**, since they tie the hex map
    together.
-4. **Add dungeons**, which is the largest single missing subsystem.
-5. **Add the Generators chapter** and **Adventures at sea** last; they are
+3. **Add dungeons**, which is the largest single missing subsystem.
+4. **Add the Generators chapter** and **Adventures at sea** last; they are
    detail layers rather than prerequisites for the core loop.

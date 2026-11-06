@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HelloAngular } from './components/hello-angular/hello-angular';
+import { LandmarkContent } from './pages/content/content';
 import { HexDrawPatch } from './pages/hex-draw-patch/hex-draw-patch';
 import { HexDraw } from './pages/hex-draw/hex-draw';
 import { Lairs } from './pages/lairs/lairs';
@@ -24,6 +25,10 @@ export const routes: Routes = [
   {
     path: 'page1',
     component: Page1
+  },
+  {
+    path: 'content',
+    component: LandmarkContent
   },
   {
     path: 'hex-draw',
