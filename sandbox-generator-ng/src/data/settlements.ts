@@ -1083,7 +1083,388 @@ function calcCity(rollFn: (faces: number) => number = d) {
   };
 }
 
+const tableCastleNameFirst: RandomTable = {
+  id: 90,
+  title: 'Castle Name (First Part)',
+  options: {
+    1: 'Apple',
+    2: 'Battle',
+    3: 'Black',
+    4: 'Bleak',
+    5: 'Blood(y)',
+    6: 'Bright',
+    7: 'Broken',
+    8: 'Cloud',
+    9: 'Dark',
+    10: 'Dawn',
+    11: 'Dragon',
+    12: 'Dusk',
+    13: 'Fire',
+    14: 'Gold(en)',
+    15: 'Hammer',
+    16: 'Hawk',
+    17: 'Horse',
+    18: 'Ice',
+    19: 'Light',
+    20: 'Lion',
+    21: 'Moon',
+    22: 'Oak',
+    23: 'Raven',
+    24: 'Red',
+    25: 'River',
+    26: 'Rose',
+    27: 'Silver',
+    28: 'Star',
+    29: 'Stone',
+    30: 'Wind(y)',
+  },
+};
+const tableCastleNameSecond: RandomTable = {
+  id: 91,
+  title: 'Castle Name (Second Part)',
+  options: {
+    1: 'Bane',
+    2: 'Bridge',
+    3: 'Fall/Fell',
+    4: 'Fang',
+    5: 'Foot',
+    6: 'Heart',
+    7: 'Herd',
+    8: 'Hold',
+    9: 'Hook',
+    10: 'Keep',
+    11: 'Maw',
+    12: 'Mist',
+    13: 'Moor',
+    14: 'Peak',
+    15: 'Rock',
+    16: 'Shield',
+    17: 'Skull',
+    18: 'Song',
+    19: 'Soul',
+    20: 'Storm',
+    21: 'Thorn',
+    22: 'Vale',
+    23: 'Way',
+    24: 'Wood',
+  },
+};
+const tableCastleCondition: RandomTable = {
+  id: 92,
+  title: 'Castle General Condition',
+  options: {
+    1: 'Perfect',
+    2: 'Worn',
+    3: 'Worn',
+    4: 'Aged',
+    5: 'Aged',
+    6: 'Crumbling',
+  },
+};
+const tableCastleKeepShape: RandomTable = {
+  id: 93,
+  title: 'Castle Keep Shape',
+  options: {
+    1: 'Square/Rectangle',
+    2: 'Square/Rectangle',
+    3: 'Square/Rectangle',
+    4: 'Round',
+    5: 'Round',
+    6: 'Shell (= hollow cylinder)',
+  },
+};
+const tableCastleDefensiveFeature: RandomTable = {
+  id: 94,
+  title: 'Castle Defensive Feature',
+  options: {
+    1: 'None',
+    2: 'None',
+    3: 'None',
+    4: 'None',
+    5: 'None',
+    6: 'None',
+    7: 'Ballista',
+    8: 'Boiling oil',
+    9: 'Catapult',
+    10: 'Hoarding',
+    11: 'Iron spikes',
+    12: 'Piles of rocks',
+  },
+};
+const tableCastleNonDefensiveFeature: RandomTable = {
+  id: 95,
+  title: 'Castle Non-Defensive Feature',
+  options: {
+    1: 'None',
+    2: 'None',
+    3: 'None',
+    4: 'None',
+    5: 'None',
+    6: 'None',
+    7: 'Banners/Flags',
+    8: 'Gargoyles',
+    9: 'Heads/Bodies',
+    10: 'Overgrown',
+    11: 'Religious symbols',
+    12: 'Secret passage',
+  },
+};
+const tableCastleDefensiveStructures: RandomTable = {
+  id: 96,
+  title: 'Castle Defensive Structures',
+  options: {
+    1: 'Stone walls and towers',
+    2: 'Stone walls and towers',
+    3: 'Stone walls and towers',
+    4: 'Moat (= trench)',
+    5: 'Motte (= mound)',
+    6: 'Wooden palisade',
+  },
+};
+const tableCastleWallShape: RandomTable = {
+  id: 97,
+  title: 'Castle Wall Shape',
+  options: {
+    1: 'Square/Rectangle',
+    2: 'Trapezium',
+    3: 'Pentagon',
+    4: 'Hexagon',
+    5: 'Octagon',
+    6: 'Star',
+    7: 'Cross',
+    8: 'Circle',
+  },
+};
+const castleWallTowers: { [key: number]: number } = {
+  1: 4,
+  2: 4,
+  3: 5,
+  4: 6,
+  5: 8,
+  6: 10,
+  7: 12,
+};
+const tableCastleGatehouse: RandomTable = {
+  id: 98,
+  title: 'Castle Gatehouse',
+  options: {
+    1: 'Portcullis and wooden door',
+    2: 'Portcullis and wooden door',
+    3: 'Portcullis and wooden door',
+    4: 'Drawbridge',
+    5: 'Drawbridge',
+    6: 'Both',
+  },
+};
+/**
+ * The 2023 edition says "Roll 1d6" but lists eight results; 1d8 is used so
+ * every entry is reachable.
+ */
+const tableCastleMoatEncounter: RandomTable = {
+  id: 99,
+  title: 'Castle Moat Encounters',
+  dice: '1d8',
+  options: {
+    1: 'Nothing',
+    2: 'Nothing',
+    3: 'Nothing',
+    4: 'Nothing',
+    5: 'Crocodiles',
+    6: 'Electric eels',
+    7: 'Leeches',
+    8: 'Piranha',
+  },
+};
+const tableCastleDisposition: RandomTable = {
+  id: 100,
+  title: 'Castle Disposition',
+  dice: '2d6',
+  options: {
+    2: 'Attack on sight',
+    3: 'Hostile',
+    4: 'Hostile',
+    5: 'Hostile',
+    6: 'Neutral',
+    7: 'Neutral',
+    8: 'Neutral',
+    9: 'Welcoming',
+    10: 'Welcoming',
+    11: 'Welcoming',
+    12: 'Enthusiastic',
+  },
+};
+const tableCastleEventWhen: RandomTable = {
+  id: 101,
+  title: 'Castle Event When',
+  options: {
+    1: 'Ended earlier',
+    2: 'Is happening now',
+    3: 'Is happening now',
+    4: 'Is happening now',
+    5: 'Will take place in the future',
+    6: 'Will take place in the future',
+  },
+};
+const tableCastleEventNature: RandomTable = {
+  id: 102,
+  title: 'Castle Event Nature',
+  options: {
+    1: 'Assassination',
+    2: 'Big HD monster attack',
+    3: 'Ceremony (wedding, etc.)',
+    4: 'Festival/Fair',
+    5: 'Fire',
+    6: 'Plague',
+    7: 'Resources/Gold dwindling',
+    8: 'Rival lord scouting',
+    9: 'Small HD monsters wanting to establish a lair nearby',
+    10: 'Siege/Looting',
+    11: 'Tournament',
+    12: 'Visit of a notable person',
+  },
+};
+
+function calcCastleName(rollFn: (faces: number) => number = d) {
+  const first = randomOptionEntry(tableCastleNameFirst, rollFn);
+  const second = randomOptionEntry(tableCastleNameSecond, rollFn);
+  return `Castle ${first.result} ${second.result}`;
+}
+
+function calcCastleTreasure(rollFn: (faces: number) => number = d) {
+  const goldFromFirst = rollFn(2) === 1 ? rollFn(4) * 10000 : 0;
+  const goldFromSecond = rollFn(2) === 1 ? rollFn(6) * 5000 : 0;
+  const gems = rollFn(4) === 1 ? rollFn(6) + rollFn(6) + rollFn(6) : 0;
+  const jewelry = rollFn(4) === 1 ? rollFn(10) : 0;
+  const hasMagicItems = rollFn(100) <= 15;
+  return {
+    goldPieces: goldFromFirst + goldFromSecond,
+    gems,
+    jewelry,
+    magicItems: hasMagicItems ? 4 : 0,
+    scrolls: hasMagicItems ? rollFn(6) : 0,
+  };
+}
+
+function calcCastleKeep(rollFn: (faces: number) => number = d) {
+  const shape = randomOptionEntry(tableCastleKeepShape, rollFn);
+  const levels = rollFn(3) + 1;
+  const defensiveFeature = randomOptionEntry(tableCastleDefensiveFeature, rollFn);
+  const nonDefensiveFeature = randomOptionEntry(tableCastleNonDefensiveFeature, rollFn);
+  const jails = {
+    commoners: rollFn(6) + rollFn(6),
+    nobles: rollFn(3),
+  };
+  const suppliesMonths = rollFn(6) + rollFn(6);
+  const treasure = calcCastleTreasure(rollFn);
+  return {
+    shape,
+    levels,
+    defensiveFeature,
+    nonDefensiveFeature,
+    jails,
+    suppliesMonths,
+    treasure,
+  };
+}
+
+function calcCastleTowersAndWalls(rollFn: (faces: number) => number = d) {
+  const shape = randomOptionEntry(tableCastleWallShape, rollFn);
+  const towers = shape.key === 8 ? rollFn(3) + 3 : castleWallTowers[shape.key];
+  const defensiveFeature = randomOptionEntry(tableCastleDefensiveFeature, rollFn);
+  const nonDefensiveFeature = randomOptionEntry(tableCastleNonDefensiveFeature, rollFn);
+  return {
+    shape,
+    towers,
+    defensiveFeature,
+    nonDefensiveFeature,
+  };
+}
+
+function calcCastleDefense(rollFn: (faces: number) => number = d) {
+  const structureCount = rollFn(4);
+  const structures = rollUniqueEntries(tableCastleDefensiveStructures, structureCount, rollFn);
+  const hasStoneWalls = structures.some(
+    (structure) => structure.result === 'Stone walls and towers'
+  );
+  const hasMoat = structures.some((structure) => structure.result === 'Moat (= trench)');
+  return {
+    structures,
+    towersAndWalls: hasStoneWalls ? calcCastleTowersAndWalls(rollFn) : null,
+    gatehouse: hasStoneWalls ? randomOptionEntry(tableCastleGatehouse, rollFn) : null,
+    moatEncounter: hasMoat ? randomOptionEntry(tableCastleMoatEncounter, rollFn) : null,
+  };
+}
+
+function calcCastleGarrison(rollFn: (faces: number) => number = d) {
+  const total = (rollFn(6) + rollFn(6) + rollFn(6)) * 10;
+  const composition = [
+    { type: 'Cavaliers: heavy horse, plate & shield, sword', percentage: 10 },
+    { type: 'Cavaliers: medium horse, plate & shield, spear', percentage: 10 },
+    { type: 'Cavaliers: medium horse, chainmail, short bow', percentage: 10 },
+    { type: 'Footmen: chainmail & shield, sword', percentage: 40 },
+    { type: 'Footmen: chainmail, polearm', percentage: 10 },
+    { type: 'Footmen: chainmail, crossbow', percentage: 10 },
+    { type: 'Footmen: chainmail, longbow', percentage: 10 },
+  ].map((entry) => ({
+    type: entry.type,
+    count: (total * entry.percentage) / 100,
+  }));
+  const lordLevel = 9 + Math.floor(total / 60);
+  const lieutenantLevel = lordLevel - 2;
+  return {
+    total,
+    composition,
+    lord: { level: lordLevel },
+    lieutenant: { level: lieutenantLevel },
+    bodyguards: { count: 6, level: lieutenantLevel - 3 },
+  };
+}
+
+function calcCastleDisposition(rollFn: (faces: number) => number = d) {
+  return randomOptionEntry(tableCastleDisposition, rollFn);
+}
+
+function calcCastleEvent(rollFn: (faces: number) => number = d) {
+  const hasEvent = rollFn(6) === 1;
+  return {
+    hasEvent,
+    whenEventHappens: hasEvent
+      ? randomOptionEntry(tableCastleEventWhen, rollFn)
+      : null,
+    eventNature: hasEvent
+      ? randomOptionEntry(tableCastleEventNature, rollFn)
+      : null,
+  };
+}
+
+function calcCastle(rollFn: (faces: number) => number = d) {
+  const name = calcCastleName(rollFn);
+  const condition = randomOptionEntry(tableCastleCondition, rollFn);
+  const keep = calcCastleKeep(rollFn);
+  const defense = calcCastleDefense(rollFn);
+  const garrison = calcCastleGarrison(rollFn);
+  const disposition = calcCastleDisposition(rollFn);
+  const event = calcCastleEvent(rollFn);
+  return {
+    name,
+    condition,
+    keep,
+    defense,
+    garrison,
+    disposition,
+    event,
+  };
+}
+
 export {
+  calcCastle,
+  calcCastleDefense,
+  calcCastleDisposition,
+  calcCastleEvent,
+  calcCastleGarrison,
+  calcCastleKeep,
+  calcCastleName,
+  calcCastleTreasure,
   calcCity,
   calcCityAppearance,
   calcCityBuildings,
@@ -1092,6 +1473,10 @@ export {
   calcCityDisposition,
   calcHamlet,
   calcVillage,
+  tableCastleCondition,
+  tableCastleDefensiveStructures,
+  tableCastleDisposition,
+  tableCastleMoatEncounter,
   tableCityBuildingType,
   tableCitySize,
   tableHamletDisposition,

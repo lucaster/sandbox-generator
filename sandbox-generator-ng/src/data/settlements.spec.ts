@@ -1,4 +1,12 @@
 import {
+  calcCastle,
+  calcCastleDefense,
+  calcCastleDisposition,
+  calcCastleEvent,
+  calcCastleGarrison,
+  calcCastleKeep,
+  calcCastleName,
+  calcCastleTreasure,
   calcCity,
   calcCityAppearance,
   calcCityBuildings,
@@ -7,6 +15,9 @@ import {
   calcCityDisposition,
   calcHamlet,
   calcVillage,
+  tableCastleCondition,
+  tableCastleDefensiveStructures,
+  tableCastleDisposition,
   tableCityBuildingType,
   tableCitySize,
   tableHamletDisposition,
@@ -334,5 +345,263 @@ describe('settlements.ts calcCity', () => {
     expect(city.people.notableNpcs.length).toBe(factor);
     expect(city.generalLocations.length).toBe(8);
     expect(city.generalLocations[0]).toBe(`${factor} Blacksmiths`);
+  });
+});
+
+describe('settlements.ts castle tables', () => {
+  it('groups the general condition like the 2023 edition', () => {
+    expect(tableCastleCondition.options[1]).toBe('Perfect');
+    expect(tableCastleCondition.options[2]).toBe('Worn');
+    expect(tableCastleCondition.options[3]).toBe('Worn');
+    expect(tableCastleCondition.options[4]).toBe('Aged');
+    expect(tableCastleCondition.options[5]).toBe('Aged');
+    expect(tableCastleCondition.options[6]).toBe('Crumbling');
+  });
+
+  it('uses 2d6 and the 2023 edition disposition groups', () => {
+    expect(tableCastleDisposition.dice).toBe('2d6');
+    expect(tableCastleDisposition.options[2]).toBe('Attack on sight');
+    expect(tableCastleDisposition.options[3]).toBe('Hostile');
+    expect(tableCastleDisposition.options[5]).toBe('Hostile');
+    expect(tableCastleDisposition.options[6]).toBe('Neutral');
+    expect(tableCastleDisposition.options[8]).toBe('Neutral');
+    expect(tableCastleDisposition.options[9]).toBe('Welcoming');
+    expect(tableCastleDisposition.options[11]).toBe('Welcoming');
+    expect(tableCastleDisposition.options[12]).toBe('Enthusiastic');
+  });
+
+  it('groups the defensive structures', () => {
+    expect(tableCastleDefensiveStructures.options[1]).toBe('Stone walls and towers');
+    expect(tableCastleDefensiveStructures.options[2]).toBe('Stone walls and towers');
+    expect(tableCastleDefensiveStructures.options[3]).toBe('Stone walls and towers');
+    expect(tableCastleDefensiveStructures.options[4]).toBe('Moat (= trench)');
+    expect(tableCastleDefensiveStructures.options[5]).toBe('Motte (= mound)');
+    expect(tableCastleDefensiveStructures.options[6]).toBe('Wooden palisade');
+  });
+});
+
+describe('settlements.ts calcCastleName', () => {
+  it('composes a name from the 1d30 and 1d24 tables', () => {
+    expect(calcCastleName(sequence([9, 13]))).toBe('Castle Dark Moor');
+  });
+});
+
+describe('settlements.ts calcCastleTreasure', () => {
+  it('rolls both gold amounts and each treasure chance independently', () => {
+    const treasure = calcCastleTreasure(
+      sequence([1, 3, 1, 1, 1, 3, 3, 2, 1, 8, 1, 4])
+    );
+
+    expect(treasure).toEqual({
+      goldPieces: 35000,
+      gems: 8,
+      jewelry: 8,
+      magicItems: 4,
+      scrolls: 4,
+    });
+  });
+
+  it('returns an empty treasure when every chance fails', () => {
+    const treasure = calcCastleTreasure(sequence([2, 2, 2, 2, 100]));
+
+    expect(treasure).toEqual({
+      goldPieces: 0,
+      gems: 0,
+      jewelry: 0,
+      magicItems: 0,
+      scrolls: 0,
+    });
+  });
+});
+
+describe('settlements.ts calcCastleKeep', () => {
+  it('rolls the shape, levels, features, jails, supplies, and treasure', () => {
+    const keep = calcCastleKeep(
+      sequence([
+        4, 2, 11, 10, 3, 4, 2, 5, 6, 2, 2, 2, 2, 100,
+      ])
+    );
+
+    expect(keep.shape.result).toBe('Round');
+    expect(keep.levels).toBe(3);
+    expect(keep.defensiveFeature.result).toBe('Iron spikes');
+    expect(keep.nonDefensiveFeature.result).toBe('Overgrown');
+    expect(keep.jails).toEqual({ commoners: 7, nobles: 2 });
+    expect(keep.suppliesMonths).toBe(11);
+    expect(keep.treasure).toEqual({
+      goldPieces: 0,
+      gems: 0,
+      jewelry: 0,
+      magicItems: 0,
+      scrolls: 0,
+    });
+  });
+});
+
+describe('settlements.ts calcCastleDefense', () => {
+  it('builds towers, walls, gatehouse, and moat for a walled and moated castle', () => {
+    const defense = calcCastleDefense(
+      sequence([2, 1, 4, 2, 7, 10, 4, 6])
+    );
+
+    expect(defense.structures.map((structure) => structure.result)).toEqual([
+      'Stone walls and towers',
+      'Moat (= trench)',
+    ]);
+    expect(defense.towersAndWalls).toEqual({
+      shape: { key: 2, result: 'Trapezium' },
+      towers: 4,
+      defensiveFeature: { key: 7, result: 'Ballista' },
+      nonDefensiveFeature: { key: 10, result: 'Overgrown' },
+    });
+    expect(defense.gatehouse).toEqual({
+      key: 4,
+      result: 'Drawbridge',
+    });
+    expect(defense.moatEncounter).toEqual({
+      key: 6,
+      result: 'Electric eels',
+    });
+  });
+
+  it('skips towers, gatehouse, and moat when neither is present', () => {
+    const defense = calcCastleDefense(sequence([1, 5]));
+
+    expect(defense.structures.map((structure) => structure.result)).toEqual([
+      'Motte (= mound)',
+    ]);
+    expect(defense.towersAndWalls).toBeNull();
+    expect(defense.gatehouse).toBeNull();
+    expect(defense.moatEncounter).toBeNull();
+  });
+
+  it('rolls a moat encounter without walls', () => {
+    const defense = calcCastleDefense(sequence([1, 4, 5]));
+
+    expect(defense.structures.map((structure) => structure.result)).toEqual([
+      'Moat (= trench)',
+    ]);
+    expect(defense.towersAndWalls).toBeNull();
+    expect(defense.gatehouse).toBeNull();
+    expect(defense.moatEncounter?.result).toBe('Crocodiles');
+  });
+
+  it('rolls 1d3+3 towers for a circular wall', () => {
+    const defense = calcCastleDefense(sequence([1, 1, 8, 2, 7, 10, 1]));
+
+    expect(defense.towersAndWalls?.shape.result).toBe('Circle');
+    expect(defense.towersAndWalls?.towers).toBe(5);
+  });
+});
+
+describe('settlements.ts calcCastleGarrison', () => {
+  it('derives the garrison composition and command levels', () => {
+    const garrison = calcCastleGarrison(sequence([5, 5, 4]));
+
+    expect(garrison.total).toBe(140);
+    expect(garrison.composition.map((entry) => entry.count)).toEqual([
+      14, 14, 14, 56, 14, 14, 14,
+    ]);
+    expect(garrison.lord.level).toBe(11);
+    expect(garrison.lieutenant.level).toBe(9);
+    expect(garrison.bodyguards).toEqual({ count: 6, level: 6 });
+  });
+
+  it('keeps the lord at level 9 for a small garrison', () => {
+    const garrison = calcCastleGarrison(sequence([1, 1, 1]));
+
+    expect(garrison.total).toBe(30);
+    expect(garrison.lord.level).toBe(9);
+    expect(garrison.lieutenant.level).toBe(7);
+    expect(garrison.bodyguards).toEqual({ count: 6, level: 4 });
+  });
+});
+
+describe('settlements.ts calcCastleDisposition', () => {
+  it('uses the 2d6 groups', () => {
+    expect(calcCastleDisposition(sequence([1, 1]))).toEqual({
+      key: 2,
+      result: 'Attack on sight',
+    });
+    expect(calcCastleDisposition(sequence([6, 6]))).toEqual({
+      key: 12,
+      result: 'Enthusiastic',
+    });
+  });
+});
+
+describe('settlements.ts calcCastleEvent', () => {
+  it('rolls the timing and nature when an event happens', () => {
+    const event = calcCastleEvent(sequence([1, 3, 11]));
+
+    expect(event.hasEvent).toBe(true);
+    expect(event.whenEventHappens?.result).toBe('Is happening now');
+    expect(event.eventNature?.result).toBe('Tournament');
+  });
+
+  it('returns no event details when the gate fails', () => {
+    const event = calcCastleEvent(sequence([2]));
+
+    expect(event.hasEvent).toBe(false);
+    expect(event.whenEventHappens).toBeNull();
+    expect(event.eventNature).toBeNull();
+  });
+});
+
+describe('settlements.ts calcCastle', () => {
+  it('generates a complete castle from the 2023 edition procedure', () => {
+    const castle = calcCastle(
+      sequence([
+        9, 13,
+        2,
+        4, 2, 11, 10,
+        3, 4, 2,
+        5, 6,
+        2, 2, 2, 2, 100,
+        1, 5,
+        5, 5, 4,
+        1, 1,
+        2,
+      ])
+    );
+
+    expect(castle.name).toBe('Castle Dark Moor');
+    expect(castle.condition.result).toBe('Worn');
+    expect(castle.keep.shape.result).toBe('Round');
+    expect(castle.keep.levels).toBe(3);
+    expect(castle.keep.defensiveFeature.result).toBe('Iron spikes');
+    expect(castle.keep.nonDefensiveFeature.result).toBe('Overgrown');
+    expect(castle.keep.jails).toEqual({ commoners: 7, nobles: 2 });
+    expect(castle.keep.suppliesMonths).toBe(11);
+    expect(castle.keep.treasure.goldPieces).toBe(0);
+    expect(castle.defense.structures.map((structure) => structure.result)).toEqual([
+      'Motte (= mound)',
+    ]);
+    expect(castle.defense.towersAndWalls).toBeNull();
+    expect(castle.defense.gatehouse).toBeNull();
+    expect(castle.defense.moatEncounter).toBeNull();
+    expect(castle.garrison.total).toBe(140);
+    expect(castle.garrison.lord.level).toBe(11);
+    expect(castle.garrison.lieutenant.level).toBe(9);
+    expect(castle.garrison.bodyguards).toEqual({ count: 6, level: 6 });
+    expect(castle.disposition.result).toBe('Attack on sight');
+    expect(castle.event.hasEvent).toBe(false);
+  });
+
+  it('always produces a plausible castle for arbitrary rolls', () => {
+    const castle = calcCastle(seeded(7));
+
+    expect(castle.name.startsWith('Castle ')).toBe(true);
+    expect(castle.keep.levels).toBeGreaterThanOrEqual(2);
+    expect(castle.keep.levels).toBeLessThanOrEqual(4);
+    expect(castle.defense.structures.length).toBeGreaterThanOrEqual(1);
+    expect(castle.defense.structures.length).toBeLessThanOrEqual(4);
+    expect(castle.garrison.total % 10).toBe(0);
+    expect(castle.garrison.total).toBeGreaterThanOrEqual(30);
+    expect(castle.garrison.total).toBeLessThanOrEqual(180);
+    expect(
+      castle.garrison.composition.reduce((sum, entry) => sum + entry.count, 0)
+    ).toBe(castle.garrison.total);
+    expect(castle.garrison.lord.level).toBeGreaterThanOrEqual(9);
   });
 });

@@ -193,3 +193,87 @@
     </ul>
   }
 </section>
+<section>
+  <header>Castle</header>
+  <button (click)="onCalcCastle()">Generate Castle</button>
+  <!-- <pre>{{ castle | json }}</pre> -->
+  @if (castle) {
+    <ul>
+      <li>Name: {{ castle.name }}</li>
+      <li>Condition: {{ castle.condition.result }}</li>
+      <li>Keep:
+        <ul>
+          <li>Shape: {{ castle.keep.shape.result }}</li>
+          <li>Levels: {{ castle.keep.levels }}</li>
+          <li>Defensive feature: {{ castle.keep.defensiveFeature.result }}</li>
+          <li>Non-defensive feature: {{ castle.keep.nonDefensiveFeature.result }}</li>
+          <li>Jails: {{ castle.keep.jails.commoners }} commoners, {{ castle.keep.jails.nobles }} nobles</li>
+          <li>Supplies: {{ castle.keep.suppliesMonths }} months</li>
+          <li>Treasure:
+            <ul>
+              <li>Gold: {{ castle.keep.treasure.goldPieces }} gp</li>
+              <li>Gems: {{ castle.keep.treasure.gems }}</li>
+              <li>Jewelry: {{ castle.keep.treasure.jewelry }}</li>
+              <li>Magic items: {{ castle.keep.treasure.magicItems }}</li>
+              <li>Scrolls: {{ castle.keep.treasure.scrolls }}</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>Defense:
+        <ul>
+          <li>Structures:
+            <ul>
+              @for (structure of castle.defense.structures; track $index) {
+              <li>{{ structure.result }}</li>
+              }
+            </ul>
+          </li>
+          @if (castle.defense.towersAndWalls; as walls) {
+          <li>Towers &amp; walls:
+            <ul>
+              <li>Shape: {{ walls.shape.result }}</li>
+              <li>Towers: {{ walls.towers }}</li>
+              <li>Defensive feature: {{ walls.defensiveFeature.result }}</li>
+              <li>Non-defensive feature: {{ walls.nonDefensiveFeature.result }}</li>
+            </ul>
+          </li>
+          }
+          @if (castle.defense.gatehouse; as gatehouse) {
+          <li>Gatehouse: {{ gatehouse.result }} (2 towers)</li>
+          }
+          @if (castle.defense.moatEncounter; as moat) {
+          <li>Moat encounter: {{ moat.result }}</li>
+          }
+        </ul>
+      </li>
+      <li>Garrison:
+        <ul>
+          <li>Total: {{ castle.garrison.total }} fighters</li>
+          <li>Composition:
+            <ul>
+              @for (unit of castle.garrison.composition; track $index) {
+              <li>{{ unit.count }} {{ unit.type }}</li>
+              }
+            </ul>
+          </li>
+          <li>Lord: level {{ castle.garrison.lord.level }}</li>
+          <li>Lieutenant: level {{ castle.garrison.lieutenant.level }}</li>
+          <li>Bodyguards: {{ castle.garrison.bodyguards.count }} at level {{ castle.garrison.bodyguards.level }}</li>
+        </ul>
+      </li>
+      <li>Disposition: {{ castle.disposition.result }}</li>
+      <li>Event:
+        @if (castle.event.hasEvent) {
+        <ul>
+          <li>{{ castle.event.eventNature?.result }}</li>
+          <li>{{ castle.event.whenEventHappens?.result }}</li>
+        </ul>
+        }
+        @else {
+        <span>(none)</span>
+        }
+      </li>
+    </ul>
+  }
+</section>
