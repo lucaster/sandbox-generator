@@ -142,6 +142,9 @@ export class HexDrawPatch implements AfterViewInit {
     );
   }
 
+  // Factions are downstream of features and lairs: features decide which
+  // settlements create domains, and the lair inhabitants decide which lairs do.
+  // drawFeatureHexPatch also prepares the biome map that drawFactions needs.
   onDrawFactionPatch() {
     this.resetPatch();
     this.drawFeatureHexPatch();

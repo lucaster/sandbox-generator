@@ -27,6 +27,8 @@ as SVG entirely in the browser — no backend required.
   defenses, dispositions, ruler, notable NPCs, secrets, and events.
 - **Lair generator** — inhabitants by biome, percentage inside/outside the lair,
   occupied neighboring hexes, and a layout.
+- **Faction generator** — political domains from castles, cities, towers, abbeys,
+  and intelligent lairs, with contested hexes, relationships, and events.
 - **Name generator** — pattern-based place names such as `{B} {A}`,
   `{D}-on-the-hill`, and `{D}sby`, with multiple variants.
 - **SVG rendering** — hex polygons, biome backgrounds, feature icons, and hex numbers.
@@ -36,9 +38,9 @@ as SVG entirely in the browser — no backend required.
 ## Book coverage
 
 The book's generation procedures are only partially implemented. The hex map,
-landmarks, settlement names, hamlets, villages, and part of the lair generator
-exist; factions, cities, castles, towers, abbeys, dungeons, the detail generators,
-and the sea rules do not.
+landmarks, settlements (hamlets, villages, cities, castles, towers, abbeys),
+lairs, and factions exist; dungeons, random encounters, the detail generators, and
+the sea rules do not.
 
 See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 2023 edition, the known rule and logic gaps, and a suggested implementation order.
@@ -49,7 +51,7 @@ See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 |---|---|
 | `/` | Redirects to `/summary` |
 | `/summary` | Landing page with links to the features |
-| `/hex-draw-patch` | **Main workspace** — draw random biome, feature, and content patches |
+| `/hex-draw-patch` | **Main workspace** — draw random biome, feature, faction, and content patches |
 | `/hex-draw` | Static, hardcoded example of the 19-hex map |
 | `/settlements` | Generate a hamlet and a village |
 | `/lairs` | Generate one lair per biome |
@@ -143,15 +145,47 @@ A roll either ends on a string or continues into another table. The generator ke
 the whole path, which is why the UI can show both the final result and how it was
 reached (e.g. `Landmark | Natural | Vegetal | Centennial tree`).
 
-### 2. Generation pipeline
+### 2. Patch generation pipeline
 
-1. Pick a table (biome, feature, or content).
-2. Roll a die for the number of options.
-3. If the result chains, recurse into the next table and accumulate the path.
-4. Flatten the path to its most specific value or icon.
-5. Render the hex map.
+The `/hex-draw-patch` page layers generators on top of each other. Each layer
+reads the previous ones, so the order matters:
 
-The engine lives in `src/data/data.ts`; dice helpers are in `src/dice/dice.ts`.
+```
+biomes → features → lairs (inhabitants) → factions
+```
+
+| Stage | Generator | Input | Output |
+|---|---|---|---|
+| Biomes | `calcHexesBiome` (`src/data/data.ts`) | optional `rollFn` | one biome per hex |
+| Features | `calcHexesDetailedFeature` (`src/data/data.ts`) | optional `rollFn` | feature path per hex |
+| Lairs | `calcLair` (`src/data/lairs.ts`) | a hex's biome | inhabitant, layout, outside hexes |
+| Factions | `calcFactions` (`src/data/factions.ts`) | features + lair inhabitants | `factions`, `hexFactions`, `contestedHexes` |
+| Content | `calcHexesDetailedContentWithDetails` (`src/data/content.ts`) | optional `rollFn` | treasure and information delivery per hex |
+
+Dependencies between the stages:
+
+- **Biomes** are independent. Each new hex has a 50% chance to inherit the
+  previous hex's biome.
+- **Features** do not depend on biomes. `drawFeatureHexPatch` still generates a
+  biome map when a lair is present, because the lair stage needs it.
+- **Lairs** depend on the biome: `calcLair(biome)` rolls the inhabitant from that
+  biome's table.
+- **Factions** depend on features and on lair inhabitants. Castles, cities,
+  towers, abbeys, and intelligent lairs create factions; hamlets, villages,
+  dungeons, and landmarks do not. A lair with no known inhabitant is treated as
+  non-intelligent, so it creates no faction.
+- **Content** is independent of the other layers.
+
+Two different notions of adjacency are used:
+
+- `currHexNextHex` in `src/data/data.ts` is the generation spanning tree used to
+  grow the map. It is **not** full adjacency.
+- `src/data/hex-grid.ts` holds the canonical axial coordinates for the 19-hex
+  patch and the real neighbour lists used for domains, tower enslavement, abbey
+  parishes, lair alliances, and relationships.
+
+Every generator accepts an optional `rollFn(faces)` so tests can fix the dice;
+`src/dice/dice.ts` provides the default.
 
 ### 3. The 19-hex map
 
@@ -171,7 +205,9 @@ The region is a radius-2 hex (1 + 6 + 12 = 19 hexes), encoded as an adjacency li
 ```
 
 `src/drawing/hex-ops.ts` handles flat-top hex geometry (neighbors and vertices), and
-`src/drawing/hex.ts` (`SvgDrawer`) draws polygons, images, and text into an `<svg>`.
+`src/drawing/hex.ts` (`SvgDrawer`) draws polygons, images, symbols, and text into an
+`<svg>`. For generation rules that need real neighbours, `src/data/hex-grid.ts` is
+the canonical topology; `currHexNextHex` is only the map-growing tree.
 
 ## Development conventions
 
