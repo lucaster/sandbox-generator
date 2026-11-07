@@ -1,1 +1,70 @@
 /* Hex Draw Biome page styles */
+
+.faction-legend {
+  margin-top: 1rem;
+
+  ol {
+    padding-left: 1.5rem;
+  }
+
+  li {
+    margin-bottom: 0.4rem;
+  }
+}
+
+.faction-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 0.4rem;
+  border: 1px solid black;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1;
+  text-shadow: 0 0 1px black;
+}
+
+.faction-swatch-circle {
+  border-radius: 50%;
+}
+
+.faction-swatch-square {
+  border-radius: 2px;
+}
+
+.faction-swatch-triangle {
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.faction-swatch-diamond {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.faction-swatch-hexagon {
+  clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%);
+}
+
+.faction-swatch-star {
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+.faction-hexes {
+  margin-left: 0.4rem;
+}
+
+.faction-detail {
+  margin-left: 1.9rem;
+  font-size: 0.9rem;
+}
+
+.faction-note {
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.contested {
+  color: #a33;
+}

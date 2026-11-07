@@ -9,7 +9,8 @@ repo, but its tables differ, so it should not be used to verify the current code
 
 The comparison is based on the book's table of contents and its tables, matched
 against `src/data/random-tables.ts`, `src/data/data.ts`, `src/data/content.ts`,
-`src/data/settlements.ts`, `src/data/lairs.ts`, and `src/data/names.ts`.
+`src/data/settlements.ts`, `src/data/lairs.ts`, `src/data/factions.ts`, and
+`src/data/names.ts`.
 
 ## At a glance
 
@@ -23,7 +24,7 @@ Coverage is concentrated in the first part of that pipeline.
 
 | Book chapter | Status | Notes |
 |---|---|---|
-| Hex Map | **Partial** | Biomes and feature outline work. Biome encounter tables match the 2023 edition and every entry is reachable. Factions and random encounters are absent. |
+| Hex Map | **Partial** | Biomes, feature outline, and factions work. Biome encounter tables match the 2023 edition and every entry is reachable. Random encounters are absent. |
 | Landmarks | **Done** | Natural, artificial, and magic tables match the 2023 edition. Content, treasure chance, and information delivery are implemented. |
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
 | Lairs | **Done** | Inhabitants, optional outside percentage and hexes, layout, per-room monster/treasure distribution, and the `% in lair` patrol distinction match the 2023 edition. Total monsters and treasure are caller-supplied because the book delegates them to a bestiary. |
@@ -31,8 +32,8 @@ Coverage is concentrated in the first part of that pipeline.
 | Generators | **Not implemented** | No coat of arms, criminal organization, dragon, guild, house, NPC, tavern, or wizard generator. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
-Counting generation subsections (examples excluded): **13 of 31 are complete,
-2 are partial, and 16 are absent.** Roughly one third of the book's generation
+Counting generation subsections (examples excluded): **14 of 31 are complete,
+2 are partial, and 15 are absent.** Roughly one third of the book's generation
 content is represented in code, and about two thirds is missing. The implemented
 tables are faithful to the 2023 edition; the gaps are mostly missing sections and
 generator logic.
@@ -46,7 +47,7 @@ generator logic.
 | Biomes | **Done** | `tableStartingHexBiome`, `tableNextHexBiome`, `calcHexesBiome` | `calcHexesBiome` does not forward `rollFn` to the starting-hex roll, so tests cannot control that roll. |
 | Encounters per Biome | **Partial** | Five biome tables in `src/data/lairs.ts`, matching the 2023 edition | Tables use keys `2..12` and roll `2d6`, so all entries are reachable and no roll returns `undefined`. No standalone encounter generator. |
 | Features | **Partial** | `tableNextHexFeature`, settlement sub-table, feature map drawing | The book's "first hex = village, second hex = dungeon" rule is not enforced; the starting table only contains `Village`, and hex 2 is rolled normally. |
-| Factions | **Not implemented** | — | No faction creation, political map, domains, tithes, magical enslavement, parish links, lair alliances, relationships, or faction events. |
+| Factions | **Done** | `calcFactions`, `calcFactionRelationship`, `calcFactionEvent`, and `isIntelligentLair` in `src/data/factions.ts`. Castle/city seven-hex domains, tower enslavement, abbey parishes, intelligent-lair factions and alliances, contested hexes, `2d6` relationships, and `1d6`/`1d12` events match the 2023 edition. | Criminal organizations, guilds, dragons, and wizard encounters are not faction sources yet because those generators are absent. |
 | Random Encounters | **Not implemented** | — | No 2d6 wilderness encounter table, contested-hex faction count, or Dragon/Wizard/NPC/Biome routing. |
 
 ### Landmarks
@@ -94,6 +95,30 @@ generated.
 Layout 3 prints `40/20/20` in the 2023 diagrams (sums to 80); the corrected
 `40/30/30` is used. Layout 4 uses the order of the book's worked example
 (`10/20/20/50`), which is the same multiset as the diagram's `20/50/10/20`.
+
+### Factions
+
+Implemented in `src/data/factions.ts`:
+
+- Castles and cities create seven-hex domains. Overlapping big domains have a
+  3-in-6 chance of being the same faction; otherwise their shared hexes are
+  contested.
+- Towers, abbeys, and intelligent lairs start with a one-hex domain. Towers can
+  magically enslave adjacent hamlets, villages, lairs, and dungeons (`1d6`), and
+  abbeys absorb adjacent hamlets and villages into their parish.
+- Adjacent lairs of the same intelligent creature have a 3-in-6 chance of
+  belonging to the same faction. The book leaves the intelligent-monster list to
+  the bestiary, so `isIntelligentLair` uses a curated subset of the five biome
+  tables and can be overridden.
+- Factions with neighbouring territories or contested hexes roll `2d6` for
+  relationships (`Open war` through `Alliance`).
+- Each faction rolls `1d6` for an event; on a `1`, `1d6` gives the timing and
+  `1d12` gives the nature.
+- The patch draws a coloured shape and number for each faction in every claimed
+  hex. Contested hexes show every claimant, and the page lists each faction's
+  hexes, relationships, and event.
+- Criminal organizations, guilds, dragons, and wizard encounters are not faction
+  sources yet because the corresponding generators are not implemented.
 
 ### Dungeons
 
@@ -150,8 +175,8 @@ the 2023 edition.
 
 If the goal is to match the book's core hexcrawl loop, the highest-value order is:
 
-1. **Add factions and wilderness random encounters**, since they tie the hex map
-   together.
+1. **Add wilderness random encounters**, since they complete the hex map loop
+   now that factions exist.
 2. **Add dungeons**, which is the largest single missing subsystem.
 3. **Add the Generators chapter** and **Adventures at sea** last; they are
    detail layers rather than prerequisites for the core loop.

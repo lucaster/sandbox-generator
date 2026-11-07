@@ -10,8 +10,9 @@ import {
 } from '@angular/core';
 import { calcContentWithPath, calcHexesDetailedContentWithDetails } from '../../../data/content';
 import { calcHexesBiome, calcHexesDetailedFeature, fromHexesDetailedToImagePathHexes, fromHexesToHexesDetailed, Hexes, HexesDetailed } from '../../../data/data';
+import { calcFactions, type Faction, type FactionResult } from '../../../data/factions';
 import { calcLair } from '../../../data/lairs';
-import { SvgDrawer } from '../../../drawing/hex';
+import { SvgDrawer, type FactionShape } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
 
@@ -27,17 +28,42 @@ export class HexDrawPatch implements AfterViewInit {
   width = input(500);
   height = input(500);
   @ViewChild('svg') svgElement!: ElementRef<SVGElement>;
+  readonly factionShapes: FactionShape[] = [
+    'circle',
+    'square',
+    'triangle',
+    'diamond',
+    'hexagon',
+    'star',
+  ];
+  readonly factionColors: string[] = [
+    '#2f6f9f',
+    '#a34a28',
+    '#3f7a3f',
+    '#7a3f8f',
+    '#9a7b1f',
+    '#3f5f7f',
+    '#8f3f4f',
+    '#4f6f3f',
+  ];
   hexDetailList = signal<{
     hexNum: number;
     details: string[] | null;
     content: { treasure: string; convey: string | null; } | null;
     lair: ReturnType<typeof calcLair> | null;
+    factions: number[];
+    contested: boolean;
   }[]>([]);
+  factionList = signal<Faction[]>([]);
   private hexesDetailed: HexesDetailed | null = null;
   private biomes: Hexes | null = null;
   private contentDetails: {
     [hexNum: number]: ReturnType<typeof calcContentWithPath>;
   } = {};
+  private lairs: {
+    [hexNum: number]: ReturnType<typeof calcLair>;
+  } = {};
+  private factionResult: FactionResult | null = null;
 
   ngAfterViewInit() {
     this.onDrawFeatureHexPatch();
@@ -116,12 +142,85 @@ export class HexDrawPatch implements AfterViewInit {
     );
   }
 
-  private drawPatch(
+  onDrawFactionPatch() {
+    this.resetPatch();
+    this.drawFeatureHexPatch();
+    this.drawFactions();
+    this.updateHexDetailList();
+  }
+
+  private drawFactions() {
+    if (!this.hexesDetailed) {
+      return;
+    }
+
+    const lairInhabitants: { [hexNum: number]: string; } = {};
+    if (this.biomes) {
+      for (const key of Object.keys(this.hexesDetailed)) {
+        const hexNum = Number(key);
+        if (this.hexesDetailed[hexNum].includes('Lair')) {
+          const lair = calcLair(this.biomes[hexNum]);
+          this.lairs[hexNum] = lair;
+          lairInhabitants[hexNum] = lair.inhabitants;
+        }
+      }
+    }
+
+    this.factionResult = calcFactions(this.hexesDetailed, { lairInhabitants });
+    this.factionList.set(this.factionResult.factions);
+
+    const svgDrawer = new SvgDrawer(this.svgElement.nativeElement);
+    const hexOps = new HexOps(50);
+    this.drawFactionSymbols(
+      svgDrawer,
+      this.calcHexCenters(hexOps),
+      this.factionResult.hexFactions,
+    );
+  }
+
+  private drawFactionSymbols(
     svgDrawer: SvgDrawer,
-    hexOps: HexOps,
-    imagePaths: Hexes,
-    imageOpts?: { width: number; height: number; },
+    hexCenters: Point[],
+    hexFactions: { [hex: number]: number[]; },
   ) {
+    for (let i = 0; i < hexCenters.length; i++) {
+      const hexNum = i + 1;
+      const factionNumbers = hexFactions[hexNum] ?? [];
+      if (factionNumbers.length === 0) {
+        continue;
+      }
+
+      const center = hexCenters[i];
+      const crowded = factionNumbers.length > 3;
+      const size = crowded ? 7 : 9;
+      const spacing = crowded
+        ? Math.min(9, 56 / Math.max(1, factionNumbers.length - 1))
+        : Math.min(16, 64 / Math.max(1, factionNumbers.length - 1));
+      const startX = center.x - ((factionNumbers.length - 1) * spacing) / 2;
+      factionNumbers.forEach((factionNumber, index) => {
+        svgDrawer.drawSymbolAtPoint(
+          { x: startX + index * spacing, y: center.y + 32 },
+          this.factionShape(factionNumber),
+          {
+            size,
+            fill: this.factionColor(factionNumber),
+            text: factionNumber,
+            fontSize: crowded ? '9' : '11',
+          }
+        );
+      });
+    }
+  }
+
+  factionColor(factionNumber: number): string {
+    return this.factionColors[(factionNumber - 1) % this.factionColors.length];
+  }
+
+  factionShape(factionNumber: number): FactionShape {
+    return this.factionShapes[(factionNumber - 1) % this.factionShapes.length];
+  }
+
+  private calcHexCenters(hexOps: HexOps): Point[] {
     const center_01 = { x: this.width() / 2, y: this.height() / 2 };
     const center_02 = hexOps.up(center_01);
     const center_03 = hexOps.upRight(center_01);
@@ -141,7 +240,7 @@ export class HexDrawPatch implements AfterViewInit {
     const center_17 = hexOps.up(center_16);
     const center_18 = hexOps.upLeft(center_07);
     const center_19 = hexOps.upRight(center_18);
-    var hexCenters: Point[] = [
+    return [
       center_01,
       center_02,
       center_03,
@@ -162,6 +261,15 @@ export class HexDrawPatch implements AfterViewInit {
       center_18,
       center_19,
     ];
+  }
+
+  private drawPatch(
+    svgDrawer: SvgDrawer,
+    hexOps: HexOps,
+    imagePaths: Hexes,
+    imageOpts?: { width: number; height: number; },
+  ) {
+    const hexCenters = this.calcHexCenters(hexOps);
     const hexagons: Point[][] = hexCenters.map(center => hexOps.hexPoints(center));
 
     this.drawHexagons(svgDrawer, hexagons);
@@ -359,6 +467,9 @@ export class HexDrawPatch implements AfterViewInit {
     this.hexesDetailed = null;
     this.biomes = null;
     this.contentDetails = {};
+    this.lairs = {};
+    this.factionResult = null;
+    this.factionList.set([]);
     const svg = this.svgElement.nativeElement;
     while (svg.firstChild) {
       svg.removeChild(svg.firstChild);
@@ -371,7 +482,15 @@ export class HexDrawPatch implements AfterViewInit {
       const details = this.hexesDetailed ? this.hexesDetailed[hexNum] : null;
       const content = this.contentDetails[hexNum];
       const biome = this.biomes ? this.biomes[hexNum] : null;
-      const lair = details?.includes('Lair') && biome ? calcLair(biome) : null;
+      const lair =
+        this.lairs[hexNum] ??
+        (details?.includes('Lair') && biome ? calcLair(biome) : null);
+      const factions = this.factionResult
+        ? this.factionResult.hexFactions[hexNum] ?? []
+        : [];
+      const contested = this.factionResult
+        ? this.factionResult.contestedHexes.includes(hexNum)
+        : false;
       return {
         hexNum,
         details,
@@ -385,6 +504,8 @@ export class HexDrawPatch implements AfterViewInit {
             }
           : null,
         lair,
+        factions,
+        contested,
       };
     });
     this.hexDetailList.set(hexDetailList);

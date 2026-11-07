@@ -1,6 +1,7 @@
 <button (click)="onResetPatch()">Reset SVG</button>
 <button (click)="onDrawBiomePatch()">Draw Biome Patch</button>
 <button (click)="onDrawFeatureHexPatch()">Draw Feature Hex Patch</button>
+<button (click)="onDrawFactionPatch()">Draw Faction Patch</button>
 <button (click)="onDrawContentHexPatch()">Draw Content Patch</button>
 <button (click)="onDrawSampleHexPatch()">Draw Sample Hex Patch</button>
 
@@ -46,6 +47,19 @@
                     <div>Outside hexes: {{ a.lair.outsideHexes.join(', ') }}</div>
                   }
                 }
+                @if (factionList().length) {
+                  <div>
+                    Faction{{ a.factions.length === 1 ? '' : 's' }}:
+                    @if (a.factions.length) {
+                      {{ a.factions.join(', ') }}
+                    } @else {
+                      <em>none</em>
+                    }
+                    @if (a.contested) {
+                      <strong class="contested"> (contested)</strong>
+                    }
+                  </div>
+                }
               </li>
             }
           </ol>
@@ -54,3 +68,37 @@
     </tbody>
   </table>
 </section>
+
+@if (factionList().length) {
+  <section class="faction-legend">
+    <h3>Factions</h3>
+    <ol>
+      @for (faction of factionList(); track faction.number) {
+        <li>
+          <span
+            [class]="'faction-swatch faction-swatch-' + factionShape(faction.number)"
+            [style.background]="factionColor(faction.number)"
+          >{{ faction.number }}</span>
+          <strong>{{ faction.label }}</strong>
+          <span class="faction-hexes">Hexes: {{ faction.hexes.join(', ') }}</span>
+          @if (faction.relationships.length) {
+            <div class="faction-detail">
+              Relations:
+              @for (relationship of faction.relationships; track relationship.faction) {
+                <span>#{{ relationship.faction }} {{ relationship.relation }} ({{ relationship.roll }})</span>
+              }
+            </div>
+          }
+          @if (faction.event) {
+            <div class="faction-detail">
+              Event: {{ faction.event.when }} — {{ faction.event.nature }}
+            </div>
+          }
+        </li>
+      }
+    </ol>
+    <p class="faction-note">
+      Contested hexes show more than one symbol and list every faction claiming them.
+    </p>
+  </section>
+}
