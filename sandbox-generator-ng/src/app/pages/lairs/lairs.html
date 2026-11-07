@@ -18,11 +18,41 @@
     <h3>{{ lair.biome }} Lair</h3>
     <ul>
       <li>Inhabitants: <strong>{{ lair.inhabitants }}</strong></li>
-      <li>Layout: {{ lair.layout }}</li>
+      <li>Layout: {{ lair.layout }} ({{ lair.percentages.join(' / ') }}%)</li>
+      <li>
+        % in lair:
+        {{ lair.percentInLair === null ? '—' : lair.percentInLair + '%' }}
+      </li>
+      <li>Encounter: {{ lair.encounter ?? '—' }}</li>
       <li>Inside lair: {{ lair.percInsideLair }}%</li>
       <li>Outside lair: {{ lair.percOutsideLair }}%</li>
       <li>Occupied hexes: {{ lair.outsideHexes | json }}</li>
+      <li>Total monsters: {{ lair.totalMonsters ?? '—' }}</li>
+      <li>
+        Inside / outside monsters:
+        {{ lair.insideMonsters ?? '—' }} / {{ lair.outsideMonsters ?? '—' }}
+      </li>
     </ul>
     <img src="/assets/images/lair_layout_{{ lair.layout }}.png" alt="{{ lair.layout }}" />
+    <table>
+      <thead>
+        <tr>
+          <th>Room</th>
+          <th>%</th>
+          <th>Monsters</th>
+          <th>Treasure</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (room of lair.rooms; track room.number) {
+        <tr>
+          <td>{{ room.number }}</td>
+          <td>{{ room.percentage }}%</td>
+          <td>{{ room.monsters ?? '—' }}</td>
+          <td>{{ treasureLabel(room.treasure) }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
   </section>
 </ng-template>

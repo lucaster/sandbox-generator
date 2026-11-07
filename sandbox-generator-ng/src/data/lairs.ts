@@ -1,7 +1,7 @@
 
 import { d } from "../dice/dice";
 import { RandomTable } from "../domain/random-table";
-import { randomOption } from "./data";
+import { randomOptionEntry } from "./data";
 
 const lairLayout: RandomTable = {
   id: 80,
@@ -17,6 +17,68 @@ const lairLayout: RandomTable = {
     8: '5',
   },
 };
+
+// Percentage of monsters and treasure found in each room.
+// Layout 4 uses the order of the book's worked example (12/24/24/60):
+// it is the same multiset as the diagram's 20/50/10/20.
+// The 2023 edition prints 40/20/20 for layout 3 (sums to 80); the corrected
+// 40/30/30 is used here.
+const lairLayoutPercentages: { [layout: number]: number[] } = {
+  1: [100],
+  2: [75, 25],
+  3: [40, 30, 30],
+  4: [10, 20, 20, 50],
+  5: [40, 20, 15, 10, 15],
+};
+
+type LairTreasure = { [denomination: string]: number };
+
+type LairOptions = {
+  // The 2023 book delegates the total number of monsters and their treasure to
+  // an external bestiary, so the caller supplies them.
+  totalMonsters?: number;
+  treasure?: LairTreasure;
+  // % in lair of the monster (20% by default, 0% if it does not live in lairs).
+  percentInLair?: number;
+  // Small groups (or alone) use 1d3 for the layout instead of 1d8.
+  smallGroups?: boolean;
+  // The book marks the outside-monster proportion as optional.
+  rollOutside?: boolean;
+};
+
+/**
+ * Splits an integer total across rooms using the largest remainder method, so
+ * the room values always add up to the total.
+ */
+function distribute(total: number, percentages: number[]): number[] {
+  const exact = percentages.map((percentage) => (total * percentage) / 100);
+  const result = exact.map(Math.floor);
+  const remainder = total - result.reduce((sum, value) => sum + value, 0);
+  const byFraction = exact
+    .map((value, index) => ({ index, fraction: value - Math.floor(value) }))
+    .sort((a, b) => b.fraction - a.fraction);
+  for (let i = 0; i < remainder; i++) {
+    result[byFraction[i % byFraction.length].index] += 1;
+  }
+  return result;
+}
+
+function distributeTreasure(
+  treasure: LairTreasure,
+  percentages: number[]
+): LairTreasure[] {
+  const denominations = Object.keys(treasure);
+  const perDenomination = denominations.map((denomination) =>
+    distribute(treasure[denomination], percentages)
+  );
+  return percentages.map((_, roomIndex) => {
+    const room: LairTreasure = {};
+    denominations.forEach((denomination, denominationIndex) => {
+      room[denomination] = perDenomination[denominationIndex][roomIndex];
+    });
+    return room;
+  });
+}
 
 const biomeEncountersGrassland: RandomTable = {
   id: 81,
@@ -113,9 +175,12 @@ const biomeEncountersHills: RandomTable = {
   },
 };
 
-function calcLair(biome: string) {
+function calcLair(
+  biome: string,
+  options: LairOptions = {},
+  rollFn: (faces: number) => number = d
+) {
   // 1. INHABITANTS
-  // 1. roll for Inhabitants: dipendono dal Biome
   const biomesAndItsInhabitants: { [key: string]: RandomTable } = {
     'Grassland': biomeEncountersGrassland,
     'Marsh': biomeEncountersMarsh,
@@ -124,59 +189,86 @@ function calcLair(biome: string) {
     'Hills': biomeEncountersHills,
   };
   const biomeInhabitantsTable = biomesAndItsInhabitants[biome];
-  const inhabitants = randomOption(biomeInhabitantsTable);
-  // 2. roll for number of inhabitants
-  // 3. roll for treasure
-  // 4. roll 1d6 * 10% proportions of inhabitants who are outside the lair
-  const percOutsideLair = d(6) * 10;
-  const percInsideLair = 100 - percOutsideLair;
-  // 5. roll 1d8 to calculate in which hex the monsters that are outside the lair:
-  //    if 8 --> they are in two exes --> roll 1d7 each
-  //             _______
-  //            /       \
-  //    _______/    2    \_______
-  //   /       \         /       \
-  //  /    7    \_______/    3    \
-  //  \         /       \         /
-  //   \_______/    1    \_______/
-  //   /       \    L    /       \
-  //  /    6    \_______/    4    \
-  //  \         /       \         /
-  //   \______ /    5    \_______/
-  //           \         /
-  //            \_______/
+  const inhabitants = randomOptionEntry(biomeInhabitantsTable, rollFn).result;
 
-  let outsideHexes: [number] | [number, number] = [d(8)];
-  if (outsideHexes[0] === 8) {
-    const a = d(7);
-    const b = dExcept(7, a);
-    outsideHexes = [a, b];
+  // 2. % IN LAIR
+  // When a faction encounter happens in a hex containing a lair, the monster's
+  // % in lair decides whether the PCs find the lair or merely a patrol.
+  const percentInLair = options.percentInLair ?? null;
+  const encounter =
+    percentInLair === null
+      ? null
+      : rollFn(100) <= percentInLair
+        ? 'lair'
+        : 'patrol';
+
+  // 3. MONSTERS OUTSIDE THE LAIR (optional)
+  const rollOutside = options.rollOutside ?? true;
+  const percOutsideLair = rollOutside ? rollFn(6) * 10 : 0;
+  const percInsideLair = 100 - percOutsideLair;
+
+  // 4. OUTSIDE HEXES
+  // An 8 means the force is split in two; each group rolls 1d8.
+  let outsideHexes: number[] = [];
+  if (rollOutside) {
+    outsideHexes = [rollFn(8)];
+    if (outsideHexes[0] === 8) {
+      outsideHexes = [rollFn(8), rollFn(8)];
+    }
   }
-  // 2. LAYOUT
-  // Each room in a layout has a percentage of inhabitants and treasure
-  const layout = d(5);
-  const lair = {
+
+  // 5. LAYOUT
+  const layout = options.smallGroups
+    ? rollFn(3)
+    : Number(randomOptionEntry(lairLayout, rollFn).result);
+  const percentages = lairLayoutPercentages[layout];
+
+  // 6. TOTAL MONSTERS AND TREASURE
+  const totalMonsters = options.totalMonsters ?? null;
+  let outsideMonsters: number | null = null;
+  let insideMonsters: number | null = null;
+  let monsterDistribution: number[] | null = null;
+  if (totalMonsters !== null) {
+    outsideMonsters = Math.round((totalMonsters * percOutsideLair) / 100);
+    insideMonsters = totalMonsters - outsideMonsters;
+    monsterDistribution = distribute(insideMonsters, percentages);
+  }
+
+  const treasure = options.treasure ?? null;
+  const treasureDistribution = treasure
+    ? distributeTreasure(treasure, percentages)
+    : null;
+
+  const rooms = percentages.map((percentage, index) => ({
+    number: index + 1,
+    percentage,
+    monsters: monsterDistribution ? monsterDistribution[index] : null,
+    treasure: treasureDistribution ? treasureDistribution[index] : null,
+  }));
+
+  return {
     biome,
     inhabitants,
+    layout,
+    percentages,
+    percentInLair,
+    encounter,
     percInsideLair,
     percOutsideLair,
     outsideHexes,
-    layout,
+    totalMonsters,
+    insideMonsters,
+    outsideMonsters,
+    treasure,
+    rooms,
   };
-  return lair;
-}
-
-function dExcept(die: number, except: number): number {
-  let res = d(die);
-  while (res === except) {
-    res = d(die);
-  }
-  return res;
 }
 
 export {
   biomeEncountersMarsh,
-  calcLair
+  calcLair,
+  lairLayout,
+  lairLayoutPercentages,
+  type LairOptions,
+  type LairTreasure,
 };
-
-

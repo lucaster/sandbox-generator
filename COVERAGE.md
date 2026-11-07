@@ -26,13 +26,13 @@ Coverage is concentrated in the first part of that pipeline.
 | Hex Map | **Partial** | Biomes and feature outline work. Biome encounter tables match the 2023 edition and every entry is reachable. Factions and random encounters are absent. |
 | Landmarks | **Done** | Natural, artificial, and magic tables match the 2023 edition. Content, treasure chance, and information delivery are implemented. |
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
-| Lairs | **Partial** | Inhabitants, outside percentage, outside hexes, and layout are generated. Monster count, treasure, and per-room distribution are missing. |
+| Lairs | **Done** | Inhabitants, optional outside percentage and hexes, layout, per-room monster/treasure distribution, and the `% in lair` patrol distinction match the 2023 edition. Total monsters and treasure are caller-supplied because the book delegates them to a bestiary. |
 | Dungeons | **Not implemented** | No cross-section, levels, structure, special rooms, or dungeon example logic. |
 | Generators | **Not implemented** | No coat of arms, criminal organization, dragon, guild, house, NPC, tavern, or wizard generator. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
-Counting generation subsections (examples excluded): **12 of 31 are complete,
-3 are partial, and 16 are absent.** Roughly one third of the book's generation
+Counting generation subsections (examples excluded): **13 of 31 are complete,
+2 are partial, and 16 are absent.** Roughly one third of the book's generation
 content is represented in code, and about two thirds is missing. The implemented
 tables are faithful to the 2023 edition; the gaps are mostly missing sections and
 generator logic.
@@ -77,18 +77,23 @@ The tables for all three landmark families match the 2023 edition.
 Implemented in `src/data/lairs.ts`:
 
 - Inhabitants by biome.
-- Percentage of monsters outside the lair (`1d6 × 10%`).
-- One or two outside hexes (`1d8`, splitting on 8).
-- A layout number.
-
-Missing:
-
-- Total number of monsters.
-- Treasure amount and type.
-- Distribution of monsters and treasure across rooms.
-- Correct use of the layout table: `lairLayout` is defined and matches the 2023
-  edition, but it is unused; the code calls `d(5)` directly instead.
+- Optional percentage of monsters outside the lair (`1d6 × 10%`).
+- One or two outside hexes (`1d8`, splitting on 8 and rolling `1d8` for each
+  group).
+- Layout from the book table (`1d8`, or `1d3` for small groups and lone
+  monsters).
+- Per-room distribution of monsters and treasure using the layout percentages.
+  The largest remainder method keeps every total intact.
 - The `% in lair` check and the patrol-vs-lair distinction.
+
+The 2023 book delegates the total number of monsters and their treasure to an
+external bestiary, so `calcLair` accepts them from the caller. If they are not
+provided, the room distributions are `null` but the lair structure is still
+generated.
+
+Layout 3 prints `40/20/20` in the 2023 diagrams (sums to 80); the corrected
+`40/30/30` is used. Layout 4 uses the order of the book's worked example
+(`10/20/20/50`), which is the same multiset as the diagram's `20/50/10/20`.
 
 ### Dungeons
 
@@ -137,8 +142,6 @@ the 2023 edition.
 - **`calcHexesBiome`** calls `calcStartingHexBiome()` without passing `rollFn`.
 - **`calcHexesDetailed`** does not enforce the book's fixed starting features
   (village in hex 1, dungeon in hex 2).
-- **`lairLayout`** is unused; `d(5)` is used instead.
-- **Lair generation** does not roll monster count, treasure, or room distribution.
 - `src/data/data.ts` and `src/data/names.ts` still contain `console.info`,
   `console.debug`, and `console.log` calls.
 - `src/data/biomes.ts` is empty, and `@svgdotjs/svg.js` is declared but unused.
@@ -147,10 +150,8 @@ the 2023 edition.
 
 If the goal is to match the book's core hexcrawl loop, the highest-value order is:
 
-1. **Finish lairs**: monster count, treasure, room distribution, and the
-   patrol/lair distinction.
-2. **Add factions and wilderness random encounters**, since they tie the hex map
+1. **Add factions and wilderness random encounters**, since they tie the hex map
    together.
-3. **Add dungeons**, which is the largest single missing subsystem.
-4. **Add the Generators chapter** and **Adventures at sea** last; they are
+2. **Add dungeons**, which is the largest single missing subsystem.
+3. **Add the Generators chapter** and **Adventures at sea** last; they are
    detail layers rather than prerequisites for the core loop.

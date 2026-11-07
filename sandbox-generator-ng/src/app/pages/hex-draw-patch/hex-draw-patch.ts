@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { calcContentWithPath, calcHexesDetailedContentWithDetails } from '../../../data/content';
 import { calcHexesBiome, calcHexesDetailedFeature, fromHexesDetailedToImagePathHexes, fromHexesToHexesDetailed, Hexes, HexesDetailed } from '../../../data/data';
+import { calcLair } from '../../../data/lairs';
 import { SvgDrawer } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
@@ -30,8 +31,10 @@ export class HexDrawPatch implements AfterViewInit {
     hexNum: number;
     details: string[] | null;
     content: { treasure: string; convey: string | null; } | null;
+    lair: ReturnType<typeof calcLair> | null;
   }[]>([]);
   private hexesDetailed: HexesDetailed | null = null;
+  private biomes: Hexes | null = null;
   private contentDetails: {
     [hexNum: number]: ReturnType<typeof calcContentWithPath>;
   } = {};
@@ -76,6 +79,12 @@ export class HexDrawPatch implements AfterViewInit {
     const hexOps = new HexOps(r);
     const imageOpts = { width: 50, height: 50 };
     this.hexesDetailed = calcHexesDetailedFeature();
+    // Features do not depend on the biome, but a lair does. Generate a biome
+    // map alongside the features so each lair hex can be detailed.
+    const hasLair = Object.values(this.hexesDetailed).some(
+      (details) => details.includes('Lair')
+    );
+    this.biomes = hasLair ? calcHexesBiome() : null;
     const imagePathHexes = fromHexesDetailedToImagePathHexes(this.hexesDetailed);
     this.drawPatch(
       svgDrawer,
@@ -348,6 +357,7 @@ export class HexDrawPatch implements AfterViewInit {
 
   private resetPatch() {
     this.hexesDetailed = null;
+    this.biomes = null;
     this.contentDetails = {};
     const svg = this.svgElement.nativeElement;
     while (svg.firstChild) {
@@ -360,6 +370,8 @@ export class HexDrawPatch implements AfterViewInit {
       const hexNum = +(key);
       const details = this.hexesDetailed ? this.hexesDetailed[hexNum] : null;
       const content = this.contentDetails[hexNum];
+      const biome = this.biomes ? this.biomes[hexNum] : null;
+      const lair = details?.includes('Lair') && biome ? calcLair(biome) : null;
       return {
         hexNum,
         details,
@@ -372,6 +384,7 @@ export class HexDrawPatch implements AfterViewInit {
               convey: content.convey ? content.convey.result : null,
             }
           : null,
+        lair,
       };
     });
     this.hexDetailList.set(hexDetailList);

@@ -37,6 +37,15 @@
                     <div>Information conveyed by: {{ a.content.convey }}</div>
                   }
                 }
+                @if (a.lair) {
+                  <div>
+                    Lair: {{ a.lair.inhabitants }} · layout {{ a.lair.layout }}
+                    ({{ a.lair.percentages.join(' / ') }}%) · {{ a.lair.percOutsideLair }}% outside
+                  </div>
+                  @if (a.lair.outsideHexes.length) {
+                    <div>Outside hexes: {{ a.lair.outsideHexes.join(', ') }}</div>
+                  }
+                }
               </li>
             }
           </ol>
