@@ -13,6 +13,11 @@
   </tbody>
 </table>
 
+<p>
+  * Example bestiary values from the 2023 book; the book delegates total
+  monsters and treasure to an external bestiary.
+</p>
+
 <ng-template #biomeLair let-lair="lair">
   <section>
     <h3>{{ lair.biome }} Lair</h3>
@@ -21,13 +26,14 @@
       <li>Layout: {{ lair.layout }} ({{ lair.percentages.join(' / ') }}%)</li>
       <li>
         % in lair:
-        {{ lair.percentInLair === null ? '—' : lair.percentInLair + '%' }}
+        {{ lair.percentInLair === null ? '—' : lair.percentInLair + '%' }}*
       </li>
       <li>Encounter: {{ lair.encounter ?? '—' }}</li>
       <li>Inside lair: {{ lair.percInsideLair }}%</li>
       <li>Outside lair: {{ lair.percOutsideLair }}%</li>
       <li>Occupied hexes: {{ lair.outsideHexes | json }}</li>
-      <li>Total monsters: {{ lair.totalMonsters ?? '—' }}</li>
+      <li>Total monsters: {{ lair.totalMonsters ?? '—' }}*</li>
+      <li>Treasure: {{ treasureLabel(lair.treasure) }}*</li>
       <li>
         Inside / outside monsters:
         {{ lair.insideMonsters ?? '—' }} / {{ lair.outsideMonsters ?? '—' }}
