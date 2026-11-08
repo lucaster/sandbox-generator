@@ -4,6 +4,7 @@ import { LandmarkContent } from './pages/content/content';
 import { Encounters } from './pages/encounters/encounters';
 import { Dungeons } from './pages/dungeons/dungeons';
 import { CriminalOrganizationPage } from './pages/criminal-organization/criminal-organization';
+import { GuildPage } from './pages/guild/guild';
 import { HexDrawPatch } from './pages/hex-draw-patch/hex-draw-patch';
 import { HexPatchPage } from './pages/hex-patch-page/hex-patch-page';
 import { HexDraw } from './pages/hex-draw/hex-draw';
@@ -81,5 +82,9 @@ export const routes: Routes = [
   {
     path: 'criminal-organization',
     component: CriminalOrganizationPage,
+  },
+  {
+    path: 'guild',
+    component: GuildPage,
   },
 ];

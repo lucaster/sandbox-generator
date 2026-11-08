@@ -1,0 +1,72 @@
+<h1>Guild Generator</h1>
+<p>
+  Based on <em>Atelier Clandestin – Sandbox Generator</em> (2023 edition, pp. 125–128).
+  The name is generated from the rolled template and field; you can supply a
+  different word or phrase to make it sound better.
+</p>
+
+<label>
+  Name field or phrase
+  <input
+    type="text"
+    [value]="nameField()"
+    (input)="onNameFieldInput($event)"
+    [placeholder]="guild().fieldSpecialty.result"
+  />
+</label>
+<button type="button" (click)="onGenerate()">Generate Guild</button>
+
+@let result = guild();
+<section>
+  <h2>{{ result.name.result }}</h2>
+  <p>
+    Name structure (d12: {{ result.name.roll }}):
+    {{ result.name.template }}
+    → {{ result.name.result }}
+  </p>
+
+  <h3>Field</h3>
+  <p>
+    {{ result.field.result }} (d8: {{ result.field.roll }}) —
+    {{ result.fieldSpecialty.result }} (d6: {{ result.fieldSpecialty.roll }})
+  </p>
+
+  <h3>Expertise</h3>
+  <p>{{ result.expertise.result }} (d12: {{ result.expertise.roll }})</p>
+
+  <h3>Power</h3>
+  <dl>
+    <dt>Renown (d12: {{ result.power.renown.roll }})</dt>
+    <dd>{{ result.power.renown.result }}</dd>
+    <dt>Resources (d12: {{ result.power.resources.roll }})</dt>
+    <dd>{{ result.power.resources.result }}</dd>
+    <dt>Guildhouses (d6: {{ result.power.guildhouses.roll }})</dt>
+    <dd>{{ result.power.guildhouses.result }}</dd>
+    <dt>Special asset (d12: {{ result.power.specialAsset.roll }})</dt>
+    <dd>{{ result.power.specialAsset.result }}</dd>
+    <dt>Motivation (d8: {{ result.power.motivation.roll }})</dt>
+    <dd>{{ result.power.motivation.result }}</dd>
+  </dl>
+
+  <h3>Members</h3>
+  <dl>
+    <dt>Initiation (d20: {{ result.members.initiation.roll }})</dt>
+    <dd>{{ result.members.initiation.result }}</dd>
+    <dt>Identifying appearance (d20: {{ result.members.appearance.roll }})</dt>
+    <dd>{{ result.members.appearance.result }}</dd>
+    <dt>Common quirk (d20: {{ result.members.quirk.roll }})</dt>
+    <dd>{{ result.members.quirk.result }}</dd>
+  </dl>
+
+  <h3>Regular event</h3>
+  <p>
+    {{ result.event.source === 'common' ? 'Common' : result.field.result }}
+    → {{ result.event.result }} (d6: {{ result.event.roll }})
+  </p>
+
+  <h3>Regular problem</h3>
+  <p>
+    {{ result.problem.source === 'common' ? 'Common' : result.field.result }}
+    → {{ result.problem.result }} (d6: {{ result.problem.roll }})
+  </p>
+</section>

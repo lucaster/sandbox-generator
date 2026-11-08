@@ -33,6 +33,9 @@ as SVG entirely in the browser — no backend required.
   internal structure, finances, hideout/front, optional special feature and room,
   and boss backstory. Supply a fitting word for name templates with ellipses, or
   leave them unfilled for the DM.
+- **Guild generator** — field and expertise, name structure, power, member traits,
+  and field-specific events and problems. Supply a fitting phrase for the name
+  template or use the rolled expertise.
 - **Faction generator** — political domains from castles, cities, towers, abbeys,
   and intelligent lairs, with contested hexes, relationships, and events.
 - **Wilderness encounters** — a `2d6` table routing to dragons, factions, NPCs,
@@ -51,11 +54,11 @@ as SVG entirely in the browser — no backend required.
 
 The book's generation procedures are partially implemented. The hex map,
 landmarks, settlements (hamlets, villages, cities, castles, towers, abbeys),
-lairs, factions, wilderness encounters, criminal organizations, and core dungeon
-generation exist. Criminal organizations are not yet integrated into faction
-generation. Dungeon lair populations and treasure still require values from an
-external bestiary; the coat of arms, guild, house, tavern, and sea generators are
-not implemented.
+lairs, factions, wilderness encounters, criminal organizations, guilds, and core
+dungeon generation exist. Criminal organizations and guilds are not yet integrated
+into faction generation. Dungeon lair populations and treasure still require
+values from an external bestiary; the coat of arms, house, tavern, and sea
+generators are not implemented.
 
 See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 2023 edition, the remaining gaps, and a suggested implementation order.
@@ -76,6 +79,7 @@ See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 | `/lairs` | Generate one lair per biome |
 | `/dungeons` | Generate linked dungeon areas, levels, and room contents |
 | `/criminal-organization` | Generate a criminal organization from the 2023 tables |
+| `/guild` | Generate a guild from the 2023 tables |
 | `/encounters` | Generate a map and roll wilderness encounters per hex |
 | `/page1` | Low-level manual testing of individual tables |
 | `/hello-angular` | Angular scaffold demo |

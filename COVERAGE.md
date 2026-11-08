@@ -30,11 +30,11 @@ Coverage is concentrated in the first part of that pipeline.
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
 | Lairs | **Done** | Inhabitants, optional outside percentage and hexes, layout, per-room monster/treasure distribution, and the `% in lair` patrol distinction match the 2023 edition. Total monsters and treasure are caller-supplied because the book delegates them to a bestiary. |
 | Dungeons | **Partial** | The main tables and printed nested special-room tables are modeled as explicit `RandomTable` definitions in book order. The demo exposes contextual, on-demand rolls for the nested tables it supports; other room procedures and their effects are not automated. Dungeon lair populations and treasure still need external bestiary data. |
-| Generators | **Partial** | Dragon, NPC, wizard, and criminal-organization generators are implemented from the 2023 edition. Coat of arms, guild, house, and tavern are missing. |
+| Generators | **Partial** | Dragon, NPC, wizard, criminal-organization, and guild generators are implemented from the 2023 edition. Coat of arms, house, and tavern are missing. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
-Counting generation subsections (examples excluded): **25 of 31 have core
-generation support, with 6 still absent.** The implemented tables are based on
+Counting generation subsections (examples excluded): **26 of 31 have core
+generation support, with 5 still absent.** The implemented tables are based on
 the 2023 edition; remaining gaps are mostly missing sections and bestiary data.
 
 ## Chapter details
@@ -180,7 +180,7 @@ Divine Altar lookup are available as contextual demo actions.
 | Wizard | **Done** | `calcWizard` in `src/data/wizard.ts`: level, specialty (including elemental subtype), appearance, goal, and staff material/top/bottom/shape/detail match the 2023 edition. |
 | Coat of arms | **Not implemented** | Escutcheon, field, charges, and the rest of the heraldry tables are absent. |
 | Criminal organization | **Done** | `calcCriminalOrganization` in `src/data/criminal-organization.ts` rolls the name template, main activity, distinctive sign, recruits, initiation rite, internal structure, finances, optional special feature, hideout/front, special-room result, and boss backstory from the 2023 tables (pp. 117–120). A fitting name for the table's ellipses is caller-supplied; those blanks are not guessed. Faction-map integration is not implemented. |
-| Guild | **Not implemented** | Guild type, members, leadership, and events are absent. |
+| Guild | **Done** | `calcGuild` in `src/data/guild.ts` rolls the field and subfield, expertise, name structure, power, member initiation/appearance/quirk, and common or field-specific regular events and problems from the 2023 tables (pp. 125–128). The name field phrase can be supplied by the caller; otherwise the rolled subfield fills the printed template. Guilds are not yet integrated into faction generation. |
 | House | **Not implemented** | House interiors and loot are absent. |
 | Tavern | **Not implemented** | Sign, menu, staff, and rumours are absent. |
 
