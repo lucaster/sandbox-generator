@@ -24,7 +24,7 @@ Coverage is concentrated in the first part of that pipeline.
 
 | Book chapter | Status | Notes |
 |---|---|---|
-| Hex Map | **Partial** | Biomes, feature outline, factions, and wilderness random encounters work. Biome encounter tables match the 2023 edition and every entry is reachable. |
+| Hex Map | **Done** | Biomes, feature outline, factions, and wilderness random encounters work. Biome encounter tables match the 2023 edition and every entry is reachable. |
 | Landmarks | **Done** | Natural, artificial, and magic tables match the 2023 edition. Content, treasure chance, and information delivery are implemented. |
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
 | Lairs | **Done** | Inhabitants, optional outside percentage and hexes, layout, per-room monster/treasure distribution, and the `% in lair` patrol distinction match the 2023 edition. Total monsters and treasure are caller-supplied because the book delegates them to a bestiary. |
@@ -32,10 +32,10 @@ Coverage is concentrated in the first part of that pipeline.
 | Generators | **Not implemented** | No coat of arms, criminal organization, dragon, guild, house, NPC, tavern, or wizard generator. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
-Counting generation subsections (examples excluded): **16 of 31 are complete,
-1 is partial, and 14 are absent.** Roughly half of the book's generation content
-is represented in code. The implemented tables are faithful to the 2023 edition;
-the gaps are mostly missing sections and generator logic.
+Counting generation subsections (examples excluded): **17 of 31 are complete
+and 14 are absent.** Roughly half of the book's generation content is represented
+in code. The implemented tables are faithful to the 2023 edition; the gaps are
+mostly missing sections and generator logic.
 
 ## Chapter details
 
@@ -43,9 +43,9 @@ the gaps are mostly missing sections and generator logic.
 
 | Subsection | Status | What exists | What is missing / wrong |
 |---|---|---|---|
-| Biomes | **Done** | `tableStartingHexBiome`, `tableNextHexBiome`, `calcHexesBiome` | `calcHexesBiome` does not forward `rollFn` to the starting-hex roll, so tests cannot control that roll. |
+| Biomes | **Done** | `tableStartingHexBiome`, `tableNextHexBiome`, `calcHexesBiome` | — |
 | Encounters per Biome | **Done** | Five biome tables and `calcBiomeEncounter` in `src/data/lairs.ts`, matching the 2023 edition | Tables use keys `2..12` and roll `2d6`, so all entries are reachable and no roll returns `undefined`. |
-| Features | **Partial** | `tableNextHexFeature`, settlement sub-table, feature map drawing | The book's "first hex = village, second hex = dungeon" rule is not enforced; the starting table only contains `Village`, and hex 2 is rolled normally. |
+| Features | **Done** | `tableNextHexFeature`, settlement sub-table, feature map drawing, and the book's fixed starting features (village in hex 1, dungeon in hex 2) | — |
 | Factions | **Done** | `calcFactions`, `calcFactionRelationship`, `calcFactionEvent`, and `isIntelligentLair` in `src/data/factions.ts`. Castle/city seven-hex domains, tower enslavement, abbey parishes, intelligent-lair factions and alliances, contested hexes, `2d6` relationships, and `1d6`/`1d12` events match the 2023 edition. | Criminal organizations, guilds, dragons, and wizard encounters are not faction sources yet because those generators are absent. |
 | Random Encounters | **Done** | `calcWildernessEncounter` and the `2d6`/`1d6` tables in `src/data/encounters.ts` | Dragon, Other faction, Faction, NPCs, Biome, and Wizard routing; contested-hex faction count; and the no-nearby-faction biome fallback match the 2023 edition. |
 
@@ -175,16 +175,11 @@ Nothing is implemented:
 - Encounters per sea location.
 - Ships, islands, and sea travel procedures.
 
-## Rule and logic issues
+## Remaining issues
 
-These are correctness problems in implemented code. The table data itself matches
-the 2023 edition.
+The implemented tables and generation rules match the 2023 edition. The remaining
+items are housekeeping:
 
-- **`calcHexesBiome`** calls `calcStartingHexBiome()` without passing `rollFn`.
-- **`calcHexesDetailed`** does not enforce the book's fixed starting features
-  (village in hex 1, dungeon in hex 2).
-- `src/data/data.ts` and `src/data/names.ts` still contain `console.info`,
-  `console.debug`, and `console.log` calls.
 - `src/data/biomes.ts` is empty, and `@svgdotjs/svg.js` is declared but unused.
 
 ## Suggested priority

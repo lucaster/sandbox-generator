@@ -1,4 +1,10 @@
-import { calcNextHexBiome, oppositeOptionEntry } from './data';
+import {
+  calcHexesBiome,
+  calcHexesDetailedFeature,
+  calcHexesFeature,
+  calcNextHexBiome,
+  oppositeOptionEntry,
+} from './data';
 import { tableNextHexBiome, tableStartingHexBiome } from './random-tables';
 
 describe('data.ts', () => {
@@ -32,6 +38,26 @@ describe('data.ts', () => {
   it('calcNextHex handles boundary values (6 and 10)', () => {
     expect(calcNextHexBiome('X', () => 6)).toBe('Grassland');
     expect(calcNextHexBiome('X', () => 10)).toBe('Mountains');
+  });
+
+  it('calcHexesBiome forwards rollFn to the starting-hex roll', () => {
+    const hexes = calcHexesBiome(() => 9);
+
+    expect(hexes[1]).toBe('Marsh');
+  });
+
+  it('calcHexesFeature fixes the first hex to Village and the second to Dungeon', () => {
+    const hexes = calcHexesFeature(() => 6);
+
+    expect(hexes[1]).toBe('Village');
+    expect(hexes[2]).toBe('Dungeon');
+  });
+
+  it('calcHexesDetailedFeature fixes the first two hexes', () => {
+    const hexes = calcHexesDetailedFeature(() => 1);
+
+    expect(hexes[1]).toEqual(['Village']);
+    expect(hexes[2]).toEqual(['Dungeon']);
   });
 
   it('oppositeOptionEntry mirrors the actual keys', () => {

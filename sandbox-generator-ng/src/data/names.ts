@@ -452,8 +452,6 @@ function generateRandomNameVariants(): string[] {
   const parts = calcNameParts(patternElements);
   const variants = patterns.map(pattern => replaceElementsInPatternWithWords(pattern, parts));
 
-  console.log(key, patterns, variants);
-
   return variants;
 }
 function generateRandomName(): string {

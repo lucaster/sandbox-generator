@@ -137,16 +137,22 @@ const currHexNextHex = [
 type Hexes = { [key: number]: string; };
 type HexesDetailed = { [key: number]: string[]; };
 
+// The 2023 edition fixes the first two hexes for a traditional campaign:
+// hex 1 contains a village and hex 2 a dungeon (p. 11).
+const fixedStartingFeatures: HexesDetailed = {
+  1: ['Village'],
+  2: ['Dungeon'],
+};
+
 function calcHexesBiome(
   rollFn: (faces: number) => number = d
 ): Hexes {
   const result: Hexes = {
-    1: calcStartingHexBiome(),
+    1: calcStartingHexBiome(rollFn),
   };
   for (const item of currHexNextHex) {
     const nextHexResult = calcNextHexBiome(result[item.cur], rollFn);
     result[item.next] = nextHexResult;
-    console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
   }
   return result;
 }
@@ -157,7 +163,8 @@ function calcHexesFeature(
   return calcHexes(
     tableStartingHexFeature,
     tableNextHexFeature,
-    rollFn
+    rollFn,
+    fixedStartingFeatures
   );
 }
 
@@ -167,7 +174,8 @@ function calcHexesDetailedFeature(
   return calcHexesDetailed(
     tableStartingHexFeature,
     tableNextHexFeature,
-    rollFn
+    rollFn,
+    fixedStartingFeatures
   );
 }
 
@@ -194,14 +202,15 @@ function calcHexesDetailedContent(
 function calcHexes(
   tableStartingHex: RandomTable,
   tableNextHex: RandomTable,
-  rollFn: (faces: number) => number
+  rollFn: (faces: number) => number,
+  fixedHexes: HexesDetailed = {}
 ): Hexes {
   var hexesDetailed = calcHexesDetailed(
     tableStartingHex,
     tableNextHex,
-    rollFn
+    rollFn,
+    fixedHexes
   );
-  console.debug('Hexes Detailed:', hexesDetailed);
   var hexes = fromHexesDetailedToHexes(hexesDetailed);
   return hexes;
 }
@@ -236,14 +245,16 @@ function fromHexesToHexesDetailed(hexes: Hexes): HexesDetailed {
 function calcHexesDetailed(
   tableStartingHex: RandomTable,
   tableNextHex: RandomTable,
-  rollFn: (faces: number) => number = d
+  rollFn: (faces: number) => number = d,
+  fixedHexes: HexesDetailed = {}
 ): HexesDetailed {
   const result: HexesDetailed = {
-    1: calcHexPathRecursivelyRec([], tableStartingHex, rollFn),
+    1: fixedHexes[1] ?? calcHexPathRecursivelyRec([], tableStartingHex, rollFn),
   }
   for (const item of currHexNextHex) {
-    result[item.next] = calcHexPathRecursivelyRec([], tableNextHex, rollFn);
-    console.info(`${item.cur} -> ${item.next} : ${result[item.cur]} -> ${result[item.next]}`);
+    result[item.next] =
+      fixedHexes[item.next] ??
+      calcHexPathRecursivelyRec([], tableNextHex, rollFn);
   }
   return result;
 }
@@ -253,7 +264,6 @@ function calcHexRecursively(
   rollFn: (faces: number) => number = d
 ): string {
   var arr = calcHexPathRecursivelyRec([], table, rollFn);
-  console.debug(`calcHexRecursively: ${arr.join(' / ')}`);
   return arr[arr.length - 1];
 }
 

@@ -253,10 +253,7 @@ See `.github/copilot-instructions.md` for the full convention list.
 - **Lair encounter tables use keys `2..12`**, but the table roller assumes contiguous
   keys starting at `1`. As a result, `options[1]` is `undefined` and `options[12]` is
   never selected. This affects `calcLair` in `src/data/lairs.ts`.
-- `calcHexesBiome` does not forward a custom `rollFn` to the starting-hex roll, so
-  tests cannot fully control biome randomness.
 - The 19-hex layout is duplicated between `hex-draw` and `hex-draw-patch`.
-- Some domain functions still contain `console.info` / `console.debug` logging.
 - `src/data/biomes.ts` is empty, and `@svgdotjs/svg.js` is declared but unused.
 
 ## Possible next steps
