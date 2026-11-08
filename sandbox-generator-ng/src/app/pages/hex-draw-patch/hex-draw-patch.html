@@ -20,7 +20,7 @@
             style="border: 1px solid black"
           ></svg>
         </td>
-        <td>
+        <td style="vertical-align: top">
           <ol>
             @for (a of hexDetailList(); track a.hexNum) {
               <li>
@@ -64,41 +64,44 @@
             }
           </ol>
         </td>
+        <td style="vertical-align: top">
+          @if (factionList().length) {
+            <section class="faction-legend">
+              <h3>Factions</h3>
+              <ol>
+                @for (faction of factionList(); track faction.number) {
+                  <li>
+                    <span
+                      [class]="'faction-swatch faction-swatch-' + factionShape(faction.number)"
+                      [style.background]="factionColor(faction.number)"
+                    >{{ faction.number }}</span>
+                    <strong>{{ faction.label }}</strong>
+                    <span class="faction-hexes">Hexes: {{ faction.hexes.join(', ') }}</span>
+                    @if (faction.relationships.length) {
+                      <div class="faction-detail">
+                        Relations:
+                        @for (relationship of faction.relationships; track relationship.faction) {
+                          <span>#{{ relationship.faction }} {{ relationship.relation }} ({{ relationship.roll }})</span>
+                        }
+                      </div>
+                    }
+                    @if (faction.event) {
+                      <div class="faction-detail">
+                        Event: {{ faction.event.when }} — {{ faction.event.nature }}
+                      </div>
+                    }
+                  </li>
+                }
+              </ol>
+              <p class="faction-note">
+                Contested hexes show more than one symbol and list every faction claiming them.
+              </p>
+            </section>
+          }
+        </td>
       </tr>
     </tbody>
   </table>
 </section>
 
-@if (factionList().length) {
-  <section class="faction-legend">
-    <h3>Factions</h3>
-    <ol>
-      @for (faction of factionList(); track faction.number) {
-        <li>
-          <span
-            [class]="'faction-swatch faction-swatch-' + factionShape(faction.number)"
-            [style.background]="factionColor(faction.number)"
-          >{{ faction.number }}</span>
-          <strong>{{ faction.label }}</strong>
-          <span class="faction-hexes">Hexes: {{ faction.hexes.join(', ') }}</span>
-          @if (faction.relationships.length) {
-            <div class="faction-detail">
-              Relations:
-              @for (relationship of faction.relationships; track relationship.faction) {
-                <span>#{{ relationship.faction }} {{ relationship.relation }} ({{ relationship.roll }})</span>
-              }
-            </div>
-          }
-          @if (faction.event) {
-            <div class="faction-detail">
-              Event: {{ faction.event.when }} — {{ faction.event.nature }}
-            </div>
-          }
-        </li>
-      }
-    </ol>
-    <p class="faction-note">
-      Contested hexes show more than one symbol and list every faction claiming them.
-    </p>
-  </section>
-}
+
