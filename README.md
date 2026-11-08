@@ -34,8 +34,8 @@ as SVG entirely in the browser — no backend required.
 - **Name generator** — pattern-based place names such as `{B} {A}`,
   `{D}-on-the-hill`, and `{D}sby`, with multiple variants.
 - **SVG rendering** — hex polygons, biome backgrounds, feature icons, and hex numbers.
-- **Deterministic tests** — generators accept an injectable `rollFn`, so dice can be
-  fixed in unit tests.
+- **Deterministic tests** — most generators accept an injectable `rollFn`, so dice
+  can be fixed in unit tests.
 
 ## Book coverage
 
@@ -45,7 +45,7 @@ lairs, factions, and wilderness encounters exist; dungeons, the detail
 generators, and the sea rules do not.
 
 See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
-2023 edition, the known rule and logic gaps, and a suggested implementation order.
+2023 edition, the remaining gaps, and a suggested implementation order.
 
 ## Routes
 
@@ -250,18 +250,17 @@ See `.github/copilot-instructions.md` for the full convention list.
 
 ## Known limitations
 
-- **Lair encounter tables use keys `2..12`**, but the table roller assumes contiguous
-  keys starting at `1`. As a result, `options[1]` is `undefined` and `options[12]` is
-  never selected. This affects `calcLair` in `src/data/lairs.ts`.
 - The 19-hex layout is duplicated between `hex-draw` and `hex-draw-patch`.
 - `src/data/biomes.ts` is empty, and `@svgdotjs/svg.js` is declared but unused.
 
 ## Possible next steps
 
-- Fix the lair table key range and make the roller key-aware.
-- Forward `rollFn` consistently through all generators.
+- Add dungeon generation, the largest missing subsystem.
+- Add the detail generators: coat of arms, criminal organization, dragon, guild,
+  house, NPC, tavern, and wizard.
+- Add adventures at sea.
+- Forward `rollFn` through the remaining generators, such as the name generator.
 - Extract the hex layout into a single shared helper.
-- Add treasure chance, dungeon generation, and full city generation.
 - Add map export (PNG/PDF) if needed.
 - Decide whether the Vue/TS/prove experiments should be kept or removed.
 
