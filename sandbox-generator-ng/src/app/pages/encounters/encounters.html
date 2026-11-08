@@ -19,109 +19,122 @@
   <button (click)="generateMap()">New Map</button>
 </div>
 
-<section class="hex-summary">
-  <h2>Hex {{ hex() }}</h2>
-  <p>Biome: {{ biomes()[hex()] }}</p>
-  <p>Feature: {{ featureLabel(hex()) }}</p>
-  <p>Factions: {{ factionLabel(hex()) }}</p>
-</section>
+<div class="encounter-layout">
+  <section class="map-panel">
+    <svg
+      #svg
+      class="encounter-map"
+      [attr.width]="width"
+      [attr.height]="height"
+    ></svg>
+  </section>
 
-@if (encounter(); as e) {
-  <section class="encounter-result">
-    <h2>Encounter</h2>
-    <p><strong>{{ e.category }}</strong> (2d6 = {{ e.roll }})</p>
-    <p>{{ e.note }}</p>
-    @if (e.category === 'Faction' || e.category === 'Other faction') {
-      @if (e.contested) {
-        <p>
-          Contested hex:
-          {{ e.factionCount === 'multiple' ? 'multiple factions involved' : 'one faction involved' }}
-        </p>
-      }
-    }
-    @if (e.factions.length) {
-      <p>Factions involved: {{ e.factions.join(', ') }}</p>
-    }
-    @if (e.monster) {
-      <p>Monster: {{ e.monster }}</p>
-    }
-    @if (e.dragon; as dragon) {
-      <div class="generated">
-        <h3>{{ dragon.name }}</h3>
-        <p>
-          {{ dragon.alignment }} {{ dragon.age.toLowerCase() }}
-          {{ dragon.size.toLowerCase() }} {{ dragon.color.toLowerCase() }} dragon
-          ({{ dragon.breath.toLowerCase() }})
-        </p>
-        <p>
-          HP {{ dragon.stats.hitPoints }}, AC {{ dragon.stats.armorClass }},
-          saves {{ dragon.stats.savingThrows }}, morale {{ dragon.stats.morale }}
-        </p>
-        <p>
-          Strength: {{ dragon.strength ?? 'none' }}. Weakness:
-          {{ dragon.weakness ?? 'none' }}.
-        </p>
-        <p>
-          Favorite food: {{ dragon.favoriteFood.toLowerCase() }}. Status:
-          {{ dragon.status.toLowerCase() }}.
-        </p>
-        <p>
-          Attacks: claws {{ dragon.attacks.claws }}, bite {{ dragon.attacks.bite }},
-          tail {{ dragon.attacks.tail }}, breath weapon.
-        </p>
-        <p>
-          Lair: {{ dragon.lair.toLowerCase() }}. Special treasure:
-          {{ dragon.specialTreasure ?? 'none' }}.
-        </p>
-      </div>
-    }
-    @if (e.wizard; as wizard) {
-      <div class="generated">
-        <h3>Level {{ wizard.level }} wizard</h3>
-        <p>
-          Specialty: {{ wizard.specialty }}. Appearance: {{ wizard.appearance }}.
-        </p>
-        <p>Goal: {{ wizard.goal }}.</p>
-        <p>
-          Staff: {{ wizard.staff.material }},
-          {{ wizard.staff.shape.toLowerCase() }},
-          {{ wizard.staff.detail.toLowerCase() }}; top
-          {{ wizard.staff.top.toLowerCase() }}, bottom
-          {{ wizard.staff.bottom.toLowerCase() }}.
-        </p>
-      </div>
-    }
-    @if (e.npc; as npc) {
-      <div class="generated">
-        <h3>{{ npc.name }}</h3>
-        <p>
-          {{ npc.occupation }}. {{ npc.appearance.clothes }} clothes;
-          {{ npc.appearance.particularity.toLowerCase() }}.
-        </p>
-        <p>
-          {{ npc.attitude }}. Favorite thing:
-          {{ npc.favoriteThing.toLowerCase() }}. Dream:
-          {{ npc.dream.toLowerCase() }}. Hobby: {{ npc.hobby.toLowerCase() }}.
-        </p>
-        @if (npc.secret) {
-          <p>Secret: {{ npc.secret }}.</p>
+  <div class="encounter-details">
+    <section class="hex-summary">
+      <h2>Hex {{ hex() }}</h2>
+      <p>Biome: {{ biomes()[hex()] }}</p>
+      <p>Feature: {{ featureLabel(hex()) }}</p>
+      <p>Factions: {{ factionLabel(hex()) }}</p>
+    </section>
+
+    @if (encounter(); as e) {
+      <section class="encounter-result">
+        <h2>Encounter</h2>
+        <p><strong>{{ e.category }}</strong> (2d6 = {{ e.roll }})</p>
+        <p>{{ e.note }}</p>
+        @if (e.category === 'Faction' || e.category === 'Other faction') {
+          @if (e.contested) {
+            <p>
+              Contested hex:
+              {{ e.factionCount === 'multiple' ? 'multiple factions involved' : 'one faction involved' }}
+            </p>
+          }
         }
-        <p>Peers: {{ npc.relationships.join(', ') }}.</p>
-      </div>
+        @if (e.factions.length) {
+          <p>Factions involved: {{ e.factions.join(', ') }}</p>
+        }
+        @if (e.monster) {
+          <p>Monster: {{ e.monster }}</p>
+        }
+        @if (e.dragon; as dragon) {
+          <div class="generated">
+            <h3>{{ dragon.name }}</h3>
+            <p>
+              {{ dragon.alignment }} {{ dragon.age.toLowerCase() }}
+              {{ dragon.size.toLowerCase() }} {{ dragon.color.toLowerCase() }} dragon
+              ({{ dragon.breath.toLowerCase() }})
+            </p>
+            <p>
+              HP {{ dragon.stats.hitPoints }}, AC {{ dragon.stats.armorClass }},
+              saves {{ dragon.stats.savingThrows }}, morale {{ dragon.stats.morale }}
+            </p>
+            <p>
+              Strength: {{ dragon.strength ?? 'none' }}. Weakness:
+              {{ dragon.weakness ?? 'none' }}.
+            </p>
+            <p>
+              Favorite food: {{ dragon.favoriteFood.toLowerCase() }}. Status:
+              {{ dragon.status.toLowerCase() }}.
+            </p>
+            <p>
+              Attacks: claws {{ dragon.attacks.claws }}, bite {{ dragon.attacks.bite }},
+              tail {{ dragon.attacks.tail }}, breath weapon.
+            </p>
+            <p>
+              Lair: {{ dragon.lair.toLowerCase() }}. Special treasure:
+              {{ dragon.specialTreasure ?? 'none' }}.
+            </p>
+          </div>
+        }
+        @if (e.wizard; as wizard) {
+          <div class="generated">
+            <h3>Level {{ wizard.level }} wizard</h3>
+            <p>
+              Specialty: {{ wizard.specialty }}. Appearance: {{ wizard.appearance }}.
+            </p>
+            <p>Goal: {{ wizard.goal }}.</p>
+            <p>
+              Staff: {{ wizard.staff.material }},
+              {{ wizard.staff.shape.toLowerCase() }},
+              {{ wizard.staff.detail.toLowerCase() }}; top
+              {{ wizard.staff.top.toLowerCase() }}, bottom
+              {{ wizard.staff.bottom.toLowerCase() }}.
+            </p>
+          </div>
+        }
+        @if (e.npc; as npc) {
+          <div class="generated">
+            <h3>{{ npc.name }}</h3>
+            <p>
+              {{ npc.occupation }}. {{ npc.appearance.clothes }} clothes;
+              {{ npc.appearance.particularity.toLowerCase() }}.
+            </p>
+            <p>
+              {{ npc.attitude }}. Favorite thing:
+              {{ npc.favoriteThing.toLowerCase() }}. Dream:
+              {{ npc.dream.toLowerCase() }}. Hobby: {{ npc.hobby.toLowerCase() }}.
+            </p>
+            @if (npc.secret) {
+              <p>Secret: {{ npc.secret }}.</p>
+            }
+            <p>Peers: {{ npc.relationships.join(', ') }}.</p>
+          </div>
+        }
+      </section>
     }
-  </section>
-}
 
-@if (history().length) {
-  <section class="encounter-log">
-    <h2>Encounter log</h2>
-    <ol>
-      @for (e of history(); track $index) {
-        <li>
-          <strong>Hex {{ e.hex }}</strong> ({{ e.biome }}) — {{ e.category }}:
-          {{ e.note }}
-        </li>
-      }
-    </ol>
-  </section>
-}
+    @if (history().length) {
+      <section class="encounter-log">
+        <h2>Encounter log</h2>
+        <ol>
+          @for (e of history(); track $index) {
+            <li>
+              <strong>Hex {{ e.hex }}</strong> ({{ e.biome }}) — {{ e.category }}:
+              {{ e.note }}
+            </li>
+          }
+        </ol>
+      </section>
+    }
+  </div>
+</div>

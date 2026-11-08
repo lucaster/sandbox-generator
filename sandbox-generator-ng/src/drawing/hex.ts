@@ -11,12 +11,12 @@ export type FactionShape =
 export class SvgDrawer {
   constructor(private svg: SVGElement) {}
 
-  drawPolygon(points: Point[]) {
+  drawPolygon(points: Point[], options: PolygonOptions = {}) {
     const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
     polygon.setAttribute('points', points.map((p) => [p.x, p.y].join(',')).join(' '));
-    polygon.setAttribute('fill', 'beige');
-    polygon.setAttribute('stroke', 'black');
-    polygon.setAttribute('stroke-width', '2');
+    polygon.setAttribute('fill', options.fill ?? 'beige');
+    polygon.setAttribute('stroke', options.stroke ?? 'black');
+    polygon.setAttribute('stroke-width', options.strokeWidth ?? '2');
     this.svg.appendChild(polygon);
   }
 
@@ -158,6 +158,12 @@ function starPolygonPoints(point: Point, radius: number, points: number): string
     );
   }
   return result.join(' ');
+}
+
+interface PolygonOptions {
+  readonly fill?: string;
+  readonly stroke?: string;
+  readonly strokeWidth?: string;
 }
 
 interface SymbolOptions {
