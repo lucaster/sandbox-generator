@@ -30,7 +30,9 @@ as SVG entirely in the browser — no backend required.
 - **Dungeon generator** — linked areas and levels, factions, wandering monsters,
   room contents, doors, traps, and corridor samples.
 - **Criminal organization generator** — name templates, activity, members, rites,
-  internal structure, finances, hideout/front, special rooms, and boss backstory.
+  internal structure, finances, hideout/front, optional special feature and room,
+  and boss backstory. Supply a fitting word for name templates with ellipses, or
+  leave them unfilled for the DM.
 - **Faction generator** — political domains from castles, cities, towers, abbeys,
   and intelligent lairs, with contested hexes, relationships, and events.
 - **Wilderness encounters** — a `2d6` table routing to dragons, factions, NPCs,
