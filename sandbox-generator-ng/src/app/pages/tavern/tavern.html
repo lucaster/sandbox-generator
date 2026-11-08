@@ -1,0 +1,180 @@
+<h1>Tavern Generator</h1>
+<p>
+  Based on <em>Atelier Clandestin – Sandbox Generator</em> (2023 edition, pp. 136–145).
+  The generator follows the book's procedures, including conditional and nested rolls.
+</p>
+
+<label>
+  <input
+    type="checkbox"
+    [checked]="includeSecondServerTrait()"
+    (change)="onIncludeSecondServerTraitChange($event)"
+  />
+  Roll an optional second individual trait for a server
+</label>
+<button type="button" (click)="onGenerate()">Generate Tavern</button>
+
+@let result = tavern();
+<section>
+  <h2>{{ result.name.result }}</h2>
+  <p>
+    Name: {{ result.name.first.result }} (d100: {{ result.name.first.roll }})
+    {{ result.name.second.result }} (d30: {{ result.name.second.roll }})
+  </p>
+
+  <h3>Decoration (1d2: {{ result.decorationCountRoll }})</h3>
+  <ul>
+    @for (decoration of result.decorations; track $index) {
+      <li>{{ decoration.result }} (d24: {{ decoration.roll }})</li>
+    }
+  </ul>
+
+  <h3>Bartender</h3>
+  <ul>
+    <li>{{ result.bartender.firstTrait.result }} (d20: {{ result.bartender.firstTrait.roll }})</li>
+    <li>{{ result.bartender.secondTrait.result }} (d20: {{ result.bartender.secondTrait.roll }})</li>
+  </ul>
+
+  <h3>Servers</h3>
+  <p>Common-trait check (d6: {{ result.servers.commonTraitCheck }})</p>
+  @if (result.servers.commonTrait; as commonTrait) {
+    <p>Common trait: {{ commonTrait.result }} (d10: {{ commonTrait.roll }})</p>
+  }
+  <p>Individual trait: {{ result.servers.individualTrait.result }} (d20: {{ result.servers.individualTrait.roll }})</p>
+  @if (result.servers.secondIndividualTrait; as secondTrait) {
+    <p>Optional second trait: {{ secondTrait.result }} (d20: {{ secondTrait.roll }})</p>
+  }
+
+  <h3>Patrons</h3>
+  <ul>
+    <li>Most customers: {{ result.patrons.mostCustomers.result }} (d12: {{ result.patrons.mostCustomers.roll }})</li>
+    <li>Specific customer: {{ result.patrons.specificCustomer.result }} (d20: {{ result.patrons.specificCustomer.roll }})</li>
+  </ul>
+
+  <h3>Entertainment</h3>
+  <p>{{ result.entertainment.result }} (d20: {{ result.entertainment.roll }})</p>
+  <p>Activities (1d3: {{ result.activityCountRoll }})</p>
+  <ul>
+    @for (activity of result.activities; track $index) {
+      <li>{{ activity.result }} (d20: {{ activity.roll }})</li>
+    }
+  </ul>
+
+  <h3>Rooms</h3>
+  <p>Best available: {{ result.rooms.bestAvailable.result }} (d6: {{ result.rooms.bestAvailable.roll }})</p>
+  <p>Special-room check (d6: {{ result.rooms.specialCheck }})</p>
+  @if (result.rooms.special; as specialRoom) {
+    <p>Special room: {{ specialRoom.result }} (d6: {{ specialRoom.roll }})</p>
+  }
+
+  <h3>Outside (1d3: {{ result.outsideCountRoll }})</h3>
+  <ul>
+    @for (amenity of result.outside; track $index) {
+      <li>{{ amenity.result }} (d20: {{ amenity.roll }})</li>
+    }
+  </ul>
+
+  <h3>Menu</h3>
+  <h4>Specials of the day</h4>
+  <p>
+    Main dish: {{ result.menu.specialsOfTheDay.mainDish.result }}
+    (d20: {{ result.menu.specialsOfTheDay.mainDish.roll }})
+    @if (result.menu.specialsOfTheDay.mainDish.detail; as detail) {
+      — {{ detail.result }} (additional roll: {{ detail.roll }})
+    }
+    @if (result.menu.specialsOfTheDay.mainDish.serving; as serving) {
+      — {{ serving }}
+    }
+  </p>
+  <p>
+    Soup: {{ result.menu.specialsOfTheDay.soup.result }}
+    (d20: {{ result.menu.specialsOfTheDay.soup.roll }}) — served with a piece of bread
+  </p>
+
+  <h4>Traveler's meal</h4>
+  <p>
+    Snack: {{ result.menu.travelersMeal.snack.result }}
+    (d12: {{ result.menu.travelersMeal.snack.roll }})
+    @if (result.menu.travelersMeal.snack.detail; as detail) {
+      — {{ detail.result }} (additional roll: {{ detail.roll }})
+    }
+  </p>
+  <p>
+    Soup: {{ result.menu.travelersMeal.soup.result }}
+    (d20: {{ result.menu.travelersMeal.soup.roll }}) — served with a piece of bread
+  </p>
+
+  <h4>Full course menu</h4>
+  <p>
+    Soup: {{ result.menu.fullCourseMenu.soup.result }}
+    (d20: {{ result.menu.fullCourseMenu.soup.roll }}) — served with a piece of bread
+  </p>
+  <p>
+    Appetizer: {{ result.menu.fullCourseMenu.appetizer.result }}
+    (d6: {{ result.menu.fullCourseMenu.appetizer.roll }})
+    @if (result.menu.fullCourseMenu.appetizer.detail; as detail) {
+      — {{ detail.result }} (additional roll: {{ detail.roll }})
+    }
+  </p>
+  <p>
+    Main dish: {{ result.menu.fullCourseMenu.mainDish.result }}
+    (d20: {{ result.menu.fullCourseMenu.mainDish.roll }})
+    @if (result.menu.fullCourseMenu.mainDish.detail; as detail) {
+      — {{ detail.result }} (additional roll: {{ detail.roll }})
+    }
+    @if (result.menu.fullCourseMenu.mainDish.serving; as serving) {
+      — {{ serving }}
+    }
+  </p>
+  <p>
+    Dessert: {{ result.menu.fullCourseMenu.dessert.result }}
+    (d10: {{ result.menu.fullCourseMenu.dessert.roll }})
+    @if (result.menu.fullCourseMenu.dessert.detail; as detail) {
+      — {{ detail.result }} (additional roll: {{ detail.roll }})
+    }
+  </p>
+  <p>
+    Drinks are not assigned a roll in the book's menu procedure.
+    <button type="button" (click)="onRollDrink()">Roll an optional drink</button>
+    @if (drink(); as rolledDrink) {
+      {{ rolledDrink.result }} (d10: {{ rolledDrink.roll }})
+      @if (rolledDrink.wine; as wine) {
+        — {{ wine.result }} (d4: {{ wine.roll }})
+      }
+    }
+  </p>
+
+  <h3>Rumor</h3>
+  <p>
+    {{ result.rumor.result.result }} (d20: {{ result.rumor.result.roll }}) —
+    {{ result.rumor.truthfulness.result }} (d6: {{ result.rumor.truthfulness.roll }})
+  </p>
+
+  <h3>Sign</h3>
+  <dl>
+    <dt>Shape (d20: {{ result.sign.shape.roll }})</dt>
+    <dd>{{ result.sign.shape.result }}</dd>
+    <dt>Material (d12: {{ result.sign.material.roll }})</dt>
+    <dd>{{ result.sign.material.result }}</dd>
+    <dt>Position (d20: {{ result.sign.position.roll }})</dt>
+    <dd>{{ result.sign.position.result }}</dd>
+    <dt>Mounting (d8: {{ result.sign.mounting.roll }})</dt>
+    <dd>{{ result.sign.mounting.result }}</dd>
+    <dt>Sub-panel (d12: {{ result.sign.subPanel.roll }})</dt>
+    <dd>
+      {{ result.sign.subPanel.result }}
+      @if (result.sign.subPanelPhrase; as phrase) {
+        — {{ phrase.result }} (d12: {{ phrase.roll }})
+      }
+    </dd>
+    <dt>Main panel content (d12: {{ result.sign.mainPanelContent.roll }})</dt>
+    <dd>
+      {{ result.sign.mainPanelContent.result }}
+      @if (result.sign.illustration; as illustration) {
+        — {{ illustration.result }} (d100: {{ illustration.roll }})
+      }
+    </dd>
+    <dt>Special feature (d20: {{ result.sign.specialFeature.roll }})</dt>
+    <dd>{{ result.sign.specialFeature.result }}</dd>
+  </dl>
+</section>
