@@ -1100,6 +1100,45 @@ export const tableDungeonBodyExchangeReappearance: RandomTable = {
   },
 };
 
+// Book: Dungeons > Special rooms > 13) Crying statues, p. 80.
+export const tableDungeonCryingStatueTreasure: RandomTable = {
+  id: 268,
+  title: 'Crying Statue Treasure',
+  options: {
+    1: 'Pouch with 1d20 gp',
+    2: 'Pouch with 1d20 gp',
+    3: 'Pouch with 1d20 gp',
+    4: '1 gem',
+    5: '1 gem',
+    6: 'Potion',
+  },
+};
+
+// Book: Dungeons > Special rooms > 20) Divine altar, p. 82.
+export const tableDungeonDivineAltarOfferingThresholds: RandomTable = {
+  id: 269,
+  title: 'Divine Altar Offering Thresholds',
+  options: {
+    150: 'Answer to a question',
+    250: 'Completely heal the party',
+    1000: 'Resurrect someone',
+  },
+};
+
+// Book: Dungeons > Special rooms > 28) Flesh room, p. 84.
+export const tableDungeonFleshRoomDefense: RandomTable = {
+  id: 270,
+  title: 'Flesh Room Defense',
+  options: {
+    1: 'Purulent pimple: explodes if touched, inflicts 1d3 damage',
+    2: 'Purulent pimple: explodes if touched, inflicts 1d3 damage',
+    3: 'Purulent pimple: explodes if touched, inflicts 1d3 damage',
+    4: '1d3 tentacles: 1d6 damage each, roll against wands to avoid',
+    5: '1d3 tentacles: 1d6 damage each, roll against wands to avoid',
+    6: 'Mouth: save against paralysis or die',
+  },
+};
+
 // Book: Dungeons > Special rooms > 32) Freshly walled corridor, p. 85.
 export const tableDungeonFreshlyWalledCorridor: RandomTable = {
   id: 251,
@@ -1296,6 +1335,49 @@ export const tableDungeonPowerfulElectromagnetSetting: RandomTable = {
   },
 };
 
+// Book: Dungeons > Special rooms > 73) Room out of time, p. 97.
+export const tableDungeonRoomOutOfTimeEra: RandomTable = {
+  id: 271,
+  title: 'Room Out of Time Era',
+  options: {
+    1: 'Distant past',
+    2: 'Distant past',
+    3: 'Distant past',
+    4: 'Distant past',
+    5: 'Future',
+    6: 'Future',
+  },
+};
+
+// Book: Dungeons > Special rooms > 75) Rotating room, p. 97.
+export const tableDungeonRotatingRoomAngle: RandomTable = {
+  id: 272,
+  title: 'Rotating Room Angle',
+  options: {
+    1: '90°',
+    2: '90°',
+    3: '90°',
+    4: '180°',
+    5: '180°',
+    6: '270°',
+  },
+};
+
+// Book: Dungeons > Special rooms > 80) Slot machine, p. 99.
+// The book rolls 3d6 independently; only matching triples have listed results.
+export const tableDungeonSlotMachinePayout: RandomTable = {
+  id: 273,
+  title: 'Slot Machine Matching Numbers',
+  options: {
+    111: 'Multiplies the bet by 2',
+    222: 'Multiplies the bet by 3',
+    333: 'Multiplies the bet by 5',
+    444: 'Gives a random gem',
+    555: 'Opens a trapdoor under the feet of the characters, that leads them to the level below',
+    666: 'Summons a lesser demon',
+  },
+};
+
 // Book: Dungeons > Special rooms > 84) Switch in a hole, p. 100.
 export const tableDungeonSwitchInHole: RandomTable = {
   id: 265,
@@ -1321,6 +1403,76 @@ export const tableDungeonTalkingBasinAnswer: RandomTable = {
     4: 'Incomplete truth',
     5: 'Incomplete truth',
     6: 'Truth',
+  },
+};
+
+// Book: Dungeons > Special rooms > 91) True intentions room, p. 102.
+export const tableDungeonTrueIntentions: RandomTable = {
+  id: 274,
+  title: 'True Intentions',
+  options: {
+    1: 'To contain a monster',
+    2: 'To find ancient ruins',
+    3: 'To find a treasure',
+    4: 'To have a hiding place',
+    5: 'To have a place to perform their magic experiments',
+    6: 'To impress their lover',
+  },
+};
+
+// Book: Dungeons > Special rooms > 94) Valuable monster (part), p. 103.
+export const tableDungeonValuableMonsterPartHarvest: RandomTable = {
+  id: 275,
+  title: 'Valuable Monster Part Harvesting Method',
+  options: {
+    1: 'Don’t use sharp weapons',
+    2: 'Don’t use sharp weapons',
+    3: 'Don’t use sharp weapons',
+    4: 'Only use magic',
+    5: 'Only use magic',
+    6: 'The part must be collected on a living monster',
+  },
+};
+
+// Book: Dungeons > Special rooms > 94) Valuable monster (part), p. 103.
+export const tableDungeonValuableMonsterPartValue: RandomTable = {
+  id: 276,
+  title: 'Valuable Monster Part Value',
+  options: {
+    1: '1d3 × 100 gp',
+    2: '1d3 × 100 gp',
+    3: '1d3 × 100 gp',
+    4: '1d6 × 100 gp',
+    5: '1d6 × 100 gp',
+    6: '(1d6 + 1d3) × 100 gp',
+  },
+};
+
+// Book: Dungeons > Special rooms > 95) Vending machine, p. 103.
+export const tableDungeonVendingMachineContents: RandomTable = {
+  id: 277,
+  title: 'Vending Machine Contents',
+  options: {
+    1: 'Rations',
+    2: 'Rations',
+    3: 'Rations',
+    4: 'Healing potion',
+    5: 'Healing potion',
+    6: 'Random scroll',
+  },
+};
+
+// Book: Dungeons > Special rooms > 97) Vortex, p. 104.
+export const tableDungeonVortexDestination: RandomTable = {
+  id: 278,
+  title: 'Vortex Destination',
+  options: {
+    1: 'Another room',
+    2: 'Another room',
+    3: 'Another room',
+    4: 'Outside of the dungeon',
+    5: 'Outside of the dungeon',
+    6: 'Another dungeon',
   },
 };
 
@@ -1397,6 +1549,9 @@ export const dungeonRandomTables: RandomTable[] = [
   tableDungeonSpecialRoom,
   tableDungeonBodyExchangeDuration,
   tableDungeonBodyExchangeReappearance,
+  tableDungeonCryingStatueTreasure,
+  tableDungeonDivineAltarOfferingThresholds,
+  tableDungeonFleshRoomDefense,
   tableDungeonFreshlyWalledCorridor,
   tableDungeonHighUpItem,
   tableDungeonKeyCondition,
@@ -1411,7 +1566,15 @@ export const dungeonRandomTables: RandomTable[] = [
   tableDungeonPetrifiedAdventurerCause,
   tableDungeonPetrifiedAdventurerOutcome,
   tableDungeonPowerfulElectromagnetSetting,
+  tableDungeonRoomOutOfTimeEra,
+  tableDungeonRotatingRoomAngle,
+  tableDungeonSlotMachinePayout,
   tableDungeonSwitchInHole,
   tableDungeonTalkingBasinAnswer,
+  tableDungeonTrueIntentions,
+  tableDungeonValuableMonsterPartHarvest,
+  tableDungeonValuableMonsterPartValue,
+  tableDungeonVendingMachineContents,
+  tableDungeonVortexDestination,
   tableDungeonWheelOfFortune,
 ];

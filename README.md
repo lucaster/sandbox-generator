@@ -148,10 +148,13 @@ contents, treasure chances, doors, and optional shapes. The demo can also roll a
 corridor for any level. Monster counts and lair treasure are intentionally left
 to an external bestiary, as in the source procedure. Since the rules do not
 prescribe a corridor count, the demo rolls corridors individually on request.
-Dungeon random tables are defined explicitly as `RandomTable` values in
-`src/data/dungeon-tables.ts`. Coverage is partial: the main dungeon-generation
-tables and some tables embedded in special-room descriptions are modeled; the
-remaining embedded tables still need to be checked against the manual.
+Dungeon tables are defined explicitly as `RandomTable` values in
+`src/data/dungeon-tables.ts`. The demo offers contextual, on-demand rolls for
+the nested tables supported by special rooms; it shows Divine Altar offering
+thresholds as a lookup and does not roll any of these automatically when a room
+is generated. Coverage is still partial because most special-room procedures
+and effects are not automated, and lair populations and treasure require an
+external bestiary.
 
 ### 1. Random tables
 

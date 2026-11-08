@@ -1,9 +1,25 @@
-import { calcDungeon, calcDungeonCorridor } from './dungeon';
+import {
+  calcDungeon,
+  calcDungeonCorridor,
+  getDungeonSpecialRoomTableActions,
+  rollDungeonSpecialRoomTable,
+} from './dungeon';
 import {
   dungeonRandomTables,
+  tableDungeonCryingStatueTreasure,
+  tableDungeonDivineAltarOfferingThresholds,
   tableDungeonEmptyRoom,
+  tableDungeonFleshRoomDefense,
+  tableDungeonRoomOutOfTimeEra,
+  tableDungeonRotatingRoomAngle,
+  tableDungeonSlotMachinePayout,
   tableDungeonSpecialRoom,
   tableDungeonTrap,
+  tableDungeonTrueIntentions,
+  tableDungeonValuableMonsterPartHarvest,
+  tableDungeonValuableMonsterPartValue,
+  tableDungeonVendingMachineContents,
+  tableDungeonVortexDestination,
 } from './dungeon-tables';
 
 describe('dungeon.ts calcDungeon', () => {
@@ -70,14 +86,18 @@ describe('dungeon.ts calcDungeon', () => {
   it('models each catalogued dungeon table with a result for every possible roll', () => {
     for (const table of dungeonRandomTables) {
       const keys = Object.keys(table.options).map(Number).sort((a, b) => a - b);
-      const [diceCount, diceFaces] = (table.dice ?? `1d${keys.length}`)
-        .split('d')
-        .map(Number);
-      const possibleRolls = Array.from(
-        { length: diceCount * diceFaces - diceCount + 1 },
-        (_, index) => diceCount + index,
-      );
-      expect(keys).withContext(table.title).toEqual(possibleRolls);
+      if (table.dice !== undefined || keys[0] === 1) {
+        const [diceCount, diceFaces] = (table.dice ?? `1d${keys.length}`)
+          .split('d')
+          .map(Number);
+        const possibleRolls = Array.from(
+          { length: diceCount * diceFaces - diceCount + 1 },
+          (_, index) => diceCount + index,
+        );
+        expect(keys).withContext(table.title).toEqual(possibleRolls);
+      } else {
+        expect(table.dice).withContext(table.title).toBeUndefined();
+      }
       for (const key of keys) {
         expect(table.options[key]).withContext(`${table.title}, roll ${key}`).toBeTruthy();
       }
@@ -86,6 +106,191 @@ describe('dungeon.ts calcDungeon', () => {
     expect(Object.keys(tableDungeonTrap.options)).toHaveSize(100);
     expect(Object.keys(tableDungeonEmptyRoom.options)).toHaveSize(100);
     expect(Object.keys(tableDungeonSpecialRoom.options)).toHaveSize(100);
+  });
+
+  it('models the nested special-room tables shown in the 2023 manual', () => {
+    expect(tableDungeonCryingStatueTreasure.options).toEqual({
+      1: 'Pouch with 1d20 gp',
+      2: 'Pouch with 1d20 gp',
+      3: 'Pouch with 1d20 gp',
+      4: '1 gem',
+      5: '1 gem',
+      6: 'Potion',
+    });
+    expect(tableDungeonDivineAltarOfferingThresholds.options).toEqual({
+      150: 'Answer to a question',
+      250: 'Completely heal the party',
+      1000: 'Resurrect someone',
+    });
+    expect(tableDungeonFleshRoomDefense.options[4]).toBe(
+      '1d3 tentacles: 1d6 damage each, roll against wands to avoid',
+    );
+    expect(tableDungeonFleshRoomDefense.options[6]).toBe(
+      'Mouth: save against paralysis or die',
+    );
+    expect(tableDungeonRoomOutOfTimeEra.options).toEqual({
+      1: 'Distant past',
+      2: 'Distant past',
+      3: 'Distant past',
+      4: 'Distant past',
+      5: 'Future',
+      6: 'Future',
+    });
+    expect(tableDungeonRotatingRoomAngle.options).toEqual({
+      1: '90°',
+      2: '90°',
+      3: '90°',
+      4: '180°',
+      5: '180°',
+      6: '270°',
+    });
+    expect(tableDungeonSlotMachinePayout.options).toEqual({
+      111: 'Multiplies the bet by 2',
+      222: 'Multiplies the bet by 3',
+      333: 'Multiplies the bet by 5',
+      444: 'Gives a random gem',
+      555: 'Opens a trapdoor under the feet of the characters, that leads them to the level below',
+      666: 'Summons a lesser demon',
+    });
+    expect(tableDungeonTrueIntentions.options[6]).toBe('To impress their lover');
+    expect(tableDungeonValuableMonsterPartHarvest.options[6]).toBe(
+      'The part must be collected on a living monster',
+    );
+    expect(tableDungeonValuableMonsterPartValue.options[6]).toBe('(1d6 + 1d3) × 100 gp');
+    expect(tableDungeonVendingMachineContents.options).toEqual({
+      1: 'Rations',
+      2: 'Rations',
+      3: 'Rations',
+      4: 'Healing potion',
+      5: 'Healing potion',
+      6: 'Random scroll',
+    });
+    expect(tableDungeonVortexDestination.options).toEqual({
+      1: 'Another room',
+      2: 'Another room',
+      3: 'Another room',
+      4: 'Outside of the dungeon',
+      5: 'Outside of the dungeon',
+      6: 'Another dungeon',
+    });
+  });
+
+  it('connects nested special-room tables to contextual rolls and references', () => {
+    const cryingStatue = getDungeonSpecialRoomTableActions('Crying statues')[0];
+    expect(rollDungeonSpecialRoomTable(cryingStatue, () => 4)).toEqual({
+      table: 'Crying Statue Treasure',
+      rolls: [4],
+      results: ['1 gem'],
+    });
+
+    const altar = getDungeonSpecialRoomTableActions('Divine altar')[0];
+    expect(altar.kind).toBe('reference');
+    expect(() => rollDungeonSpecialRoomTable(altar, () => 1)).toThrowError(
+      RangeError,
+      'Divine Altar Offering Thresholds is a reference table, not a random table.',
+    );
+
+    expect(rollDungeonSpecialRoomTable(
+      getDungeonSpecialRoomTableActions('Flesh room')[0],
+      () => 4,
+    ).results).toEqual(['1d3 tentacles: 1d6 damage each, roll against wands to avoid']);
+    expect(rollDungeonSpecialRoomTable(
+      getDungeonSpecialRoomTableActions('Room out of time')[0],
+      () => 5,
+    ).results).toEqual(['Future']);
+    expect(rollDungeonSpecialRoomTable(
+      getDungeonSpecialRoomTableActions('Rotating room')[0],
+      () => 6,
+    ).results).toEqual(['270°']);
+    expect(rollDungeonSpecialRoomTable(
+      getDungeonSpecialRoomTableActions('True intentions room')[0],
+      () => 6,
+    ).results).toEqual(['To impress their lover']);
+
+    const valuablePartActions = getDungeonSpecialRoomTableActions('Valuable monster (part)');
+    expect(rollDungeonSpecialRoomTable(valuablePartActions[0], () => 6).rolls).toEqual([6]);
+    expect(rollDungeonSpecialRoomTable(valuablePartActions[1], () => 6).results)
+      .toEqual(['(1d6 + 1d3) × 100 gp']);
+
+    const vendingRolls = [1, 4, 6];
+    let vendingRollIndex = 0;
+    expect(rollDungeonSpecialRoomTable(
+      getDungeonSpecialRoomTableActions('Vending machine')[0],
+      () => vendingRolls[vendingRollIndex++],
+    )).toEqual({
+      table: 'Vending Machine Contents',
+      rolls: [1, 4, 6],
+      results: ['Rations', 'Healing potion', 'Random scroll'],
+    });
+    expect(rollDungeonSpecialRoomTable(
+      getDungeonSpecialRoomTableActions('Vortex')[0],
+      () => 6,
+    ).results).toEqual(['Another dungeon']);
+  });
+
+  it('rolls three slot-machine dice and pays only on matching numbers', () => {
+    const slotMachine = getDungeonSpecialRoomTableActions('Slot machine')[0];
+    const matchingRolls = [4, 4, 4];
+    let matchingRollIndex = 0;
+    expect(rollDungeonSpecialRoomTable(
+      slotMachine,
+      () => matchingRolls[matchingRollIndex++],
+    )).toEqual({
+      table: 'Slot Machine Matching Numbers',
+      rolls: [4, 4, 4],
+      results: ['Gives a random gem'],
+    });
+
+    const nonMatchingRolls = [1, 2, 3];
+    let nonMatchingRollIndex = 0;
+    expect(rollDungeonSpecialRoomTable(
+      slotMachine,
+      () => nonMatchingRolls[nonMatchingRollIndex++],
+    )).toEqual({
+      table: 'Slot Machine Matching Numbers',
+      rolls: [1, 2, 3],
+      results: ['No matching numbers; nothing happens'],
+    });
+  });
+
+  it('keeps all special-room tables in the order they appear in the manual', () => {
+    const firstNestedTable = dungeonRandomTables.indexOf(tableDungeonSpecialRoom) + 1;
+    const nestedTableTitles = dungeonRandomTables
+      .slice(firstNestedTable)
+      .map((table) => table.title);
+
+    expect(nestedTableTitles).toEqual([
+      'Body Exchange Duration',
+      'Body Exchange Reappearance',
+      'Crying Statue Treasure',
+      'Divine Altar Offering Thresholds',
+      'Flesh Room Defense',
+      'Freshly Walled Corridor',
+      'High Up Item',
+      'Key Condition',
+      'Magic Forge Result',
+      'Magic Fountain Siren Intentions',
+      'Magic Stairs Destination',
+      'Medicine Cabinet Treatment',
+      'Minecart Destination',
+      'Moving Statues Blocked Exits',
+      'Mutation',
+      'Orb Transformation',
+      'Petrified Adventurer Cause',
+      'Petrified Adventurer Outcome',
+      'Powerful Electromagnet Setting',
+      'Room Out of Time Era',
+      'Rotating Room Angle',
+      'Slot Machine Matching Numbers',
+      'Switch in a Hole',
+      'Talking Basin Answer',
+      'True Intentions',
+      'Valuable Monster Part Harvesting Method',
+      'Valuable Monster Part Value',
+      'Vending Machine Contents',
+      'Vortex Destination',
+      'Wheel of Fortune',
+    ]);
   });
 
   it('resolves area names and themes from the Cross section tables', () => {

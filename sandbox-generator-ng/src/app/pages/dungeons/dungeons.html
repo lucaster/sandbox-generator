@@ -127,6 +127,35 @@
                   @if (room.treasureChance !== null) {
                     — treasure: {{ room.hasTreasure ? 'yes' : 'no' }}
                   }
+                  @if (room.type === 'special' && room.detail) {
+                    @for (action of specialRoomTableActions(room.detail.result); track action.id) {
+                      <section class="special-room-table">
+                        <p>{{ action.instruction }}</p>
+                        @if (action.kind === 'reference') {
+                          <ul>
+                            @for (entry of tableEntries(action.table); track entry.roll) {
+                              <li>{{ entry.roll }} gp: {{ entry.result }}</li>
+                            }
+                          </ul>
+                        } @else {
+                          <button
+                            type="button"
+                            (click)="onRollSpecialRoomTable(area, level, room.number, action)"
+                          >
+                            Roll {{ action.table.title }}
+                          </button>
+                        }
+                        @if (specialRoomTableResults()[specialRoomTableResultKey(area, level, room.number, action)]; as tableRolls) {
+                          @for (tableRoll of tableRolls; track $index) {
+                            <p>
+                              {{ tableRoll.table }} — rolls {{ tableRoll.rolls.join(', ') }}:
+                              {{ tableRoll.results.join('; ') }}
+                            </p>
+                          }
+                        }
+                      </section>
+                    }
+                  }
                   @if (room.doors.length) {
                     <ul>
                       @for (door of room.doors; track $index) {

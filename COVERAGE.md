@@ -29,7 +29,7 @@ Coverage is concentrated in the first part of that pipeline.
 | Landmarks | **Done** | Natural, artificial, and magic tables match the 2023 edition. Content, treasure chance, and information delivery are implemented. |
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
 | Lairs | **Done** | Inhabitants, optional outside percentage and hexes, layout, per-room monster/treasure distribution, and the `% in lair` patrol distinction match the 2023 edition. Total monsters and treasure are caller-supplied because the book delegates them to a bestiary. |
-| Dungeons | **Partial** | The main dungeon-generation tables and some nested special-room tables are modeled as explicit `RandomTable` definitions in manual order. Nested tables in special-room entries still need a full audit against the book. Dungeon lair populations and treasure still need external bestiary data; detailed special-room procedures are not automated. |
+| Dungeons | **Partial** | The main tables and printed nested special-room tables are modeled as explicit `RandomTable` definitions in book order. The demo exposes contextual, on-demand rolls for the nested tables it supports; other room procedures and their effects are not automated. Dungeon lair populations and treasure still need external bestiary data. |
 | Generators | **Partial** | Dragon, NPC, and wizard generators match the 2023 edition. Coat of arms, criminal organization, guild, house, and tavern are missing. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
@@ -151,19 +151,24 @@ Implemented in `src/data/dungeon.ts` and the `/dungeons` page:
   secret doors, traps, empty-room results, and special-room results, with
   monster names and table outcomes resolved from the book's tables.
 - Optional corridor generation with sections, features, and valid level exits.
-- The main dungeon-generation tables and some tables embedded in special-room
-  descriptions are explicit `RandomTable` definitions in
-  `src/data/dungeon-tables.ts`, following the order used in the manual. Coverage
-  of the nested special-room tables is incomplete and must not be treated as
-  exhaustive.
+- The main dungeon-generation tables and all printed lookup/roll tables in the
+  100 special-room entries (2023 edition, pp. 77–105) are explicit `RandomTable`
+  definitions in `src/data/dungeon-tables.ts`, following book order. This
+  includes lookup tables such as the Divine Altar offering thresholds and the
+  Slot Machine's matching-number payouts.
+- The demo offers contextual, manual rolls for the Crying Statues, Flesh Room,
+  Room Out of Time, Rotating Room, Slot Machine, True Intentions, Valuable
+  Monster Part, Vending Machine, and Vortex tables. The Divine Altar thresholds
+  are shown as a lookup, not rolled. These tables are not rolled automatically
+  when the room is generated.
 
 Monster population and treasure within a dungeon lair still depend on external
 bestiary values. The generator marks lair results and allows per-monster
 `% in lair` overrides, but does not invent the missing bestiary statistics.
 Corridors are rolled individually because the source procedure does not specify
-how many each level contains. The detailed prose procedures for the 100 special
-rooms are not automated. Only some random tables embedded in their descriptions
-are modeled; the remainder still require verification and implementation.
+how many each level contains. The detailed prose procedures and effects for
+special rooms are not automated; only the listed nested-table rolls and the
+Divine Altar lookup are available as contextual demo actions.
 
 ### Generators
 
@@ -201,7 +206,8 @@ items are housekeeping:
 
 If the goal is to match the book's core hexcrawl loop, the highest-value order is:
 
-1. **Add dungeons**, which is the largest single missing subsystem.
+1. **Complete dungeon generation** with external bestiary data, automated
+   special-room procedures, and assembled level maps.
 2. **Add the remaining Generators** (coat of arms, criminal organization, guild,
    house, tavern) and **Adventures at sea** last; they are detail layers rather
    than prerequisites for the core loop.

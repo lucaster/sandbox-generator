@@ -1,4 +1,5 @@
 import { d } from '../dice/dice';
+import { type RandomTable } from '../domain/random-table';
 import { randomOptionEntry } from './data';
 import {
   tableDungeonAreaNameNoun,
@@ -11,28 +12,39 @@ import {
   tableDungeonCorridorFeatures,
   tableDungeonCorridorLength,
   tableDungeonCrossSectionLinks,
+  tableDungeonCryingStatueTreasure,
   tableDungeonDemonDoorTask,
+  tableDungeonDivineAltarOfferingThresholds,
   tableDungeonDoorCount,
   tableDungeonDoorDestination,
   tableDungeonDoorType,
   tableDungeonEmptyRoom,
   tableDungeonFactionCount,
   tableDungeonFactionRelationship,
+  tableDungeonFleshRoomDefense,
   tableDungeonLinkTarget,
   tableDungeonLinkTargetWithoutSameDepth,
   tableDungeonMagicDoorType,
   tableDungeonMonsterLevelByDepth,
   tableDungeonMonsterTypesByLevel,
   tableDungeonRoomDoorPosition,
+  tableDungeonRoomOutOfTimeEra,
   tableDungeonRoomShape,
   tableDungeonRoomSize,
   tableDungeonRoomType,
+  tableDungeonRotatingRoomAngle,
   tableDungeonSecretDoorForm,
   tableDungeonSecretDoorMechanism,
+  tableDungeonSlotMachinePayout,
   tableDungeonSpecialRoom,
   tableDungeonSublevelLink,
   tableDungeonTrap,
+  tableDungeonTrueIntentions,
+  tableDungeonValuableMonsterPartHarvest,
+  tableDungeonValuableMonsterPartValue,
+  tableDungeonVendingMachineContents,
   tableDungeonVisibleSecretDoorType,
+  tableDungeonVortexDestination,
 } from './dungeon-tables';
 
 type RollFunction = (faces: number) => number;
@@ -57,6 +69,19 @@ type DungeonTableResult = {
   table: string;
   roll: number;
   result: string;
+};
+
+type DungeonSpecialRoomTableAction = {
+  id: string;
+  table: RandomTable;
+  kind: 'roll' | 'reference' | 'vending-machine' | 'slot-machine';
+  instruction: string;
+};
+
+type DungeonSpecialRoomTableRoll = {
+  table: string;
+  rolls: number[];
+  results: string[];
 };
 
 type DungeonFaction = {
@@ -149,6 +174,137 @@ type DungeonCorridorOptions = {
   hasHigherLevel?: boolean;
   rollFn?: RollFunction;
 };
+
+const dungeonSpecialRoomTableActions: Record<string, DungeonSpecialRoomTableAction[]> = {
+  'Crying statues': [
+    {
+      id: 'crying-statue-cache',
+      table: tableDungeonCryingStatueTreasure,
+      kind: 'roll',
+      instruction: 'Roll after wiping tears that are not blood.',
+    },
+  ],
+  'Divine altar': [
+    {
+      id: 'divine-altar-offerings',
+      table: tableDungeonDivineAltarOfferingThresholds,
+      kind: 'reference',
+      instruction: 'Offerings unlock the listed effects; do not roll this table.',
+    },
+  ],
+  'Flesh room': [
+    {
+      id: 'flesh-room-defense',
+      table: tableDungeonFleshRoomDefense,
+      kind: 'roll',
+      instruction: 'Roll after the room has been irritated three times.',
+    },
+  ],
+  'Room out of time': [
+    {
+      id: 'room-out-of-time-era',
+      table: tableDungeonRoomOutOfTimeEra,
+      kind: 'roll',
+      instruction: 'Roll to determine the era of the room.',
+    },
+  ],
+  'Rotating room': [
+    {
+      id: 'rotating-room-angle',
+      table: tableDungeonRotatingRoomAngle,
+      kind: 'roll',
+      instruction: 'Roll to determine the room rotation angle.',
+    },
+  ],
+  'Slot machine': [
+    {
+      id: 'slot-machine-payout',
+      table: tableDungeonSlotMachinePayout,
+      kind: 'slot-machine',
+      instruction: 'Roll three d6; consult the table only when all three match.',
+    },
+  ],
+  'True intentions room': [
+    {
+      id: 'true-intentions',
+      table: tableDungeonTrueIntentions,
+      kind: 'roll',
+      instruction: 'Use this table when determining true intentions.',
+    },
+  ],
+  'Valuable monster (part)': [
+    {
+      id: 'valuable-monster-part-harvest',
+      table: tableDungeonValuableMonsterPartHarvest,
+      kind: 'roll',
+      instruction: 'Roll when attempting to collect a valuable monster part.',
+    },
+    {
+      id: 'valuable-monster-part-value',
+      table: tableDungeonValuableMonsterPartValue,
+      kind: 'roll',
+      instruction: 'Roll for value after successfully collecting the part.',
+    },
+  ],
+  'Vending machine': [
+    {
+      id: 'vending-machine-contents',
+      table: tableDungeonVendingMachineContents,
+      kind: 'vending-machine',
+      instruction: 'Roll three times to determine the machine contents.',
+    },
+  ],
+  Vortex: [
+    {
+      id: 'vortex-destination',
+      table: tableDungeonVortexDestination,
+      kind: 'roll',
+      instruction: 'Roll to determine the vortex destination.',
+    },
+  ],
+};
+
+function getDungeonSpecialRoomTableActions(room: string): DungeonSpecialRoomTableAction[] {
+  return dungeonSpecialRoomTableActions[room] ?? [];
+}
+
+function rollDungeonSpecialRoomTable(
+  action: DungeonSpecialRoomTableAction,
+  rollFn: RollFunction = d,
+): DungeonSpecialRoomTableRoll {
+  if (action.kind === 'reference') {
+    throw new RangeError(`${action.table.title} is a reference table, not a random table.`);
+  }
+
+  if (action.kind === 'slot-machine') {
+    const rolls = Array.from({ length: 3 }, () => rollFn(6));
+    const matchingNumber = rolls.every((roll) => roll === rolls[0])
+      ? Number(`${rolls[0]}${rolls[1]}${rolls[2]}`)
+      : null;
+    const result = matchingNumber === null
+      ? 'No matching numbers; nothing happens'
+      : action.table.options[matchingNumber];
+    if (typeof result !== 'string') {
+      throw new RangeError(`No slot-machine payout is defined for ${matchingNumber}.`);
+    }
+    return {
+      table: action.table.title,
+      rolls,
+      results: [result],
+    };
+  }
+
+  const rollCount = action.kind === 'vending-machine' ? 3 : 1;
+  const entries = Array.from(
+    { length: rollCount },
+    () => randomOptionEntry(action.table, rollFn),
+  );
+  return {
+    table: action.table.title,
+    rolls: entries.map((entry) => entry.key),
+    results: entries.map((entry) => entry.result),
+  };
+}
 
 function rollDice(count: number, faces: number, rollFn: RollFunction): number {
   let total = 0;
@@ -613,17 +769,23 @@ function calcDungeon(options: DungeonOptions = {}): Dungeon {
 export {
   calcDungeon,
   calcDungeonCorridor,
-  type Dungeon,
-  type DungeonArea,
-  type DungeonCorridor,
-  type DungeonCorridorOptions,
-  type DungeonDepth,
-  type DungeonEncounter,
-  type DungeonFaction,
-  type DungeonLevel,
-  type DungeonLink,
-  type DungeonMonsterResult,
-  type DungeonOptions,
-  type DungeonRoom,
-  type DungeonTableResult,
+  getDungeonSpecialRoomTableActions,
+  rollDungeonSpecialRoomTable,
+};
+export type {
+  DungeonSpecialRoomTableAction,
+  DungeonSpecialRoomTableRoll,
+  Dungeon,
+  DungeonArea,
+  DungeonCorridor,
+  DungeonCorridorOptions,
+  DungeonDepth,
+  DungeonEncounter,
+  DungeonFaction,
+  DungeonLevel,
+  DungeonLink,
+  DungeonMonsterResult,
+  DungeonOptions,
+  DungeonRoom,
+  DungeonTableResult,
 };
