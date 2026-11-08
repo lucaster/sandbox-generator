@@ -1,0 +1,97 @@
+<section>
+  <h3>Dynamic SVG polygon with JavaScript</h3>
+  <table>
+    <tbody>
+      <tr>
+        <td style="vertical-align: top">
+          <svg
+            #svg
+            id="svg"
+            [attr.width]="width()"
+            [attr.height]="height()"
+            style="border: 1px solid black"
+          ></svg>
+        </td>
+        <td style="vertical-align: top">
+          <ol>
+            @for (a of hexDetailList(); track a.hexNum) {
+              <li>
+                @for (detail of a.details; let last = $last; track detail) {
+                  @if (last) {
+                    <strong>{{ detail }}</strong>
+                  }
+                  @else {
+                    {{ detail }} |
+                  }
+                }
+                @if (a.content) {
+                  <div>Treasure: {{ a.content.treasure }}</div>
+                  @if (a.content.convey) {
+                    <div>Information conveyed by: {{ a.content.convey }}</div>
+                  }
+                }
+                @if (a.lair) {
+                  <div>
+                    Lair: {{ a.lair.inhabitants }} · layout {{ a.lair.layout }}
+                    ({{ a.lair.percentages.join(' / ') }}%) · {{ a.lair.percOutsideLair }}% outside
+                  </div>
+                  @if (a.lair.outsideHexes.length) {
+                    <div>Outside hexes: {{ a.lair.outsideHexes.join(', ') }}</div>
+                  }
+                }
+                @if (factionList().length) {
+                  <div>
+                    Faction{{ a.factions.length === 1 ? '' : 's' }}:
+                    @if (a.factions.length) {
+                      {{ a.factions.join(', ') }}
+                    } @else {
+                      <em>none</em>
+                    }
+                    @if (a.contested) {
+                      <strong class="contested"> (contested)</strong>
+                    }
+                  </div>
+                }
+              </li>
+            }
+          </ol>
+        </td>
+        <td style="vertical-align: top">
+          @if (factionList().length) {
+            <section class="faction-legend">
+              <h3>Factions</h3>
+              <ol>
+                @for (faction of factionList(); track faction.number) {
+                  <li>
+                    <span
+                      [class]="'faction-swatch faction-swatch-' + factionShape(faction.number)"
+                      [style.background]="factionColor(faction.number)"
+                    >{{ faction.number }}</span>
+                    <strong>{{ faction.label }}</strong>
+                    <span class="faction-hexes">Hexes: {{ faction.hexes.join(', ') }}</span>
+                    @if (faction.relationships.length) {
+                      <div class="faction-detail">
+                        Relations:
+                        @for (relationship of faction.relationships; track relationship.faction) {
+                          <span>#{{ relationship.faction }} {{ relationship.relation }} ({{ relationship.roll }})</span>
+                        }
+                      </div>
+                    }
+                    @if (faction.event) {
+                      <div class="faction-detail">
+                        Event: {{ faction.event.when }} — {{ faction.event.nature }}
+                      </div>
+                    }
+                  </li>
+                }
+              </ol>
+              <p class="faction-note">
+                Contested hexes show more than one symbol and list every faction claiming them.
+              </p>
+            </section>
+          }
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>

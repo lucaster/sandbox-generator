@@ -58,7 +58,11 @@ See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 |---|---|
 | `/` | Redirects to `/summary` |
 | `/summary` | Landing page with links to the features |
-| `/hex-draw-patch` | **Main workspace** — draw random biome, feature, faction, and content patches |
+| `/hex-draw-patch` | Sample 19-hex map with reset and sample drawing controls |
+| `/hex-draw-biome-patch` | Draw a random biome patch |
+| `/hex-draw-feature-patch` | Draw a random feature patch |
+| `/hex-draw-faction-patch` | Draw a random feature and faction patch |
+| `/hex-draw-content-patch` | Draw a random content patch |
 | `/hex-draw` | Static, hardcoded example of the 19-hex map |
 | `/settlements` | Generate a hamlet and a village |
 | `/lairs` | Generate one lair per biome |
@@ -155,8 +159,9 @@ reached (e.g. `Landmark | Natural | Vegetal | Centennial tree`).
 
 ### 2. Patch generation pipeline
 
-The `/hex-draw-patch` page layers generators on top of each other. Each layer
-reads the previous ones, so the order matters:
+The hex patch pages separate the map layers. Features, lairs, and factions are
+generated together on `/hex-draw-feature-patch` and `/hex-draw-faction-patch`,
+whereas biomes and content can be drawn independently:
 
 ```
 biomes → features → lairs (inhabitants) → factions

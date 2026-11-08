@@ -3,6 +3,7 @@ import { HelloAngular } from './components/hello-angular/hello-angular';
 import { LandmarkContent } from './pages/content/content';
 import { Encounters } from './pages/encounters/encounters';
 import { HexDrawPatch } from './pages/hex-draw-patch/hex-draw-patch';
+import { HexPatchPage } from './pages/hex-patch-page/hex-patch-page';
 import { HexDraw } from './pages/hex-draw/hex-draw';
 import { Lairs } from './pages/lairs/lairs';
 import { Page1 } from './pages/page1/page1';
@@ -38,6 +39,26 @@ export const routes: Routes = [
   {
     path: 'hex-draw-patch',
     component: HexDrawPatch
+  },
+  {
+    path: 'hex-draw-biome-patch',
+    component: HexPatchPage,
+    data: { mode: 'biome' },
+  },
+  {
+    path: 'hex-draw-feature-patch',
+    component: HexPatchPage,
+    data: { mode: 'feature' },
+  },
+  {
+    path: 'hex-draw-faction-patch',
+    component: HexPatchPage,
+    data: { mode: 'faction' },
+  },
+  {
+    path: 'hex-draw-content-patch',
+    component: HexPatchPage,
+    data: { mode: 'content' },
   },
   {
     path: 'settlements',
