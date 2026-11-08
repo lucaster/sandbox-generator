@@ -1,0 +1,62 @@
+<h1>Wilderness Encounters</h1>
+<p>
+  When an encounter happens in the wilderness, roll 2d6. Faction results use the
+  generated political map; if neither the current hex nor an adjacent one has a
+  faction, the encounter falls back to a biome monster.
+</p>
+
+<div class="encounter-controls">
+  <label>
+    Hex:
+    <select [value]="hex()" (change)="onHexChange($event)">
+      @for (h of hexes; track h) {
+        <option [value]="h">{{ h }} — {{ featureLabel(h) }}</option>
+      }
+    </select>
+  </label>
+  <button (click)="onRollEncounter()">Roll Encounter</button>
+  <button (click)="generateMap()">New Map</button>
+</div>
+
+<section class="hex-summary">
+  <h2>Hex {{ hex() }}</h2>
+  <p>Biome: {{ biomes()[hex()] }}</p>
+  <p>Feature: {{ featureLabel(hex()) }}</p>
+  <p>Factions: {{ factionLabel(hex()) }}</p>
+</section>
+
+@if (encounter(); as e) {
+  <section class="encounter-result">
+    <h2>Encounter</h2>
+    <p><strong>{{ e.category }}</strong> (2d6 = {{ e.roll }})</p>
+    <p>{{ e.note }}</p>
+    @if (e.category === 'Faction' || e.category === 'Other faction') {
+      @if (e.contested) {
+        <p>
+          Contested hex:
+          {{ e.factionCount === 'multiple' ? 'multiple factions involved' : 'one faction involved' }}
+        </p>
+      }
+    }
+    @if (e.factions.length) {
+      <p>Factions involved: {{ e.factions.join(', ') }}</p>
+    }
+    @if (e.monster) {
+      <p>Monster: {{ e.monster }}</p>
+    }
+  </section>
+}
+
+@if (history().length) {
+  <section class="encounter-log">
+    <h2>Encounter log</h2>
+    <ol>
+      @for (e of history(); track $index) {
+        <li>
+          <strong>Hex {{ e.hex }}</strong> ({{ e.biome }}) — {{ e.category }}:
+          {{ e.note }}
+        </li>
+      }
+    </ol>
+  </section>
+}

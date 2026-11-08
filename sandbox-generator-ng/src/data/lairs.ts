@@ -175,21 +175,36 @@ const biomeEncountersHills: RandomTable = {
   },
 };
 
+const biomeEncounterTables: { [biome: string]: RandomTable } = {
+  'Grassland': biomeEncountersGrassland,
+  'Marsh': biomeEncountersMarsh,
+  'Forest': biomeEncountersForest,
+  'Mountains': biomeEncountersMountains,
+  'Hills': biomeEncountersHills,
+};
+
+/**
+ * Rolls a wilderness monster on the fitting biome table (2023 edition, p. 10).
+ * The same tables are used for lair inhabitants.
+ */
+function calcBiomeEncounter(
+  biome: string,
+  rollFn: (faces: number) => number = d
+): string {
+  const table = biomeEncounterTables[biome];
+  if (!table) {
+    throw new Error(`Unknown biome: ${biome}`);
+  }
+  return randomOptionEntry(table, rollFn).result;
+}
+
 function calcLair(
   biome: string,
   options: LairOptions = {},
   rollFn: (faces: number) => number = d
 ) {
   // 1. INHABITANTS
-  const biomesAndItsInhabitants: { [key: string]: RandomTable } = {
-    'Grassland': biomeEncountersGrassland,
-    'Marsh': biomeEncountersMarsh,
-    'Forest': biomeEncountersForest,
-    'Mountains': biomeEncountersMountains,
-    'Hills': biomeEncountersHills,
-  };
-  const biomeInhabitantsTable = biomesAndItsInhabitants[biome];
-  const inhabitants = randomOptionEntry(biomeInhabitantsTable, rollFn).result;
+  const inhabitants = calcBiomeEncounter(biome, rollFn);
 
   // 2. % IN LAIR
   // When a faction encounter happens in a hex containing a lair, the monster's
@@ -266,6 +281,7 @@ function calcLair(
 
 export {
   biomeEncountersMarsh,
+  calcBiomeEncounter,
   calcLair,
   lairLayout,
   lairLayoutPercentages,

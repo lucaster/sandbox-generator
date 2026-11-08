@@ -9,8 +9,8 @@ repo, but its tables differ, so it should not be used to verify the current code
 
 The comparison is based on the book's table of contents and its tables, matched
 against `src/data/random-tables.ts`, `src/data/data.ts`, `src/data/content.ts`,
-`src/data/settlements.ts`, `src/data/lairs.ts`, `src/data/factions.ts`, and
-`src/data/names.ts`.
+`src/data/settlements.ts`, `src/data/lairs.ts`, `src/data/factions.ts`,
+`src/data/encounters.ts`, and `src/data/names.ts`.
 
 ## At a glance
 
@@ -24,7 +24,7 @@ Coverage is concentrated in the first part of that pipeline.
 
 | Book chapter | Status | Notes |
 |---|---|---|
-| Hex Map | **Partial** | Biomes, feature outline, and factions work. Biome encounter tables match the 2023 edition and every entry is reachable. Random encounters are absent. |
+| Hex Map | **Partial** | Biomes, feature outline, factions, and wilderness random encounters work. Biome encounter tables match the 2023 edition and every entry is reachable. |
 | Landmarks | **Done** | Natural, artificial, and magic tables match the 2023 edition. Content, treasure chance, and information delivery are implemented. |
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
 | Lairs | **Done** | Inhabitants, optional outside percentage and hexes, layout, per-room monster/treasure distribution, and the `% in lair` patrol distinction match the 2023 edition. Total monsters and treasure are caller-supplied because the book delegates them to a bestiary. |
@@ -32,11 +32,10 @@ Coverage is concentrated in the first part of that pipeline.
 | Generators | **Not implemented** | No coat of arms, criminal organization, dragon, guild, house, NPC, tavern, or wizard generator. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
-Counting generation subsections (examples excluded): **14 of 31 are complete,
-2 are partial, and 15 are absent.** Roughly one third of the book's generation
-content is represented in code, and about two thirds is missing. The implemented
-tables are faithful to the 2023 edition; the gaps are mostly missing sections and
-generator logic.
+Counting generation subsections (examples excluded): **16 of 31 are complete,
+1 is partial, and 14 are absent.** Roughly half of the book's generation content
+is represented in code. The implemented tables are faithful to the 2023 edition;
+the gaps are mostly missing sections and generator logic.
 
 ## Chapter details
 
@@ -45,10 +44,10 @@ generator logic.
 | Subsection | Status | What exists | What is missing / wrong |
 |---|---|---|---|
 | Biomes | **Done** | `tableStartingHexBiome`, `tableNextHexBiome`, `calcHexesBiome` | `calcHexesBiome` does not forward `rollFn` to the starting-hex roll, so tests cannot control that roll. |
-| Encounters per Biome | **Partial** | Five biome tables in `src/data/lairs.ts`, matching the 2023 edition | Tables use keys `2..12` and roll `2d6`, so all entries are reachable and no roll returns `undefined`. No standalone encounter generator. |
+| Encounters per Biome | **Done** | Five biome tables and `calcBiomeEncounter` in `src/data/lairs.ts`, matching the 2023 edition | Tables use keys `2..12` and roll `2d6`, so all entries are reachable and no roll returns `undefined`. |
 | Features | **Partial** | `tableNextHexFeature`, settlement sub-table, feature map drawing | The book's "first hex = village, second hex = dungeon" rule is not enforced; the starting table only contains `Village`, and hex 2 is rolled normally. |
 | Factions | **Done** | `calcFactions`, `calcFactionRelationship`, `calcFactionEvent`, and `isIntelligentLair` in `src/data/factions.ts`. Castle/city seven-hex domains, tower enslavement, abbey parishes, intelligent-lair factions and alliances, contested hexes, `2d6` relationships, and `1d6`/`1d12` events match the 2023 edition. | Criminal organizations, guilds, dragons, and wizard encounters are not faction sources yet because those generators are absent. |
-| Random Encounters | **Not implemented** | — | No 2d6 wilderness encounter table, contested-hex faction count, or Dragon/Wizard/NPC/Biome routing. |
+| Random Encounters | **Done** | `calcWildernessEncounter` and the `2d6`/`1d6` tables in `src/data/encounters.ts` | Dragon, Other faction, Faction, NPCs, Biome, and Wizard routing; contested-hex faction count; and the no-nearby-faction biome fallback match the 2023 edition. |
 
 ### Landmarks
 
@@ -120,6 +119,23 @@ Implemented in `src/data/factions.ts`:
 - Criminal organizations, guilds, dragons, and wizard encounters are not faction
   sources yet because the corresponding generators are not implemented.
 
+### Random Encounters
+
+Implemented in `src/data/encounters.ts`:
+
+- `calcWildernessEncounter` rolls `2d6` for Dragon (`2`), Other faction (`3`),
+  Faction (`4-6`), NPCs (`7`), Biome (`8-11`), or Wizard (`12`).
+- Faction encounters use the current hex's factions. Other faction encounters use
+  a faction from an adjacent hex. A contested hex rolls `1d6` to decide whether
+  one (`1-4`) or multiple (`5-6`) factions are involved.
+- If neither the current hex nor an adjacent one has a faction, a faction result
+  falls back to a biome encounter.
+- Biome encounters roll on the fitting table through `calcBiomeEncounter` in
+  `src/data/lairs.ts`. The monster does not belong to a faction.
+- Dragon and Wizard only flag that the next lair/tower is theirs, and NPCs only
+  flag friendly non-faction NPCs, because those generators are separate chapters.
+- The `/encounters` page generates a map and rolls encounters for a chosen hex.
+
 ### Dungeons
 
 Nothing is implemented. Missing pieces include:
@@ -175,8 +191,6 @@ the 2023 edition.
 
 If the goal is to match the book's core hexcrawl loop, the highest-value order is:
 
-1. **Add wilderness random encounters**, since they complete the hex map loop
-   now that factions exist.
-2. **Add dungeons**, which is the largest single missing subsystem.
-3. **Add the Generators chapter** and **Adventures at sea** last; they are
+1. **Add dungeons**, which is the largest single missing subsystem.
+2. **Add the Generators chapter** and **Adventures at sea** last; they are
    detail layers rather than prerequisites for the core loop.

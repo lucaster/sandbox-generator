@@ -29,6 +29,8 @@ as SVG entirely in the browser — no backend required.
   occupied neighboring hexes, and a layout.
 - **Faction generator** — political domains from castles, cities, towers, abbeys,
   and intelligent lairs, with contested hexes, relationships, and events.
+- **Wilderness encounters** — a `2d6` table routing to dragons, factions, NPCs,
+  biome monsters, and wizards, with contested-hex and no-nearby-faction handling.
 - **Name generator** — pattern-based place names such as `{B} {A}`,
   `{D}-on-the-hill`, and `{D}sby`, with multiple variants.
 - **SVG rendering** — hex polygons, biome backgrounds, feature icons, and hex numbers.
@@ -39,8 +41,8 @@ as SVG entirely in the browser — no backend required.
 
 The book's generation procedures are only partially implemented. The hex map,
 landmarks, settlements (hamlets, villages, cities, castles, towers, abbeys),
-lairs, and factions exist; dungeons, random encounters, the detail generators, and
-the sea rules do not.
+lairs, factions, and wilderness encounters exist; dungeons, the detail
+generators, and the sea rules do not.
 
 See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 2023 edition, the known rule and logic gaps, and a suggested implementation order.
@@ -55,6 +57,7 @@ See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 | `/hex-draw` | Static, hardcoded example of the 19-hex map |
 | `/settlements` | Generate a hamlet and a village |
 | `/lairs` | Generate one lair per biome |
+| `/encounters` | Generate a map and roll wilderness encounters per hex |
 | `/page1` | Low-level manual testing of individual tables |
 | `/hello-angular` | Angular scaffold demo |
 
@@ -208,6 +211,29 @@ The region is a radius-2 hex (1 + 6 + 12 = 19 hexes), encoded as an adjacency li
 `src/drawing/hex.ts` (`SvgDrawer`) draws polygons, images, symbols, and text into an
 `<svg>`. For generation rules that need real neighbours, `src/data/hex-grid.ts` is
 the canonical topology; `currHexNextHex` is only the map-growing tree.
+
+### 4. Wilderness encounters
+
+`calcWildernessEncounter` in `src/data/encounters.ts` rolls `2d6` for an encounter
+in one hex:
+
+| 2d6 | Result |
+|---|---|
+| 2 | Dragon |
+| 3 | Other faction |
+| 4–6 | Faction |
+| 7 | NPCs |
+| 8–11 | Biome |
+| 12 | Wizard |
+
+Faction encounters use the current hex's factions and Other faction encounters
+use an adjacent hex's faction. A contested hex rolls `1d6` (`1–4` one faction,
+`5–6` multiple). If neither the current hex nor an adjacent one has a faction,
+the encounter falls back to a biome monster. Dragon, Wizard, and NPC results are
+routing flags: their dedicated generators belong to separate book chapters.
+
+The `/encounters` page generates a map, then rolls and logs encounters for a
+chosen hex.
 
 ## Development conventions
 
