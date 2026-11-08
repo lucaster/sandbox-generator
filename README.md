@@ -29,6 +29,8 @@ as SVG entirely in the browser — no backend required.
   occupied neighboring hexes, and a layout.
 - **Dungeon generator** — linked areas and levels, factions, wandering monsters,
   room contents, doors, traps, and corridor samples.
+- **Criminal organization generator** — name templates, activity, members, rites,
+  internal structure, finances, hideout/front, special rooms, and boss backstory.
 - **Faction generator** — political domains from castles, cities, towers, abbeys,
   and intelligent lairs, with contested hexes, relationships, and events.
 - **Wilderness encounters** — a `2d6` table routing to dragons, factions, NPCs,
@@ -47,10 +49,11 @@ as SVG entirely in the browser — no backend required.
 
 The book's generation procedures are partially implemented. The hex map,
 landmarks, settlements (hamlets, villages, cities, castles, towers, abbeys),
-lairs, factions, wilderness encounters, and core dungeon generation exist.
-Dungeon lair populations and treasure still require values from an external
-bestiary; the coat of arms, criminal organization, guild, house, tavern, and sea
-generators are not implemented.
+lairs, factions, wilderness encounters, criminal organizations, and core dungeon
+generation exist. Criminal organizations are not yet integrated into faction
+generation. Dungeon lair populations and treasure still require values from an
+external bestiary; the coat of arms, guild, house, tavern, and sea generators are
+not implemented.
 
 See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 2023 edition, the remaining gaps, and a suggested implementation order.
@@ -70,6 +73,7 @@ See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 | `/settlements` | Generate a hamlet and a village |
 | `/lairs` | Generate one lair per biome |
 | `/dungeons` | Generate linked dungeon areas, levels, and room contents |
+| `/criminal-organization` | Generate a criminal organization from the 2023 tables |
 | `/encounters` | Generate a map and roll wilderness encounters per hex |
 | `/page1` | Low-level manual testing of individual tables |
 | `/hello-angular` | Angular scaffold demo |

@@ -1,0 +1,65 @@
+<h1>Criminal Organization Generator</h1>
+<p>
+  Based on <em>Atelier Clandestin – Sandbox Generator</em> (2023 edition, pp. 117–120).
+  The name table has blanks for a fitting name, noun, or adjective; supply one below
+  or leave the template for the DM to complete.
+</p>
+
+<label>
+  Fitting name for the template
+  <input
+    type="text"
+    [value]="fittingName()"
+    (input)="onFittingNameInput($event)"
+  />
+</label>
+<button type="button" (click)="onGenerate()">Generate Criminal Organization</button>
+
+@let result = organization();
+<section>
+  <h2>{{ result.name.result }}</h2>
+  <p>
+    Name (d30: {{ result.name.roll }}):
+    {{ result.name.template }}
+    @if (result.name.template !== result.name.result) {
+      → {{ result.name.result }}
+    }
+  </p>
+  <dl>
+    <dt>Main activity (d24: {{ result.mainActivity.roll }})</dt>
+    <dd>{{ result.mainActivity.result }}</dd>
+
+    <dt>Distinctive sign (d10: {{ result.distinctiveSign.roll }})</dt>
+    <dd>{{ result.distinctiveSign.result }}</dd>
+
+    <dt>Most recruited (d20: {{ result.recruits.roll }})</dt>
+    <dd>{{ result.recruits.result }}</dd>
+
+    <dt>Initiation rite (d12: {{ result.initiationRite.roll }})</dt>
+    <dd>{{ result.initiationRite.result }}</dd>
+
+    <dt>Internal organization (d12: {{ result.organization.roll }})</dt>
+    <dd>{{ result.organization.result }}</dd>
+
+    <dt>Finances (d12: {{ result.finances.roll }})</dt>
+    <dd>{{ result.finances.result }}</dd>
+
+    <dt>Special check (d6: {{ result.specialCheckRoll }})</dt>
+    <dd>
+      @if (result.special; as special) {
+        Yes — {{ special.result }} (d10: {{ special.roll }})
+      } @else {
+        None
+      }
+    </dd>
+
+    <dt>Hideout/front (d20: {{ result.hideoutFront.roll }})</dt>
+    <dd>{{ result.hideoutFront.result }}</dd>
+
+    <dt>Special room (d24: {{ result.specialRoom.roll }})</dt>
+    <dd>{{ result.specialRoom.result }}</dd>
+
+    <dt>Boss backstory (d20: {{ result.boss.roll }})</dt>
+    <dd>{{ result.boss.result }}</dd>
+  </dl>
+</section>

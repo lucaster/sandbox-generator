@@ -1,0 +1,24 @@
+section {
+  margin-block: 2rem;
+  max-width: 60rem;
+}
+
+label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 1rem;
+}
+
+input {
+  min-width: 12rem;
+}
+
+dt {
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+dd {
+  margin-inline-start: 0;
+}
