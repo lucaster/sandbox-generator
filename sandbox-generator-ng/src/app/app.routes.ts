@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { HelloAngular } from './components/hello-angular/hello-angular';
 import { LandmarkContent } from './pages/content/content';
 import { Encounters } from './pages/encounters/encounters';
+import { Dungeons } from './pages/dungeons/dungeons';
 import { HexDrawPatch } from './pages/hex-draw-patch/hex-draw-patch';
 import { HexPatchPage } from './pages/hex-patch-page/hex-patch-page';
 import { HexDraw } from './pages/hex-draw/hex-draw';
@@ -71,5 +72,9 @@ export const routes: Routes = [
   {
     path: 'encounters',
     component: Encounters
+  },
+  {
+    path: 'dungeons',
+    component: Dungeons
   },
 ];

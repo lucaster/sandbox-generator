@@ -1,0 +1,152 @@
+<h1>Dungeon Generator</h1>
+<p>Generate a dungeon area with levels, factions, wandering monsters, and room contents.</p>
+<p>
+  Monster numbers and lair treasure depend on a bestiary and are left for the DM to supply.
+</p>
+
+<label>
+  Connected areas
+  <input
+    type="number"
+    min="1"
+    [value]="areaCount()"
+    (input)="onAreaCountInput($event)"
+  />
+</label>
+<button type="button" (click)="onGenerateDungeon()">Generate Dungeon</button>
+
+@if (dungeon(); as generatedDungeon) {
+  <section>
+    <h2>Cross-section links</h2>
+    <ul>
+      @for (link of generatedDungeon.links; track $index) {
+        <li>
+          @if (link.fromArea === 0) {
+            Surface → Area {{ link.toArea }}, Level {{ link.toLevel }}
+          } @else {
+            Area {{ link.fromArea }}, Level {{ link.fromLevel }}
+            → Area {{ link.toArea }}, Level {{ link.toLevel }}
+          }
+          ({{ link.type }})
+        </li>
+      }
+    </ul>
+  </section>
+
+  @for (area of generatedDungeon.areas; track area.number) {
+    <section class="area">
+      <h2>
+        {{ area.name.result }}
+      </h2>
+      <p>Area {{ area.number }} · Theme: {{ area.theme }}.</p>
+
+      @for (level of area.levels; track level.number) {
+        <article class="level">
+          <h3>
+            Level {{ level.number }} — Depth {{ depthLabel(level.depth) }}
+            @if (level.sublevel > 1) {
+              (sublevel {{ level.sublevel }})
+            }
+          </h3>
+          <p>{{ level.roomCount }} rooms</p>
+          <button type="button" (click)="onGenerateCorridor(area, level)">
+            Generate corridor
+          </button>
+          @if (corridorSamples()[area.number + '-' + level.number]; as corridor) {
+            <p>
+              Corridor: {{ corridor.sections.length }} section(s) of six squares;
+              end: {{ corridor.end }}
+            </p>
+            <ul>
+              @for (section of corridor.sections; track section.number) {
+                <li>
+                  Section {{ section.number }}:
+                  {{ section.features.length ? section.features.join(', ') : 'no features' }}
+                </li>
+              }
+            </ul>
+          }
+
+          <h4>Factions</h4>
+          <ul>
+            @for (faction of level.factions; track $index) {
+              <li>
+                Faction {{ faction.number }}: {{ faction.monster.type }}
+                (monster level {{ faction.monster.level }}, table result {{ faction.monster.roll }}),
+                {{ faction.encounterChance }}-in-6 encounter chance
+              </li>
+            }
+          </ul>
+
+          @if (level.factionRelationships.length) {
+            <h4>Faction relationships</h4>
+            <ul>
+              @for (relationship of level.factionRelationships; track $index) {
+                <li>
+                  Faction {{ relationship.firstFaction }} /
+                  {{ relationship.secondFaction }}:
+                  {{ relationship.relationship }}
+                </li>
+              }
+            </ul>
+          }
+
+          <h4>Wandering monsters</h4>
+          <ul>
+            @for (encounter of level.wanderingMonsters; track $index) {
+              <li>
+                {{ encounter.faction ? 'Faction' : 'Wandering' }} monster
+                {{ encounter.monster.type }} (level {{ encounter.monster.level }},
+                table result {{ encounter.monster.roll }}):
+                {{ encounter.chance }}-in-6
+              </li>
+            }
+          </ul>
+
+          <details>
+            <summary>Rooms ({{ level.rooms.length }})</summary>
+            <ol>
+              @for (room of level.rooms; track room.number) {
+                <li>
+                  <strong>{{ room.type | titlecase }}</strong>
+                  @if (room.detail) {
+                    — {{ room.detail.table }} result: {{ room.detail.result }}
+                    (d100: {{ room.detail.roll }})
+                  }
+                  @if (room.monster) {
+                    — {{ room.monster.type }} (monster level {{ room.monster.level }},
+                    table result {{ room.monster.roll }})
+                  }
+                  — {{ room.size.toLowerCase() }} ({{ room.length }} × {{ room.width }})
+                  @if (room.shape) {
+                    — {{ room.shape }}
+                  }
+                  @if (room.monster) {
+                    — {{ room.isLair ? 'Lair' : 'Not a lair' }}
+                  }
+                  @if (room.treasureChance !== null) {
+                    — treasure: {{ room.hasTreasure ? 'yes' : 'no' }}
+                  }
+                  @if (room.doors.length) {
+                    <ul>
+                      @for (door of room.doors; track $index) {
+                        <li>
+                          {{ door.position }} {{ door.type }} to {{ door.destination.toLowerCase() }}
+                          @if (door.details) {
+                            (@for (detail of door.details; track $index) {
+                              {{ detail.table }}: {{ detail.result }} (roll {{ detail.roll }}){{ $last ? '' : '; ' }}
+                            })
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </li>
+              }
+            </ol>
+          </details>
+        </article>
+      }
+    </section>
+  }
+}

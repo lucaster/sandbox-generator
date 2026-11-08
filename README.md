@@ -27,6 +27,8 @@ as SVG entirely in the browser — no backend required.
   defenses, dispositions, ruler, notable NPCs, secrets, and events.
 - **Lair generator** — inhabitants by biome, percentage inside/outside the lair,
   occupied neighboring hexes, and a layout.
+- **Dungeon generator** — linked areas and levels, factions, wandering monsters,
+  room contents, doors, traps, and corridor samples.
 - **Faction generator** — political domains from castles, cities, towers, abbeys,
   and intelligent lairs, with contested hexes, relationships, and events.
 - **Wilderness encounters** — a `2d6` table routing to dragons, factions, NPCs,
@@ -43,11 +45,12 @@ as SVG entirely in the browser — no backend required.
 
 ## Book coverage
 
-The book's generation procedures are only partially implemented. The hex map,
+The book's generation procedures are partially implemented. The hex map,
 landmarks, settlements (hamlets, villages, cities, castles, towers, abbeys),
-lairs, factions, wilderness encounters, and the dragon/NPC/wizard generators
-exist; dungeons, the remaining detail generators (coat of arms, criminal
-organization, guild, house, tavern), and the sea rules do not.
+lairs, factions, wilderness encounters, and core dungeon generation exist.
+Dungeon lair populations and treasure still require values from an external
+bestiary; the coat of arms, criminal organization, guild, house, tavern, and sea
+generators are not implemented.
 
 See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 2023 edition, the remaining gaps, and a suggested implementation order.
@@ -66,6 +69,7 @@ See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 | `/hex-draw` | Static, hardcoded example of the 19-hex map |
 | `/settlements` | Generate a hamlet and a village |
 | `/lairs` | Generate one lair per biome |
+| `/dungeons` | Generate linked dungeon areas, levels, and room contents |
 | `/encounters` | Generate a map and roll wilderness encounters per hex |
 | `/page1` | Low-level manual testing of individual tables |
 | `/hello-angular` | Angular scaffold demo |
@@ -135,6 +139,19 @@ Only `sandbox-generator-ng` is actively developed. The other folders are experim
 and prototypes.
 
 ## How it works
+
+### Dungeon generation
+
+`src/data/dungeon.ts` generates one or more linked areas, each with randomly
+placed levels, factions, a six-in-six wandering-monster table, and rooms with
+contents, treasure chances, doors, and optional shapes. The demo can also roll a
+corridor for any level. Monster counts and lair treasure are intentionally left
+to an external bestiary, as in the source procedure. Since the rules do not
+prescribe a corridor count, the demo rolls corridors individually on request.
+Dungeon random tables are defined explicitly as `RandomTable` values in
+`src/data/dungeon-tables.ts`. Coverage is partial: the main dungeon-generation
+tables and some tables embedded in special-room descriptions are modeled; the
+remaining embedded tables still need to be checked against the manual.
 
 ### 1. Random tables
 
@@ -266,7 +283,7 @@ See `.github/copilot-instructions.md` for the full convention list.
 
 ## Possible next steps
 
-- Add dungeon generation, the largest missing subsystem.
+- Add bestiary input to generate dungeon lair populations and treasure.
 - Add the remaining detail generators: coat of arms, criminal organization, guild,
   house, and tavern.
 - Add adventures at sea.

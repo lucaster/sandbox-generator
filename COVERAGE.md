@@ -29,14 +29,13 @@ Coverage is concentrated in the first part of that pipeline.
 | Landmarks | **Done** | Natural, artificial, and magic tables match the 2023 edition. Content, treasure chance, and information delivery are implemented. |
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
 | Lairs | **Done** | Inhabitants, optional outside percentage and hexes, layout, per-room monster/treasure distribution, and the `% in lair` patrol distinction match the 2023 edition. Total monsters and treasure are caller-supplied because the book delegates them to a bestiary. |
-| Dungeons | **Not implemented** | No cross-section, levels, structure, special rooms, or dungeon example logic. |
+| Dungeons | **Partial** | The main dungeon-generation tables and some nested special-room tables are modeled as explicit `RandomTable` definitions in manual order. Nested tables in special-room entries still need a full audit against the book. Dungeon lair populations and treasure still need external bestiary data; detailed special-room procedures are not automated. |
 | Generators | **Partial** | Dragon, NPC, and wizard generators match the 2023 edition. Coat of arms, criminal organization, guild, house, and tavern are missing. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
-Counting generation subsections (examples excluded): **20 of 31 are complete
-and 11 are absent.** Roughly two-thirds of the book's generation content is
-represented in code. The implemented tables are faithful to the 2023 edition; the
-gaps are mostly missing sections and generator logic.
+Counting generation subsections (examples excluded): **24 of 31 have core
+generation support, with 7 still absent.** The implemented tables are based on
+the 2023 edition; remaining gaps are mostly missing sections and bestiary data.
 
 ## Chapter details
 
@@ -141,17 +140,30 @@ Implemented in `src/data/encounters.ts`:
 
 ### Dungeons
 
-Nothing is implemented. Missing pieces include:
+Implemented in `src/data/dungeon.ts` and the `/dungeons` page:
 
-- Cross-section and area/depth model.
-- Number of levels and links between levels.
-- Level size, sub-levels, and same-depth links.
-- Number of rooms per level.
-- Factions and wandering-monster tables per level.
-- Monster level by depth.
-- Room types, doors, stairs, traps, and special rooms.
-- Treasure placement.
-- Megadungeon linking.
+- Area names and optional themes; caller-selected area count for megadungeons.
+- Random level counts, depths, sub-levels, surface and vertical links, same-depth
+  links, and links between adjacent areas.
+- Per-level factions, monster levels by depth, faction relationships, and a
+  six-in-six wandering-monster table.
+- Room counts, types, treasure chances, sizes, optional shapes, door types,
+  secret doors, traps, empty-room results, and special-room results, with
+  monster names and table outcomes resolved from the book's tables.
+- Optional corridor generation with sections, features, and valid level exits.
+- The main dungeon-generation tables and some tables embedded in special-room
+  descriptions are explicit `RandomTable` definitions in
+  `src/data/dungeon-tables.ts`, following the order used in the manual. Coverage
+  of the nested special-room tables is incomplete and must not be treated as
+  exhaustive.
+
+Monster population and treasure within a dungeon lair still depend on external
+bestiary values. The generator marks lair results and allows per-monster
+`% in lair` overrides, but does not invent the missing bestiary statistics.
+Corridors are rolled individually because the source procedure does not specify
+how many each level contains. The detailed prose procedures for the 100 special
+rooms are not automated. Only some random tables embedded in their descriptions
+are modeled; the remainder still require verification and implementation.
 
 ### Generators
 
