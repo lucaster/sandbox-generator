@@ -33,9 +33,9 @@ as SVG entirely in the browser — no backend required.
   internal structure, finances, hideout/front, optional special feature and room,
   and boss backstory. Supply a fitting word for name templates with ellipses, or
   leave them unfilled for the DM.
-- **Guild generator** — field and expertise, name structure, power, member traits,
-  and field-specific events and problems. Supply a fitting phrase for the name
-  template or use the rolled expertise.
+- **Guild generator** — field and specialty, separate expertise, name structure,
+  power, member traits, and regular events and problems. Supply a fitting phrase
+  for the name template; possessive name-template formatting is a known limitation.
 - **Faction generator** — political domains from castles, cities, towers, abbeys,
   and intelligent lairs, with contested hexes, relationships, and events.
 - **Wilderness encounters** — a `2d6` table routing to dragons, factions, NPCs,
@@ -297,8 +297,8 @@ See `.github/copilot-instructions.md` for the full convention list.
 ## Possible next steps
 
 - Add bestiary input to generate dungeon lair populations and treasure.
-- Add the remaining detail generators: coat of arms, criminal organization, guild,
-  house, and tavern.
+- Add the remaining detail generators: coat of arms, house, and tavern.
+- Correct possessive formatting in Guild name templates.
 - Add adventures at sea.
 - Forward `rollFn` through the remaining generators, such as the name generator.
 - Extract the hex layout into a single shared helper.

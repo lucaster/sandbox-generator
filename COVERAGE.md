@@ -30,7 +30,7 @@ Coverage is concentrated in the first part of that pipeline.
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
 | Lairs | **Done** | Inhabitants, optional outside percentage and hexes, layout, per-room monster/treasure distribution, and the `% in lair` patrol distinction match the 2023 edition. Total monsters and treasure are caller-supplied because the book delegates them to a bestiary. |
 | Dungeons | **Partial** | The main tables and printed nested special-room tables are modeled as explicit `RandomTable` definitions in book order. The demo exposes contextual, on-demand rolls for the nested tables it supports; other room procedures and their effects are not automated. Dungeon lair populations and treasure still need external bestiary data. |
-| Generators | **Partial** | Dragon, NPC, wizard, criminal-organization, and guild generators are implemented from the 2023 edition. Coat of arms, house, and tavern are missing. |
+| Generators | **Partial** | Dragon, NPC, wizard, criminal-organization, and guild generators are implemented from the 2023 edition. Coat of arms, house, and tavern are missing; Guild name templates still need possessive formatting corrected. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
 Counting generation subsections (examples excluded): **26 of 31 have core
@@ -180,7 +180,7 @@ Divine Altar lookup are available as contextual demo actions.
 | Wizard | **Done** | `calcWizard` in `src/data/wizard.ts`: level, specialty (including elemental subtype), appearance, goal, and staff material/top/bottom/shape/detail match the 2023 edition. |
 | Coat of arms | **Not implemented** | Escutcheon, field, charges, and the rest of the heraldry tables are absent. |
 | Criminal organization | **Done** | `calcCriminalOrganization` in `src/data/criminal-organization.ts` rolls the name template, main activity, distinctive sign, recruits, initiation rite, internal structure, finances, optional special feature, hideout/front, special-room result, and boss backstory from the 2023 tables (pp. 117–120). A fitting name for the table's ellipses is caller-supplied; those blanks are not guessed. Faction-map integration is not implemented. |
-| Guild | **Done** | `calcGuild` in `src/data/guild.ts` rolls the field and subfield, expertise, name structure, power, member initiation/appearance/quirk, and common or field-specific regular events and problems from the 2023 tables (pp. 125–128). The name field phrase can be supplied by the caller; otherwise the rolled subfield fills the printed template. Guilds are not yet integrated into faction generation. |
+| Guild | **Partial** | `calcGuild` in `src/data/guild.ts` rolls the field and subfield, separate expertise, name structure, power, member initiation/appearance/quirk, and common or field-specific regular events and problems from the 2023 tables (pp. 125–128). Event/problem rolls 1–4 use the common table and 5–6 use the guild-field table. The name field phrase can be supplied by the caller; otherwise the rolled subfield fills the template. Possessive templates currently render the printed `('s)` notation literally or omit it, rather than producing the manual's possessive names. Guilds are not yet integrated into faction generation. |
 | House | **Not implemented** | House interiors and loot are absent. |
 | Tavern | **Not implemented** | Sign, menu, staff, and rumours are absent. |
 
@@ -198,7 +198,8 @@ Nothing is implemented:
 
 ## Remaining issues
 
-The implemented tables and generation rules match the 2023 edition. The remaining
+Apart from the Guild name-template possessive-formatting limitation above, the
+implemented tables and generation rules match the 2023 edition. The remaining
 items are housekeeping:
 
 - `src/data/biomes.ts` is empty, and `@svgdotjs/svg.js` is declared but unused.
@@ -209,6 +210,6 @@ If the goal is to match the book's core hexcrawl loop, the highest-value order i
 
 1. **Complete dungeon generation** with external bestiary data, automated
    special-room procedures, and assembled level maps.
-2. **Add the remaining Generators** (coat of arms, criminal organization, guild,
-   house, tavern) and **Adventures at sea** last; they are detail layers rather
-   than prerequisites for the core loop.
+2. **Finish the remaining Generators** (correct Guild name formatting and add
+   coat of arms, house, tavern) and **Adventures at sea** last; they are detail
+   layers rather than prerequisites for the core loop.
