@@ -16,3 +16,114 @@ input {
 details {
   margin-top: 1rem;
 }
+
+.cross-section-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid #ccc;
+}
+
+.cross-section-svg {
+  display: block;
+  background: #fff;
+  color: #222;
+  font: 14px sans-serif;
+}
+
+.cross-section-area,
+.cross-section-depth,
+.cross-section-surface,
+.cross-section-room-count,
+.cross-section-level-number {
+  text-anchor: middle;
+}
+
+.cross-section-area,
+.cross-section-depth,
+.cross-section-surface {
+  font-weight: 600;
+}
+
+.cross-section-depth {
+  text-anchor: end;
+}
+
+.cross-section-surface {
+  text-anchor: start;
+}
+
+.cross-section-connection {
+  fill: none;
+  stroke-width: 2;
+}
+
+.cross-section-connection--vertical {
+  stroke: #454545;
+}
+
+.cross-section-connection--corridor {
+  stroke: #286090;
+}
+
+.cross-section-connection--secret {
+  stroke: #75418a;
+  stroke-dasharray: 6 4;
+}
+
+.cross-section-connection--same-depth {
+  stroke: #a56a13;
+  stroke-dasharray: 2 4;
+}
+
+.cross-section-level rect {
+  fill: #fff;
+  stroke: #222;
+  stroke-width: 2;
+}
+
+.cross-section-room-count {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cross-section-level-number {
+  fill: #555;
+  font-size: 10px;
+}
+
+.cross-section-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.cross-section-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend-line {
+  width: 1.5rem;
+  border-top: 2px solid;
+}
+
+.legend-line.connector--vertical {
+  border-color: #454545;
+}
+
+.legend-line.connector--corridor {
+  border-color: #286090;
+}
+
+.legend-line.connector--secret {
+  border-color: #75418a;
+  border-top-style: dashed;
+}
+
+.legend-line.connector--same-depth {
+  border-color: #a56a13;
+  border-top-style: dotted;
+}

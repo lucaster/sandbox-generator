@@ -17,6 +17,72 @@
 
 @if (dungeon(); as generatedDungeon) {
   <section>
+    <h2>Dungeon cross-section</h2>
+    <p>
+      Each box shows a level and its room count; lines show the generated links.
+      This is a cross-section, not a room-by-room floor plan.
+    </p>
+    @if (crossSection(); as diagram) {
+      <div class="cross-section-scroll">
+        <svg
+          class="cross-section-svg"
+          role="img"
+          aria-label="Dungeon cross-section showing areas, levels, room counts, and links"
+          [attr.viewBox]="'0 0 ' + diagram.width + ' ' + diagram.height"
+          [attr.width]="diagram.width"
+          [attr.height]="diagram.height"
+        >
+          @for (area of diagram.areas; track area.number) {
+            <text class="cross-section-area" [attr.x]="area.x" y="28">
+              Area {{ area.number }}
+            </text>
+          }
+          <text class="cross-section-surface" x="8" y="53">Surface</text>
+          @for (depth of diagram.depths; track depth.number) {
+            <text
+              class="cross-section-depth"
+              [attr.x]="diagram.depthLabelX"
+              [attr.y]="depth.y + 5"
+            >
+              {{ depth.label }}
+            </text>
+          }
+          @for (connection of diagram.connections; track $index) {
+            <line
+              [attr.class]="'cross-section-connection cross-section-connection--' + connection.type"
+              [attr.x1]="connection.x1"
+              [attr.y1]="connection.y1"
+              [attr.x2]="connection.x2"
+              [attr.y2]="connection.y2"
+            />
+          }
+          @for (node of diagram.nodes; track node.area + '-' + node.level) {
+            <g class="cross-section-level">
+              <title>
+                Area {{ node.area }}, level {{ node.level }}, depth {{ depthLabel(node.depth) }},
+                {{ node.roomCount }} rooms
+              </title>
+              <rect [attr.x]="node.x - 36" [attr.y]="node.y - 21" width="72" height="42" rx="5" />
+              <text class="cross-section-room-count" [attr.x]="node.x" [attr.y]="node.y - 2">
+                {{ node.roomCount }}
+              </text>
+              <text class="cross-section-level-number" [attr.x]="node.x" [attr.y]="node.y + 14">
+                Level {{ node.level }}
+              </text>
+            </g>
+          }
+        </svg>
+      </div>
+      <ul class="cross-section-legend" aria-label="Connection types">
+        <li><span class="legend-line connector--vertical"></span>Vertical</li>
+        <li><span class="legend-line connector--corridor"></span>Corridor</li>
+        <li><span class="legend-line connector--secret"></span>Secret</li>
+        <li><span class="legend-line connector--same-depth"></span>Same-depth</li>
+      </ul>
+    }
+  </section>
+
+  <section>
     <h2>Cross-section links</h2>
     <ul>
       @for (link of generatedDungeon.links; track $index) {
