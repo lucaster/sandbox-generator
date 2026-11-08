@@ -36,9 +36,9 @@
   @for (area of generatedDungeon.areas; track area.number) {
     <section class="area">
       <h2>
-        {{ area.name.result }}
+        Area {{ area.number }}: {{ area.name.result }}
       </h2>
-      <p>Area {{ area.number }} · Theme: {{ area.theme }}.</p>
+      <p>Theme: {{ area.theme }}.</p>
 
       @for (level of area.levels; track level.number) {
         <article class="level">
