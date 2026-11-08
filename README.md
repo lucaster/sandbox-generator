@@ -31,6 +31,10 @@ as SVG entirely in the browser — no backend required.
   and intelligent lairs, with contested hexes, relationships, and events.
 - **Wilderness encounters** — a `2d6` table routing to dragons, factions, NPCs,
   biome monsters, and wizards, with contested-hex and no-nearby-faction handling.
+  Dragon, NPC, and wizard results are generated in place.
+- **Detail generators** — dragons (description, breath/color, stats, attacks, lair,
+  treasure), NPCs (name, occupation, personality, secret, peers), and wizards
+  (level, specialty, appearance, goal, staff).
 - **Name generator** — pattern-based place names such as `{B} {A}`,
   `{D}-on-the-hill`, and `{D}sby`, with multiple variants.
 - **SVG rendering** — hex polygons, biome backgrounds, feature icons, and hex numbers.
@@ -41,8 +45,9 @@ as SVG entirely in the browser — no backend required.
 
 The book's generation procedures are only partially implemented. The hex map,
 landmarks, settlements (hamlets, villages, cities, castles, towers, abbeys),
-lairs, factions, and wilderness encounters exist; dungeons, the detail
-generators, and the sea rules do not.
+lairs, factions, wilderness encounters, and the dragon/NPC/wizard generators
+exist; dungeons, the remaining detail generators (coat of arms, criminal
+organization, guild, house, tavern), and the sea rules do not.
 
 See [`COVERAGE.md`](COVERAGE.md) for a section-by-section comparison against the
 2023 edition, the remaining gaps, and a suggested implementation order.
@@ -229,8 +234,9 @@ in one hex:
 Faction encounters use the current hex's factions and Other faction encounters
 use an adjacent hex's faction. A contested hex rolls `1d6` (`1–4` one faction,
 `5–6` multiple). If neither the current hex nor an adjacent one has a faction,
-the encounter falls back to a biome monster. Dragon, Wizard, and NPC results are
-routing flags: their dedicated generators belong to separate book chapters.
+the encounter falls back to a biome monster. Dragon, NPC, and Wizard results also
+generate the corresponding entity; Dragon and Wizard still flag that the next
+lair/tower is theirs.
 
 The `/encounters` page generates a map, then rolls and logs encounters for a
 chosen hex.
@@ -256,8 +262,8 @@ See `.github/copilot-instructions.md` for the full convention list.
 ## Possible next steps
 
 - Add dungeon generation, the largest missing subsystem.
-- Add the detail generators: coat of arms, criminal organization, dragon, guild,
-  house, NPC, tavern, and wizard.
+- Add the remaining detail generators: coat of arms, criminal organization, guild,
+  house, and tavern.
 - Add adventures at sea.
 - Forward `rollFn` through the remaining generators, such as the name generator.
 - Extract the hex layout into a single shared helper.

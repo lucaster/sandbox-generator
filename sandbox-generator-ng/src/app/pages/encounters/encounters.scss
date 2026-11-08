@@ -18,6 +18,16 @@
   background: beige;
 }
 
+.generated {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #666;
+}
+
+.generated h3 {
+  margin: 0 0 0.5rem;
+}
+
 .encounter-log ol {
   padding-left: 1.5rem;
 }

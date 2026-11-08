@@ -65,6 +65,9 @@ describe('encounters.ts non-faction results', () => {
     expect(result.factions).toEqual([]);
     expect(result.monster).toBeNull();
     expect(result.fallback).toBe(false);
+    expect(result.dragon?.name).toBe('Arkos');
+    expect(result.npc).toBeNull();
+    expect(result.wizard).toBeNull();
   });
 
   it('returns friendly NPCs on a 2d6 result of 7', () => {
@@ -74,6 +77,10 @@ describe('encounters.ts non-faction results', () => {
     expect(result.category).toBe('NPCs');
     expect(result.note).toContain('Friendly NPCs');
     expect(result.factions).toEqual([]);
+    expect(result.npc?.name).toBe('Ann Briggs');
+    expect(result.npc?.occupation).toBe('Accountant');
+    expect(result.dragon).toBeNull();
+    expect(result.wizard).toBeNull();
   });
 
   it('returns a biome monster on an 8-11 result', () => {
@@ -85,6 +92,9 @@ describe('encounters.ts non-faction results', () => {
     expect(result.monster).toBe('Dinosaurs');
     expect(result.factions).toEqual([]);
     expect(result.fallback).toBe(false);
+    expect(result.dragon).toBeNull();
+    expect(result.npc).toBeNull();
+    expect(result.wizard).toBeNull();
   });
 
   it('returns a wizard encounter on a 2d6 result of 12', () => {
@@ -94,6 +104,9 @@ describe('encounters.ts non-faction results', () => {
     expect(result.category).toBe('Wizard');
     expect(result.note).toContain('tower');
     expect(result.factions).toEqual([]);
+    expect(result.wizard?.level).toBe(7);
+    expect(result.dragon).toBeNull();
+    expect(result.npc).toBeNull();
   });
 });
 

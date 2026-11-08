@@ -2,7 +2,8 @@
 <p>
   When an encounter happens in the wilderness, roll 2d6. Faction results use the
   generated political map; if neither the current hex nor an adjacent one has a
-  faction, the encounter falls back to a biome monster.
+  faction, the encounter falls back to a biome monster. Dragon, NPC, and wizard
+  results generate the corresponding entity.
 </p>
 
 <div class="encounter-controls">
@@ -43,6 +44,70 @@
     }
     @if (e.monster) {
       <p>Monster: {{ e.monster }}</p>
+    }
+    @if (e.dragon; as dragon) {
+      <div class="generated">
+        <h3>{{ dragon.name }}</h3>
+        <p>
+          {{ dragon.alignment }} {{ dragon.age.toLowerCase() }}
+          {{ dragon.size.toLowerCase() }} {{ dragon.color.toLowerCase() }} dragon
+          ({{ dragon.breath.toLowerCase() }})
+        </p>
+        <p>
+          HP {{ dragon.stats.hitPoints }}, AC {{ dragon.stats.armorClass }},
+          saves {{ dragon.stats.savingThrows }}, morale {{ dragon.stats.morale }}
+        </p>
+        <p>
+          Strength: {{ dragon.strength ?? 'none' }}. Weakness:
+          {{ dragon.weakness ?? 'none' }}.
+        </p>
+        <p>
+          Favorite food: {{ dragon.favoriteFood.toLowerCase() }}. Status:
+          {{ dragon.status.toLowerCase() }}.
+        </p>
+        <p>
+          Attacks: claws {{ dragon.attacks.claws }}, bite {{ dragon.attacks.bite }},
+          tail {{ dragon.attacks.tail }}, breath weapon.
+        </p>
+        <p>
+          Lair: {{ dragon.lair.toLowerCase() }}. Special treasure:
+          {{ dragon.specialTreasure ?? 'none' }}.
+        </p>
+      </div>
+    }
+    @if (e.wizard; as wizard) {
+      <div class="generated">
+        <h3>Level {{ wizard.level }} wizard</h3>
+        <p>
+          Specialty: {{ wizard.specialty }}. Appearance: {{ wizard.appearance }}.
+        </p>
+        <p>Goal: {{ wizard.goal }}.</p>
+        <p>
+          Staff: {{ wizard.staff.material }},
+          {{ wizard.staff.shape.toLowerCase() }},
+          {{ wizard.staff.detail.toLowerCase() }}; top
+          {{ wizard.staff.top.toLowerCase() }}, bottom
+          {{ wizard.staff.bottom.toLowerCase() }}.
+        </p>
+      </div>
+    }
+    @if (e.npc; as npc) {
+      <div class="generated">
+        <h3>{{ npc.name }}</h3>
+        <p>
+          {{ npc.occupation }}. {{ npc.appearance.clothes }} clothes;
+          {{ npc.appearance.particularity.toLowerCase() }}.
+        </p>
+        <p>
+          {{ npc.attitude }}. Favorite thing:
+          {{ npc.favoriteThing.toLowerCase() }}. Dream:
+          {{ npc.dream.toLowerCase() }}. Hobby: {{ npc.hobby.toLowerCase() }}.
+        </p>
+        @if (npc.secret) {
+          <p>Secret: {{ npc.secret }}.</p>
+        }
+        <p>Peers: {{ npc.relationships.join(', ') }}.</p>
+      </div>
     }
   </section>
 }

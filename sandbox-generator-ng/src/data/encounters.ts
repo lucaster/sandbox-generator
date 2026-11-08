@@ -1,8 +1,11 @@
 import { d } from '../dice/dice';
 import { type RandomTable } from '../domain/random-table';
 import { randomOptionEntry } from './data';
+import { calcDragon, type Dragon } from './dragon';
 import { neighborsOfPatchHex } from './hex-grid';
 import { calcBiomeEncounter } from './lairs';
+import { calcNpc, type Npc } from './npc';
+import { calcWizard, type Wizard } from './wizard';
 
 type WildernessEncounterCategory =
   | 'Dragon'
@@ -36,6 +39,9 @@ type WildernessEncounter = {
   fallback: boolean;
   factions: number[];
   monster: string | null;
+  dragon: Dragon | null;
+  npc: Npc | null;
+  wizard: Wizard | null;
   note: string;
 };
 
@@ -90,9 +96,9 @@ function factionNote(factions: number[]): string {
  * Rolls a wilderness random encounter for one hex (2023 edition, p. 14).
  *
  * The 2d6 table routes to Dragon, Other faction, Faction, NPCs, Biome, or
- * Wizard. Dragon and Wizard only flag that the next lair/tower is theirs; the
- * NPC, dragon, and wizard generators are separate chapters and are not part of
- * this procedure.
+ * Wizard. Dragon, NPC, and Wizard results also generate the corresponding
+ * entity through the Generators chapter; Dragon and Wizard still flag that the
+ * next lair/tower is theirs.
  *
  * Faction encounters use the current hex's factions. Other faction encounters
  * use a faction from an adjacent hex. A contested current hex rolls 1d6 to
@@ -125,26 +131,42 @@ function calcWildernessEncounter(
     fallback: false,
     factions: [] as number[],
     monster: null as string | null,
+    dragon: null as Dragon | null,
+    npc: null as Npc | null,
+    wizard: null as Wizard | null,
   };
 
   if (category === 'Dragon') {
+    const dragon = calcDragon('wilderness', rollFn);
     return {
       ...base,
-      note: "The next lair generated will be the dragon's lair.",
+      dragon,
+      note:
+        `Dragon encounter: ${dragon.name} (${dragon.age.toLowerCase()} ` +
+        `${dragon.size.toLowerCase()} ${dragon.color.toLowerCase()} dragon). ` +
+        "The next lair generated will be the dragon's lair.",
     };
   }
 
   if (category === 'Wizard') {
+    const wizard = calcWizard(rollFn);
     return {
       ...base,
-      note: "The next tower generated will be the wizard's house.",
+      wizard,
+      note:
+        `Wizard encounter: level ${wizard.level} ${wizard.specialty} wizard. ` +
+        "The next tower generated will be the wizard's house.",
     };
   }
 
   if (category === 'NPCs') {
+    const npc = calcNpc(rollFn);
     return {
       ...base,
-      note: 'Friendly NPCs who do not appear to belong to a faction.',
+      npc,
+      note:
+        `NPC encounter: ${npc.name}, ${npc.occupation.toLowerCase()}. ` +
+        'Friendly NPCs who do not appear to belong to a faction.',
     };
   }
 
