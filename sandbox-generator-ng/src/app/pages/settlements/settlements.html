@@ -1,6 +1,34 @@
+<button type="button" (click)="onCalcRandomSettlement()">Generate Random Settlement</button>
+<button type="button" (click)="onCalcHamlet()">Generate Hamlet</button>
+<button type="button" (click)="onCalcVillage()">Generate Village</button>
+<button type="button" (click)="onCalcCity()">Generate City</button>
+<button type="button" (click)="onCalcCastle()">Generate Castle</button>
+<button type="button" (click)="onCalcTower()">Generate Tower</button>
+<button type="button" (click)="onCalcAbbey()">Generate Abbey</button>
+<button
+  type="button"
+  [disabled]="!randomSettlementType"
+  (click)="exportSettlement()"
+>
+  Export JSON
+</button>
+<label>
+  Import JSON
+  <input
+    type="file"
+    accept="application/json,.json"
+    (change)="importSettlement($event)"
+  />
+</label>
+@if (importError(); as error) {
+  <p role="alert">{{ error }}</p>
+}
+@if (randomSettlementType) {
+  <p>Generated settlement type: {{ randomSettlementType }}</p>
+}
+@if (randomSettlementType === 'Hamlet') {
 <section>
   <header>Hamlet</header>
-  <button (click)="onCalcHamlet()">Generate Hamlet</button>
   <!-- <pre>{{ hamlet | json }}</pre> -->
   @if (hamlet) {
   <ul>
@@ -13,9 +41,10 @@
   </ul>
   }
 </section>
+}
+@if (randomSettlementType === 'Village') {
 <section>
   <header>Village</header>
-  <button (click)="onCalcVillage()">Generate Village</button>
   <!-- <pre>{{ village | json }}</pre> -->
   @if (village) {
     <ul>
@@ -90,9 +119,10 @@
     </ul>
   }
 </section>
+}
+@if (randomSettlementType === 'City') {
 <section>
   <header>City</header>
-  <button (click)="onCalcCity()">Generate City</button>
   <!-- <pre>{{ city | json }}</pre> -->
   @if (city) {
     <ul>
@@ -193,9 +223,10 @@
     </ul>
   }
 </section>
+}
+@if (randomSettlementType === 'Castle') {
 <section>
   <header>Castle</header>
-  <button (click)="onCalcCastle()">Generate Castle</button>
   <!-- <pre>{{ castle | json }}</pre> -->
   @if (castle) {
     <ul>
@@ -277,9 +308,10 @@
     </ul>
   }
 </section>
+}
+@if (randomSettlementType === 'Tower') {
 <section>
   <header>Tower</header>
-  <button (click)="onCalcTower()">Generate Tower</button>
   <!-- <pre>{{ tower | json }}</pre> -->
   @if (tower) {
     <ul>
@@ -348,9 +380,10 @@
     </ul>
   }
 </section>
+}
+@if (randomSettlementType === 'Abbey') {
 <section>
   <header>Abbey</header>
-  <button (click)="onCalcAbbey()">Generate Abbey</button>
   <!-- <pre>{{ abbey | json }}</pre> -->
   @if (abbey) {
     <ul>
@@ -425,3 +458,4 @@
     </ul>
   }
 </section>
+}
