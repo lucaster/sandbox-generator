@@ -1,3 +1,17 @@
 <h1>{{ title }} Patch</h1>
 <button type="button" (click)="patch.draw()">Draw {{ title }} Patch</button>
+@if (mode === 'biome') {
+  <button type="button" (click)="exportBiomePatch(patch)">Export JSON</button>
+  <label>
+    Import JSON
+    <input
+      type="file"
+      accept="application/json,.json"
+      (change)="importBiomePatch($event, patch)"
+    />
+  </label>
+  @if (importError(); as error) {
+    <p role="alert">{{ error }}</p>
+  }
+}
 <app-hex-patch [mode]="mode" #patch />

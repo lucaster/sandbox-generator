@@ -98,14 +98,31 @@ export class HexPatch implements AfterViewInit {
     this.resetPatch();
   }
 
-  private drawBiomePatch() {
+  loadBiomePatch(biomes: Hexes) {
+    if (this.mode() !== 'biome') {
+      throw new Error('Biome patches can only be loaded in biome mode.');
+    }
+
+    this.resetPatch();
+    this.drawBiomePatch(biomes);
+    this.updateHexDetailList();
+  }
+
+  exportBiomePatch(): Hexes {
+    if (this.mode() !== 'biome' || !this.biomes) {
+      throw new Error('No biome patch is available to export.');
+    }
+    return { ...this.biomes };
+  }
+
+  private drawBiomePatch(biomes: Hexes = calcHexesBiome()) {
     const svg = this.svgElement.nativeElement;
     const svgDrawer = new SvgDrawer(svg);
     const r = 50;
     const hexOps = new HexOps(r);
     const imageOpts = { width: 2.45 * hexOps.h, height: 2.45 * hexOps.h };
-    const hexes = calcHexesBiome();
-    this.hexesDetailed = fromHexesToHexesDetailed(hexes);
+    this.biomes = biomes;
+    this.hexesDetailed = fromHexesToHexesDetailed(biomes);
     const imagePathHexes = fromHexesDetailedToImagePathHexes(this.hexesDetailed);
     this.drawPatch(
       svgDrawer,
