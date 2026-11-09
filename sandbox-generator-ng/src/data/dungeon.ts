@@ -301,7 +301,7 @@ function rollDungeonSpecialRoomTable(
   );
   return {
     table: action.table.title,
-    rolls: entries.map((entry) => entry.key),
+    rolls: entries.map((entry) => entry.roll),
     results: entries.map((entry) => entry.result),
   };
 }
@@ -336,7 +336,7 @@ function rollMonster(depth: DungeonDepth, rollFn: RollFunction): DungeonMonsterR
   const monster = randomOptionEntry(tableDungeonMonsterTypesByLevel[level], rollFn);
   return {
     level,
-    roll: monster.key,
+    roll: monster.roll,
     type: monster.result,
   };
 }
@@ -379,7 +379,7 @@ function generateFactionRelationships(
   const relationships: DungeonLevel['factionRelationships'] = [];
   for (let first = 0; first < factions.length; first++) {
     for (let second = first + 1; second < factions.length; second++) {
-      const { key: roll, result: relationship } =
+      const { roll, result: relationship } =
         randomOptionEntry(tableDungeonFactionRelationship, rollFn);
       relationships.push({
         firstFaction: factions[first].number,
@@ -396,7 +396,7 @@ function generateSecretDoor(rollFn: RollFunction): DungeonTableResult[] {
   const form = randomOptionEntry(tableDungeonSecretDoorForm, rollFn);
   const formResult: DungeonTableResult = {
     table: tableDungeonSecretDoorForm.title,
-    roll: form.key,
+    roll: form.roll,
     result: form.result,
   };
   if (form.result === 'Camouflaged') {
@@ -406,12 +406,12 @@ function generateSecretDoor(rollFn: RollFunction): DungeonTableResult[] {
       formResult,
       {
         table: tableDungeonCamouflagedDoorAppearance.title,
-        roll: appearance.key,
+        roll: appearance.roll,
         result: appearance.result,
       },
       {
         table: tableDungeonCamouflagedDoorClue.title,
-        roll: clue.key,
+        roll: clue.roll,
         result: clue.result,
       },
     ];
@@ -422,12 +422,12 @@ function generateSecretDoor(rollFn: RollFunction): DungeonTableResult[] {
     formResult,
     {
       table: tableDungeonVisibleSecretDoorType.title,
-      roll: type.key,
+      roll: type.roll,
       result: type.result,
     },
     {
       table: tableDungeonSecretDoorMechanism.title,
-      roll: mechanism.key,
+      roll: mechanism.roll,
       result: mechanism.result,
     },
   ];
@@ -444,7 +444,7 @@ function generateDoor(rollFn: RollFunction, corridorSide?: string): DungeonDoor 
     const magicDoor = randomOptionEntry(tableDungeonMagicDoorType, rollFn);
     const magicDoorDetail: DungeonTableResult = {
       table: tableDungeonMagicDoorType.title,
-      roll: magicDoor.key,
+      roll: magicDoor.roll,
       result: magicDoor.result,
     };
     if (magicDoor.result === 'Demon door') {
@@ -457,7 +457,7 @@ function generateDoor(rollFn: RollFunction, corridorSide?: string): DungeonDoor 
           magicDoorDetail,
           {
             table: tableDungeonDemonDoorTask.title,
-            roll: task.key,
+            roll: task.roll,
             result: task.result,
           },
         ],
@@ -497,11 +497,11 @@ function generateRoom(
   let detail: DungeonTableResult | null = null;
   if (type === 'trap') {
     const trap = randomOptionEntry(tableDungeonTrap, rollFn);
-    detail = { table: tableDungeonTrap.title, roll: trap.key, result: trap.result };
+    detail = { table: tableDungeonTrap.title, roll: trap.roll, result: trap.result };
   } else if (type === 'empty' || type === 'special') {
     const table = type === 'empty' ? tableDungeonEmptyRoom : tableDungeonSpecialRoom;
     const result = randomOptionEntry(table, rollFn);
-    detail = { table: table.title, roll: result.key, result: result.result };
+    detail = { table: table.title, roll: result.roll, result: result.result };
   } else {
     const encounterRoll = rollFn(6);
     let cumulativeChance = 0;
@@ -588,8 +588,8 @@ function generateArea(
   const prefix = randomOptionEntry(tableDungeonAreaNamePrefix, rollFn);
   const noun = randomOptionEntry(tableDungeonAreaNameNoun, rollFn);
   const name = {
-    prefixRoll: prefix.key,
-    nounRoll: noun.key,
+    prefixRoll: prefix.roll,
+    nounRoll: noun.roll,
     result: prefix.result.replace('...', noun.result),
   };
   const theme = randomOptionEntry(tableDungeonAreaTheme, rollFn);
@@ -605,7 +605,7 @@ function generateArea(
   return {
     number,
     name,
-    themeRoll: theme.key,
+    themeRoll: theme.roll,
     theme: theme.result,
     levels,
   };
@@ -633,7 +633,7 @@ function calcDungeonCorridor(options: DungeonCorridorOptions = {}): DungeonCorri
       features = [`Secret door: ${generateSecretDoor(rollFn).map((entry) => `${entry.table}: ${entry.result} (#${entry.roll})`).join('; ')}`];
     } else if (feature.result === 'Trap') {
       const trap = randomOptionEntry(tableDungeonTrap, rollFn);
-      features = [`${tableDungeonTrap.title}: ${trap.result} (d100: ${trap.key})`];
+      features = [`${tableDungeonTrap.title}: ${trap.result} (d100: ${trap.roll})`];
     }
     return { number: index + 1, length: 6 as const, features };
   });

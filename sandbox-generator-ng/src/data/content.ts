@@ -16,7 +16,7 @@ function resolveContentPath(
   rollFn: (faces: number) => number
 ): string[] {
   const entry = randomOptionEntry(table, rollFn);
-  const option = table.options[entry.key];
+  const option = table.options[entry.roll];
   if (typeof option === 'string') {
     return [option];
   }

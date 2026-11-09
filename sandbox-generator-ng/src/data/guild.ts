@@ -617,7 +617,7 @@ function rollEntry(
   rollFn: (faces: number) => number,
 ): GuildTableResult {
   const entry = randomOptionEntry(table, rollFn);
-  return { roll: entry.key, result: entry.result };
+  return { roll: entry.roll, result: entry.result };
 }
 
 function rollConditionalResult(

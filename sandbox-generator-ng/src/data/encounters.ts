@@ -124,7 +124,7 @@ function calcWildernessEncounter(
   const base = {
     hex: context.hex,
     biome: context.biome,
-    roll: entry.key,
+    roll: entry.roll,
     category,
     factionCount: null as WildernessEncounterFactionCount,
     contested,

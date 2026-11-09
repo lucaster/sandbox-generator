@@ -185,14 +185,14 @@ describe('settlements.ts calcCityCharacteristics', () => {
 describe('settlements.ts calcCityAppearance', () => {
   it('rolls a normal appearance', () => {
     expect(calcCityAppearance(sequence([3]))).toEqual({
-      key: 3,
+      roll: 3,
       result: 'Colorful',
     });
   });
 
   it('resolves the color scheme follow-up', () => {
     expect(calcCityAppearance(sequence([20, 3]))).toEqual({
-      key: 20,
+      roll: 20,
       result: 'Specific color scheme: Blue and white',
     });
   });
@@ -465,17 +465,17 @@ describe('settlements.ts calcCastleDefense', () => {
       'Moat (= trench)',
     ]);
     expect(defense.towersAndWalls).toEqual({
-      shape: { key: 2, result: 'Trapezium' },
+      shape: { roll: 2, result: 'Trapezium' },
       towers: 4,
-      defensiveFeature: { key: 7, result: 'Ballista' },
-      nonDefensiveFeature: { key: 10, result: 'Overgrown' },
+      defensiveFeature: { roll: 7, result: 'Ballista' },
+      nonDefensiveFeature: { roll: 10, result: 'Overgrown' },
     });
     expect(defense.gatehouse).toEqual({
-      key: 4,
+      roll: 4,
       result: 'Drawbridge',
     });
     expect(defense.moatEncounter).toEqual({
-      key: 6,
+      roll: 6,
       result: 'Electric eels',
     });
   });
@@ -536,11 +536,11 @@ describe('settlements.ts calcCastleGarrison', () => {
 describe('settlements.ts calcCastleDisposition', () => {
   it('uses the 2d6 groups', () => {
     expect(calcCastleDisposition(sequence([1, 1]))).toEqual({
-      key: 2,
+      roll: 2,
       result: 'Attack on sight',
     });
     expect(calcCastleDisposition(sequence([6, 6]))).toEqual({
-      key: 12,
+      roll: 12,
       result: 'Enthusiastic',
     });
   });
@@ -871,16 +871,16 @@ describe('settlements.ts calcAbbeyFame', () => {
 
   it('returns a non-artifact fame reason', () => {
     expect(calcAbbeyFame('Major', sequence([5]))).toEqual({
-      fame: { key: 5, result: 'Domain and landscapes' },
+      fame: { roll: 5, result: 'Domain and landscapes' },
       artifact: null,
     });
   });
 
   it('returns a non-relic artifact', () => {
     expect(calcAbbeyFame('Major', sequence([20, 4]))).toEqual({
-      fame: { key: 20, result: 'Religious artifact' },
+      fame: { roll: 20, result: 'Religious artifact' },
       artifact: {
-        nature: { key: 4, result: 'Holy sword' },
+        nature: { roll: 4, result: 'Holy sword' },
         relic: null,
       },
     });
@@ -888,13 +888,13 @@ describe('settlements.ts calcAbbeyFame', () => {
 
   it('returns a relic with its saint and spell level', () => {
     expect(calcAbbeyFame('Major', sequence([12, 6, 9, 14, 1]))).toEqual({
-      fame: { key: 12, result: 'Religious artifact' },
+      fame: { roll: 12, result: 'Religious artifact' },
       artifact: {
-        nature: { key: 6, result: 'Relic' },
+        nature: { roll: 6, result: 'Relic' },
         relic: {
-          type: { key: 9, result: 'Leg' },
-          saint: { key: 14, result: 'Geffrey' },
-          spellLevel: { key: 1, result: 'Level 1' },
+          type: { roll: 9, result: 'Leg' },
+          saint: { roll: 14, result: 'Geffrey' },
+          spellLevel: { roll: 1, result: 'Level 1' },
         },
       },
     });
@@ -904,14 +904,14 @@ describe('settlements.ts calcAbbeyFame', () => {
 describe('settlements.ts calcAbbeyHistory', () => {
   it('leaves the founding date empty for other histories', () => {
     expect(calcAbbeyHistory(sequence([2]))).toEqual({
-      history: { key: 2, result: 'Changed confession' },
+      history: { roll: 2, result: 'Changed confession' },
       foundedYearsAgo: null,
     });
   });
 
   it('rolls 2d10 x10 years for a founded abbey', () => {
     expect(calcAbbeyHistory(sequence([5, 3, 4]))).toEqual({
-      history: { key: 5, result: 'Founded 2d10 x10 years ago' },
+      history: { roll: 5, result: 'Founded 2d10 x10 years ago' },
       foundedYearsAgo: 70,
     });
   });
@@ -929,8 +929,8 @@ describe('settlements.ts calcAbbeyEvent', () => {
   it('produces an event with timing and nature on a 1', () => {
     expect(calcAbbeyEvent(sequence([1, 5, 10]))).toEqual({
       hasEvent: true,
-      when: { key: 5, result: 'Will take place in the future' },
-      nature: { key: 10, result: 'Plague' },
+      when: { roll: 5, result: 'Will take place in the future' },
+      nature: { roll: 10, result: 'Plague' },
     });
   });
 });

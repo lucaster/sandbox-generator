@@ -1121,7 +1121,7 @@ const tavernRandomTables: RandomTable[] = [
 
 function rollEntry(table: RandomTable, rollFn: (faces: number) => number): TavernRoll {
   const entry = randomOptionEntry(table, rollFn);
-  return { roll: entry.key, result: entry.result };
+  return { roll: entry.roll, result: entry.result };
 }
 
 function rollMany(table: RandomTable, count: number, rollFn: (faces: number) => number): TavernRoll[] {

@@ -67,8 +67,8 @@ describe('data.ts', () => {
       options: { 2: 'A', 3: 'B', 4: 'C' },
     };
 
-    expect(oppositeOptionEntry(2, table)).toEqual({ key: 4, result: 'C' });
-    expect(oppositeOptionEntry(3, table)).toEqual({ key: 3, result: 'B' });
-    expect(oppositeOptionEntry(4, table)).toEqual({ key: 2, result: 'A' });
+    expect(oppositeOptionEntry(2, table)).toEqual({ roll: 4, result: 'C' });
+    expect(oppositeOptionEntry(3, table)).toEqual({ roll: 3, result: 'B' });
+    expect(oppositeOptionEntry(4, table)).toEqual({ roll: 2, result: 'A' });
   });
 });

@@ -135,8 +135,8 @@ function isIntelligentLair(inhabitant: string): boolean {
 function calcFactionRelationship(
   rollFn: (faces: number) => number = d
 ): { roll: number; relation: string; } {
-  const { key, result } = randomOptionEntry(tableFactionRelationship, rollFn);
-  return { roll: key, relation: result };
+  const { roll, result } = randomOptionEntry(tableFactionRelationship, rollFn);
+  return { roll, relation: result };
 }
 
 function calcFactionEvent(

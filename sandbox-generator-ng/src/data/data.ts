@@ -322,18 +322,18 @@ function randomOptionEntry(
   const key = randomKey(options, table.dice, rollFn);
   const result = options[key];
   return {
-    key,
+    roll: key,
     result: result as string,
   };
 }
 
-function oppositeOptionEntry(key: number, table: RandomTable) {
+function oppositeOptionEntry(roll: number, table: RandomTable) {
   const keys = Object.keys(table.options).map(Number).sort((a, b) => a - b);
-  const keyIndex = keys.indexOf(key);
+  const keyIndex = keys.indexOf(roll);
   const oppositeKey = keys[keys.length - 1 - keyIndex];
   const oppositeResult = table.options[oppositeKey];
   return {
-    key: oppositeKey,
+    roll: oppositeKey,
     result: oppositeResult,
   };
 }
@@ -361,4 +361,3 @@ export {
   type Hexes,
   type HexesDetailed
 };
-

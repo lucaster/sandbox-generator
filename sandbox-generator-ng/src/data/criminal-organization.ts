@@ -322,7 +322,7 @@ function rollEntry(
   rollFn: (faces: number) => number,
 ): CriminalOrganizationTableResult {
   const entry = randomOptionEntry(table, rollFn);
-  return { roll: entry.key, result: entry.result };
+  return { roll: entry.roll, result: entry.result };
 }
 
 function calcCriminalOrganization(
@@ -352,7 +352,7 @@ function calcCriminalOrganization(
   const boss = rollEntry(tableCriminalOrganizationBoss, rollFn);
 
   return {
-    name: { roll: nameEntry.key, template, result: name },
+    name: { roll: nameEntry.roll, template, result: name },
     mainActivity,
     distinctiveSign,
     recruits,

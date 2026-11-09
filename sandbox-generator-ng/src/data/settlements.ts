@@ -345,7 +345,7 @@ function rollUniqueEntries(
   count: number,
   rollFn: (faces: number) => number = d
 ) {
-  const results: { key: number; result: string }[] = [];
+  const results: { roll: number; result: string }[] = [];
   while (results.length < count) {
     const entry = randomOptionEntry(table, rollFn);
     if (!results.some((result) => result.result === entry.result)) {
@@ -378,9 +378,9 @@ function calcVillage(rollFn: (faces: number) => number = d) {
   const rulerDisposition =
     villageDisposition.result === 'Neutral'
     ? randomOptionEntry(tableVillageRulerDispositionIfVillageDispositionNeutral, rollFn)
-    : randomOptionEntry(tableVillageRulerDisposition, rollFn).key <= 4
+    : randomOptionEntry(tableVillageRulerDisposition, rollFn).roll <= 4
       ? villageDisposition // Same as villagers
-      : oppositeOptionEntry(villageDisposition.key, tableVillageDisposition); // Opposite (to as villagers)
+      : oppositeOptionEntry(villageDisposition.roll, tableVillageDisposition); // Opposite (to as villagers)
   const notableNpcs = new Array(sizeFactor).fill(0).map(() => randomOptionEntry(tableVillageNotableNpcs, rollFn));
   const ruler = randomOptionEntry(tableVillageRuler, rollFn);
   const villageHasSecret = randomOptionEntry(tableVillageHasSecret, rollFn);
@@ -956,7 +956,7 @@ const citySizeFactors: { [key: string]: number } = {
 function calcCityCharacteristics(rollFn: (faces: number) => number = d) {
   const first = randomOptionEntry(tableCityCharacteristics, rollFn);
   let second = randomOptionEntry(tableCityCharacteristics, rollFn);
-  while (second.key === first.key) {
+  while (second.roll === first.roll) {
     second = randomOptionEntry(tableCityCharacteristics, rollFn);
   }
   return [first, second]
@@ -966,10 +966,10 @@ function calcCityCharacteristics(rollFn: (faces: number) => number = d) {
 
 function calcCityAppearance(rollFn: (faces: number) => number = d) {
   const appearance = randomOptionEntry(tableCityAppearance, rollFn);
-  if (appearance.key === 20) {
+  if (appearance.roll === 20) {
     const colorScheme = randomOptionEntry(tableCityColorScheme, rollFn);
     return {
-      key: appearance.key,
+      roll: appearance.roll,
       result: `${appearance.result}: ${colorScheme.result}`,
     };
   }
@@ -1017,9 +1017,9 @@ function calcCityDisposition(rollFn: (faces: number) => number = d) {
   const rulerDisposition =
     cityDisposition.result === 'Neutral'
       ? randomOptionEntry(tableCityRulerDispositionIfNeutral, rollFn)
-      : randomOptionEntry(tableCityRulerDisposition, rollFn).key <= 4
+      : randomOptionEntry(tableCityRulerDisposition, rollFn).roll <= 4
         ? cityDisposition // Same as citizens
-        : oppositeOptionEntry(cityDisposition.key, tableCityDisposition); // Opposite (to as citizens)
+        : oppositeOptionEntry(cityDisposition.roll, tableCityDisposition); // Opposite (to as citizens)
   return {
     cityDisposition,
     rulerDisposition,
@@ -1369,7 +1369,7 @@ function calcCastleKeep(rollFn: (faces: number) => number = d) {
 
 function calcCastleTowersAndWalls(rollFn: (faces: number) => number = d) {
   const shape = randomOptionEntry(tableCastleWallShape, rollFn);
-  const towers = shape.key === 8 ? rollFn(3) + 3 : castleWallTowers[shape.key];
+  const towers = shape.roll === 8 ? rollFn(3) + 3 : castleWallTowers[shape.roll];
   const defensiveFeature = randomOptionEntry(tableCastleDefensiveFeature, rollFn);
   const nonDefensiveFeature = randomOptionEntry(tableCastleNonDefensiveFeature, rollFn);
   return {
@@ -2169,13 +2169,13 @@ const abbeyStructure = {
 
 function calcAbbeyName(rollFn: (faces: number) => number = d) {
   const name = randomOptionEntry(tableAbbeyName, rollFn);
-  if (name.key === 4) {
+  if (name.roll === 4) {
     return `Good-${randomOptionEntry(tableAbbeyNameGood, rollFn).result}`;
   }
-  if (name.key === 7) {
+  if (name.roll === 7) {
     return `Our-Lady-of-${randomOptionEntry(tableAbbeyNameOurLady, rollFn).result}`;
   }
-  if (name.key >= 8) {
+  if (name.roll >= 8) {
     return `Saint-${randomOptionEntry(tableAbbeySaints, rollFn).result}`;
   }
   return name.result;
@@ -2203,11 +2203,11 @@ function calcAbbeyFame(size: string, rollFn: (faces: number) => number = d) {
     return null;
   }
   const fame = randomOptionEntry(tableAbbeyFame, rollFn);
-  if (fame.key < 12) {
+  if (fame.roll < 12) {
     return { fame, artifact: null };
   }
   const artifact = randomOptionEntry(tableAbbeyArtifactNature, rollFn);
-  if (artifact.key !== 6) {
+  if (artifact.roll !== 6) {
     return { fame, artifact: { nature: artifact, relic: null } };
   }
   return {
@@ -2237,7 +2237,7 @@ function calcAbbeyHistory(rollFn: (faces: number) => number = d) {
   return {
     history,
     foundedYearsAgo:
-      history.key === 5 ? (rollFn(10) + rollFn(10)) * 10 : null,
+      history.roll === 5 ? (rollFn(10) + rollFn(10)) * 10 : null,
   };
 }
 
@@ -2329,4 +2329,3 @@ export {
   tableTowerUndergroundUsage,
   tableTowerWizardLevel
 };
-

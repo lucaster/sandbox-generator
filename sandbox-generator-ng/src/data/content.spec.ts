@@ -112,7 +112,7 @@ describe('content.ts calcContent', () => {
       type: 'Empty',
       detail: 'Upcoming weather',
       treasure: { chance: 0.15, roll: 52, hasTreasure: false },
-      convey: { key: 3, result: 'Etched/Drawn on something' },
+      convey: { roll: 3, result: 'Etched/Drawn on something' },
     });
   });
 
