@@ -8,14 +8,30 @@ import {
   ViewChild
 } from '@angular/core';
 import { calcContentWithPath, calcHexesDetailedContentWithDetails } from '../../../data/content';
-import { calcHexesBiome, calcHexesDetailedFeature, fromHexesDetailedToImagePathHexes, fromHexesToHexesDetailed, Hexes, HexesDetailed } from '../../../data/data';
+import {
+  calcHexesBiomeWithRolls,
+  calcHexesDetailedFeatureWithRolls,
+  fromHexesDetailedToImagePathHexes,
+  fromHexesToHexesDetailed,
+  hexesBiomeFromRolls,
+  hexesDetailedFeatureFromRolls,
+  type Hexes,
+  type HexesDetailed,
+  type HexRolls,
+  type HexRollSequences,
+} from '../../../data/data';
 import { calcFactions, type Faction, type FactionResult } from '../../../data/factions';
-import { calcLair } from '../../../data/lairs';
+import { calcLair, calcLairFromRolls, calcLairWithRolls, type LairRolls } from '../../../data/lairs';
 import { SvgDrawer, type FactionShape } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
 
 export type HexPatchMode = 'biome' | 'feature' | 'faction' | 'content' | 'sample';
+export type FeaturePatchExport = {
+  featureRolls: HexRollSequences;
+  biomeRolls: HexRolls | null;
+  lairRolls: { [hex: number]: LairRolls };
+};
 
 @Component({
   selector: 'app-hex-patch',
@@ -59,6 +75,9 @@ export class HexPatch implements AfterViewInit {
   factionList = signal<Faction[]>([]);
   private hexesDetailed: HexesDetailed | null = null;
   private biomes: Hexes | null = null;
+  private biomeRolls: HexRolls | null = null;
+  private featureRolls: HexRollSequences | null = null;
+  private lairRolls: { [hex: number]: LairRolls } = {};
   private contentDetails: {
     [hexNum: number]: ReturnType<typeof calcContentWithPath>;
   } = {};
@@ -98,30 +117,89 @@ export class HexPatch implements AfterViewInit {
     this.resetPatch();
   }
 
-  loadBiomePatch(biomes: Hexes) {
+  loadBiomePatch(rolls: HexRolls) {
     if (this.mode() !== 'biome') {
       throw new Error('Biome patches can only be loaded in biome mode.');
     }
 
+    const biomes = hexesBiomeFromRolls(rolls);
     this.resetPatch();
-    this.drawBiomePatch(biomes);
+    this.drawBiomePatch({ biomes, rolls });
     this.updateHexDetailList();
   }
 
-  exportBiomePatch(): Hexes {
-    if (this.mode() !== 'biome' || !this.biomes) {
-      throw new Error('No biome patch is available to export.');
+  loadFeaturePatch(featurePatch: FeaturePatchExport) {
+    if (this.mode() !== 'feature') {
+      throw new Error('Feature patches can only be loaded in feature mode.');
     }
-    return { ...this.biomes };
+
+    const hexesDetailed = hexesDetailedFeatureFromRolls(featurePatch.featureRolls);
+    const lairHexes = Object.entries(hexesDetailed)
+      .filter(([, details]) => details.includes('Lair'))
+      .map(([hex]) => Number(hex));
+    if (lairHexes.length > 0 && !featurePatch.biomeRolls) {
+      throw new Error('Biome rolls are required for feature patches containing lairs.');
+    }
+    if (
+      lairHexes.length === 0 &&
+      (featurePatch.biomeRolls !== null || Object.keys(featurePatch.lairRolls).length > 0)
+    ) {
+      throw new Error('Biome and lair rolls are not expected for feature patches without lairs.');
+    }
+    if (lairHexes.length > 0) {
+      const expectedLairHexes = new Set(lairHexes.map(String));
+      if (
+        Object.keys(featurePatch.lairRolls).length !== lairHexes.length ||
+        Object.keys(featurePatch.lairRolls).some((hex) => !expectedLairHexes.has(hex))
+      ) {
+        throw new Error('Lair rolls must be provided for each lair hex and no others.');
+      }
+      const biomes = hexesBiomeFromRolls(featurePatch.biomeRolls!);
+      for (const hex of lairHexes) {
+        calcLairFromRolls(biomes[hex], featurePatch.lairRolls[hex]);
+      }
+    }
+    this.resetPatch();
+    this.drawFeatureHexPatch(
+      { hexesDetailed, rolls: featurePatch.featureRolls },
+      featurePatch
+    );
+    this.updateHexDetailList();
   }
 
-  private drawBiomePatch(biomes: Hexes = calcHexesBiome()) {
+  exportBiomePatch(): HexRolls {
+    if (this.mode() !== 'biome' || !this.biomeRolls) {
+      throw new Error('No biome patch is available to export.');
+    }
+    return { ...this.biomeRolls };
+  }
+
+  exportFeaturePatch(): FeaturePatchExport {
+    if (this.mode() !== 'feature' || !this.featureRolls) {
+      throw new Error('No feature patch is available to export.');
+    }
+    return {
+      featureRolls: Object.fromEntries(
+        Object.entries(this.featureRolls).map(([hex, rolls]) => [hex, [...rolls]])
+      ),
+      biomeRolls: this.biomeRolls ? { ...this.biomeRolls } : null,
+      lairRolls: Object.fromEntries(
+        Object.entries(this.lairRolls).map(([hex, rolls]) => [hex, [...rolls]])
+      ),
+    };
+  }
+
+  private drawBiomePatch(
+    generated: { biomes: Hexes; rolls: HexRolls } = calcHexesBiomeWithRolls()
+  ) {
     const svg = this.svgElement.nativeElement;
     const svgDrawer = new SvgDrawer(svg);
     const r = 50;
     const hexOps = new HexOps(r);
     const imageOpts = { width: 2.45 * hexOps.h, height: 2.45 * hexOps.h };
+    const biomes = generated.biomes;
     this.biomes = biomes;
+    this.biomeRolls = generated.rolls;
     this.hexesDetailed = fromHexesToHexesDetailed(biomes);
     const imagePathHexes = fromHexesDetailedToImagePathHexes(this.hexesDetailed);
     this.drawPatch(
@@ -132,19 +210,51 @@ export class HexPatch implements AfterViewInit {
     );
   }
 
-  private drawFeatureHexPatch() {
+  private drawFeatureHexPatch(
+    generated: { hexesDetailed: HexesDetailed; rolls: HexRollSequences } =
+      calcHexesDetailedFeatureWithRolls(),
+    importedRolls?: FeaturePatchExport
+  ) {
     const svg = this.svgElement.nativeElement;
     const svgDrawer = new SvgDrawer(svg);
     const r = 50;
     const hexOps = new HexOps(r);
     const imageOpts = { width: 50, height: 50 };
-    this.hexesDetailed = calcHexesDetailedFeature();
+    this.hexesDetailed = generated.hexesDetailed;
+    this.featureRolls = generated.rolls;
     // Features do not depend on the biome, but a lair does. Generate a biome
     // map alongside the features so each lair hex can be detailed.
     const hasLair = Object.values(this.hexesDetailed).some(
       (details) => details.includes('Lair')
     );
-    this.biomes = hasLair ? calcHexesBiome() : null;
+    if (hasLair) {
+      const biomeData = importedRolls?.biomeRolls
+        ? {
+            biomes: hexesBiomeFromRolls(importedRolls.biomeRolls),
+            rolls: importedRolls.biomeRolls,
+          }
+        : calcHexesBiomeWithRolls();
+      this.biomes = biomeData.biomes;
+      this.biomeRolls = biomeData.rolls;
+      for (const [hex, details] of Object.entries(this.hexesDetailed)) {
+        const hexNum = Number(hex);
+        if (!details.includes('Lair') || this.mode() !== 'feature') {
+          continue;
+        }
+        if (importedRolls) {
+          const rolls = importedRolls.lairRolls[hexNum];
+          this.lairs[hexNum] = calcLairFromRolls(this.biomes[hexNum], rolls);
+          this.lairRolls[hexNum] = [...rolls];
+        } else {
+          const result = calcLairWithRolls(this.biomes[hexNum]);
+          this.lairs[hexNum] = result.lair;
+          this.lairRolls[hexNum] = result.rolls;
+        }
+      }
+    } else {
+      this.biomes = null;
+      this.biomeRolls = null;
+    }
     const imagePathHexes = fromHexesDetailedToImagePathHexes(this.hexesDetailed);
     this.drawPatch(
       svgDrawer,
@@ -493,6 +603,9 @@ export class HexPatch implements AfterViewInit {
     this.contentDetails = {};
     this.lairs = {};
     this.factionResult = null;
+    this.biomeRolls = null;
+    this.featureRolls = null;
+    this.lairRolls = {};
     this.factionList.set([]);
     this.hexDetailList.set([]);
     const svg = this.svgElement.nativeElement;

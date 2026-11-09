@@ -51,6 +51,104 @@ function calcStartingHexBiome(
   );
 }
 
+type FeaturePatchWithRolls = {
+  hexesDetailed: HexesDetailed;
+  rolls: HexRollSequences;
+};
+
+function calcHexesDetailedFeatureWithRolls(
+  rollFn: (faces: number) => number = d
+): FeaturePatchWithRolls {
+  const hexesDetailed: HexesDetailed = {
+    1: ['Village'],
+    2: ['Dungeon'],
+  };
+  // Store the table results for these fixed features as well: Village is 1
+  // on the starting table and Dungeon is 6 on the next-feature table.
+  const rolls: HexRollSequences = {
+    1: [1],
+    2: [6],
+  };
+  for (const { next: hex } of currHexNextHex) {
+    if (hex === 2) {
+      continue;
+    }
+    const result = calcHexPathWithRolls(tableNextHexFeature, rollFn);
+    hexesDetailed[hex] = result.details;
+    rolls[hex] = result.rolls;
+  }
+  return { hexesDetailed, rolls };
+}
+
+function hexesDetailedFeatureFromRolls(rolls: HexRollSequences): HexesDetailed {
+  const entries = Object.entries(rolls);
+  if (entries.length !== 19) {
+    throw new Error('Expected exactly 19 feature roll sequences.');
+  }
+  for (const [hex, sequence] of entries) {
+    const hexNumber = Number(hex);
+    if (!Number.isInteger(hexNumber) || hexNumber < 1 || hexNumber > 19) {
+      throw new Error(`Invalid hex number: ${hex}.`);
+    }
+    if (
+      !Array.isArray(sequence) ||
+      sequence.length === 0 ||
+      !sequence.every((roll) => Number.isInteger(roll))
+    ) {
+      throw new Error(`Feature rolls for hex ${hex} must be a non-empty array of integers.`);
+    }
+  }
+  if (rolls[1].length !== 1 || rolls[1][0] !== 1) {
+    throw new Error('Hex 1 must contain the fixed Village result [1].');
+  }
+  if (rolls[2].length !== 1 || rolls[2][0] !== 6) {
+    throw new Error('Hex 2 must contain the fixed Dungeon result [6].');
+  }
+
+  const result: HexesDetailed = {
+    1: ['Village'],
+    2: ['Dungeon'],
+  };
+  for (let hex = 3; hex <= 19; hex++) {
+    result[hex] = featurePathFromRolls(tableNextHexFeature, rolls[hex]);
+  }
+  return result;
+}
+
+function calcHexPathWithRolls(
+  table: RandomTable,
+  rollFn: (faces: number) => number
+): { details: string[]; rolls: number[] } {
+  const roll = randomKey(table.options, table.dice, rollFn);
+  const option = table.options[roll];
+  if (typeof option === 'string') {
+    return { details: [option], rolls: [roll] };
+  }
+  const nested = calcHexPathWithRolls(option.nextTable, rollFn);
+  return {
+    details: [option.text, ...nested.details],
+    rolls: [roll, ...nested.rolls],
+  };
+}
+
+function featurePathFromRolls(table: RandomTable, rolls: number[]): string[] {
+  const [roll, ...remainingRolls] = rolls;
+  if (!Number.isInteger(roll) || !Object.hasOwn(table.options, roll)) {
+    throw new Error(`Invalid roll ${String(roll)} for table "${table.title}".`);
+  }
+  const option = table.options[roll];
+  if (typeof option === 'string') {
+    if (remainingRolls.length > 0) {
+      throw new Error(`Unexpected extra rolls for table "${table.title}".`);
+    }
+    return [option];
+  }
+  if (remainingRolls.length === 0) {
+    throw new Error(`Missing roll for table "${option.nextTable.title}".`);
+  }
+  return [option.text, ...featurePathFromRolls(option.nextTable, remainingRolls)];
+}
+
 function calcStartingHexFeature(
   rollFn: (faces: number) => number = d
 ): string {
@@ -138,6 +236,8 @@ const currHexNextHex = [
 
 type Hexes = { [key: number]: string; };
 type HexesDetailed = { [key: number]: string[]; };
+type HexRolls = { [key: number]: number; };
+type HexRollSequences = { [key: number]: number[]; };
 
 // The 2023 edition fixes the first two hexes for a traditional campaign:
 // hex 1 contains a village and hex 2 a dungeon (p. 11).
@@ -149,12 +249,45 @@ const fixedStartingFeatures: HexesDetailed = {
 function calcHexesBiome(
   rollFn: (faces: number) => number = d
 ): Hexes {
-  const result: Hexes = {
-    1: calcStartingHexBiome(rollFn),
-  };
+  return calcHexesBiomeWithRolls(rollFn).biomes;
+}
+
+function calcHexesBiomeWithRolls(
+  rollFn: (faces: number) => number = d
+): { biomes: Hexes; rolls: HexRolls } {
+  const first = randomOptionEntry(tableStartingHexBiome, rollFn);
+  const biomes: Hexes = { 1: first.result };
+  const rolls: HexRolls = { 1: first.roll };
   for (const item of currHexNextHex) {
-    const nextHexResult = calcNextHexBiome(result[item.cur], rollFn);
-    result[item.next] = nextHexResult;
+    const roll = rollFn(10);
+    rolls[item.next] = roll;
+    biomes[item.next] =
+      roll <= 5 ? biomes[item.cur] : (tableNextHexBiome.options[roll] as string);
+  }
+  return { biomes, rolls };
+}
+
+function hexesBiomeFromRolls(rolls: HexRolls): Hexes {
+  const result: Hexes = {};
+  const entries = Object.entries(rolls);
+  if (entries.length !== 19) {
+    throw new Error('Expected exactly 19 biome rolls.');
+  }
+  for (const [hex, roll] of entries) {
+    const hexNumber = Number(hex);
+    if (!Number.isInteger(hexNumber) || hexNumber < 1 || hexNumber > 19) {
+      throw new Error(`Invalid hex number: ${hex}.`);
+    }
+    if (!Number.isInteger(roll) || roll < 1 || roll > 10) {
+      throw new Error(`Invalid biome roll for hex ${hex}.`);
+    }
+  }
+
+  result[1] = tableStartingHexBiome.options[rolls[1]] as string;
+  for (const item of currHexNextHex) {
+    const roll = rolls[item.next];
+    result[item.next] =
+      roll <= 5 ? result[item.cur] : (tableNextHexBiome.options[roll] as string);
   }
   return result;
 }
@@ -342,10 +475,12 @@ function oppositeOptionEntry(roll: number, table: RandomTable) {
 
 export {
   calcHexesBiome,
+  calcHexesBiomeWithRolls,
   calcHexesContent,
   calcHexesDetailed,
   calcHexesDetailedContent,
   calcHexesDetailedFeature,
+  calcHexesDetailedFeatureWithRolls,
   calcHexesFeature,
   calcNextHexBiome,
   calcNextHexFeature,
@@ -355,11 +490,15 @@ export {
   fromHexesDetailedToHexes,
   fromHexesDetailedToImagePathHexes,
   fromHexesToHexesDetailed,
+  hexesBiomeFromRolls,
+  hexesDetailedFeatureFromRolls,
   oppositeOptionEntry,
   optionsToImagePath,
   optionToImagePath,
   randomOption,
   randomOptionEntry,
   type Hexes,
-  type HexesDetailed
+  type HexesDetailed,
+  type HexRolls,
+  type HexRollSequences
 };

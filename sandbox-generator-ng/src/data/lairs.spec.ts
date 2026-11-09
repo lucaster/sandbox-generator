@@ -2,6 +2,8 @@ import { randomOption } from './data';
 import {
   biomeEncountersMarsh,
   calcLair,
+  calcLairFromRolls,
+  calcLairWithRolls,
   lairLayout,
   lairLayoutPercentages,
 } from './lairs';
@@ -67,6 +69,22 @@ describe('lairs.ts lair layout percentages', () => {
 });
 
 describe('lairs.ts calcLair', () => {
+  it('replays a lair from its numeric roll sequence', () => {
+    let seed = 41;
+    const rollFn = (faces: number) => {
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      return (seed % faces) + 1;
+    };
+
+    const generated = calcLairWithRolls('Forest', {}, rollFn);
+    const imported = calcLairFromRolls('Forest', generated.rolls);
+
+    expect(imported).toEqual(generated.lair);
+    expect(() => calcLairFromRolls('Forest', [...generated.rolls, 1])).toThrowError(
+      'Unexpected extra lair rolls.'
+    );
+  });
+
   it('reproduces the book example (200 goblins, 4000 sp, 4 gems, 40% outside)', () => {
     // Forest 2d6 = 3 + 3 -> Goblins (key 6).
     // % in lair = 50, roll 70 -> patrol.

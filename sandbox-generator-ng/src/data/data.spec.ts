@@ -1,8 +1,12 @@
 import {
   calcHexesBiome,
+  calcHexesBiomeWithRolls,
   calcHexesDetailedFeature,
+  calcHexesDetailedFeatureWithRolls,
   calcHexesFeature,
   calcNextHexBiome,
+  hexesBiomeFromRolls,
+  hexesDetailedFeatureFromRolls,
   oppositeOptionEntry,
 } from './data';
 import { tableNextHexBiome, tableStartingHexBiome } from './biome-tables';
@@ -44,6 +48,51 @@ describe('data.ts', () => {
     const hexes = calcHexesBiome(() => 9);
 
     expect(hexes[1]).toBe('Marsh');
+  });
+
+  it('round-trips biome patches using numeric rolls', () => {
+    const patch = calcHexesBiomeWithRolls(() => 7);
+
+    expect(patch.rolls).toEqual(Object.fromEntries(
+      Array.from({ length: 19 }, (_, index) => [index + 1, 7])
+    ));
+    expect(patch.biomes[1]).toBe('Hills');
+    expect(patch.biomes[2]).toBe('Forest');
+    expect(hexesBiomeFromRolls(patch.rolls)).toEqual(patch.biomes);
+  });
+
+  it('round-trips feature patches using numeric roll sequences', () => {
+    const patch = calcHexesDetailedFeatureWithRolls(() => 1);
+
+    expect(patch.rolls[1]).toEqual([1]);
+    expect(patch.rolls[2]).toEqual([6]);
+    expect(patch.rolls[3]).toEqual([1, 1, 1, 1]);
+    expect(patch.hexesDetailed[3]).toEqual([
+      'Landmark',
+      'Natural',
+      'Fauna',
+      'Animal boneyard',
+    ]);
+    expect(hexesDetailedFeatureFromRolls(patch.rolls)).toEqual(patch.hexesDetailed);
+  });
+
+  it('preserves feature generation results and roll order', () => {
+    let expectedSeed = 17;
+    let actualSeed = 17;
+    const expectedRoll = (faces: number) => {
+      expectedSeed = (expectedSeed * 1664525 + 1013904223) % 4294967296;
+      return (expectedSeed % faces) + 1;
+    };
+    const actualRoll = (faces: number) => {
+      actualSeed = (actualSeed * 1664525 + 1013904223) % 4294967296;
+      return (actualSeed % faces) + 1;
+    };
+
+    const expected = calcHexesDetailedFeature(expectedRoll);
+    const actual = calcHexesDetailedFeatureWithRolls(actualRoll);
+
+    expect(actual.hexesDetailed).toEqual(expected);
+    expect(hexesDetailedFeatureFromRolls(actual.rolls)).toEqual(expected);
   });
 
   it('calcHexesFeature fixes the first hex to Village and the second to Dungeon', () => {

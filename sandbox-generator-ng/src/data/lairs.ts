@@ -46,6 +46,8 @@ type LairOptions = {
   rollOutside?: boolean;
 };
 
+type LairRolls = number[];
+
 /**
  * Splits an integer total across rooms using the largest remainder method, so
  * the room values always add up to the total.
@@ -279,12 +281,48 @@ function calcLair(
   };
 }
 
+function calcLairWithRolls(
+  biome: string,
+  options: LairOptions = {},
+  rollFn: (faces: number) => number = d
+): { lair: ReturnType<typeof calcLair>; rolls: LairRolls } {
+  const rolls: LairRolls = [];
+  const lair = calcLair(biome, options, (faces) => {
+    const roll = rollFn(faces);
+    rolls.push(roll);
+    return roll;
+  });
+  return { lair, rolls };
+}
+
+function calcLairFromRolls(
+  biome: string,
+  rolls: LairRolls,
+  options: LairOptions = {}
+): ReturnType<typeof calcLair> {
+  let index = 0;
+  const lair = calcLair(biome, options, (faces) => {
+    const roll = rolls[index++];
+    if (!Number.isInteger(roll) || roll < 1 || roll > faces) {
+      throw new Error(`Invalid lair roll at position ${index}.`);
+    }
+    return roll;
+  });
+  if (index !== rolls.length) {
+    throw new Error('Unexpected extra lair rolls.');
+  }
+  return lair;
+}
+
 export {
   biomeEncountersMarsh,
   calcBiomeEncounter,
   calcLair,
+  calcLairFromRolls,
+  calcLairWithRolls,
   lairLayout,
   lairLayoutPercentages,
+  type LairRolls,
   type LairOptions,
   type LairTreasure,
 };

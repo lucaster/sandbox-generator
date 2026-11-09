@@ -14,4 +14,18 @@
     <p role="alert">{{ error }}</p>
   }
 }
+@if (mode === 'feature') {
+  <button type="button" (click)="exportFeaturePatch(patch)">Export JSON</button>
+  <label>
+    Import JSON
+    <input
+      type="file"
+      accept="application/json,.json"
+      (change)="importFeaturePatch($event, patch)"
+    />
+  </label>
+  @if (importError(); as error) {
+    <p role="alert">{{ error }}</p>
+  }
+}
 <app-hex-patch [mode]="mode" #patch />
