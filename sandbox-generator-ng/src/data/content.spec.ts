@@ -1,7 +1,9 @@
 import {
   calcContent,
+  calcHexesDetailedContentWithRolls,
   calcContentWithPath,
   calcHexesDetailedContentWithDetails,
+  contentPatchFromRolls,
 } from './content';
 import {
   tableContentConvey,
@@ -90,6 +92,38 @@ describe('content.ts calcHexesDetailedContentWithDetails', () => {
     expect(contents[1].type).toBe('Empty');
     expect(contents[1].treasure.hasTreasure).toBe(false);
     expect(contents[1].convey?.result).toBe('Etched/Drawn on something');
+  });
+});
+
+describe('content.ts content patch rolls', () => {
+  it('replays all numeric rolls to reproduce content paths and details', () => {
+    const generated = calcHexesDetailedContentWithRolls(seeded(29));
+    const replayed = contentPatchFromRolls(generated.rolls);
+
+    expect(replayed).toEqual({
+      hexesDetailed: generated.hexesDetailed,
+      contents: generated.contents,
+    });
+  });
+
+  it('rejects invalid nested content rolls', () => {
+    const generated = calcHexesDetailedContentWithRolls(seeded(29));
+    const rolls = {
+      ...generated.rolls,
+      1: { ...generated.rolls[1], pathRolls: [4] },
+    };
+
+    expect(() => contentPatchFromRolls(rolls)).toThrowError(/Missing roll/);
+  });
+
+  it('rejects patches that do not contain all 19 hexes', () => {
+    const generated = calcHexesDetailedContentWithRolls(seeded(29));
+    const rolls = { ...generated.rolls };
+    delete rolls[19];
+
+    expect(() => contentPatchFromRolls(rolls)).toThrowError(
+      /Expected exactly 19 content roll entries/
+    );
   });
 });
 

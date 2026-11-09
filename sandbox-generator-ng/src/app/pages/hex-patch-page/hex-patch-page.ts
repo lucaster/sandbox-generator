@@ -7,6 +7,10 @@ import {
   type HexPatchMode,
 } from '../../components/hex-patch/hex-patch';
 import type { HexRolls, HexRollSequences } from '../../../data/data';
+import {
+  contentPatchFromRolls,
+  type ContentPatchRolls,
+} from '../../../data/content';
 
 const patchTitles: Record<Exclude<HexPatchMode, 'sample'>, string> = {
   biome: 'Biome',
@@ -143,6 +147,41 @@ export class HexPatchPage {
     }
   }
 
+  exportContentPatch(patch: HexPatch) {
+    const data = JSON.stringify(patch.exportContentPatch(), null, 2);
+    const file = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'content-patch.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async importContentPatch(event: Event, patch: HexPatch) {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error('Content patch import requires a file input.');
+    }
+
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    this.importError.set(null);
+    try {
+      const imported = this.parseContentPatch(JSON.parse(await file.text()));
+      patch.loadContentPatch(imported);
+    } catch (error) {
+      this.importError.set(
+        `Unable to import content patch: ${error instanceof Error ? error.message : String(error)}`
+      );
+    } finally {
+      input.value = '';
+    }
+  }
+
   private parseBiomePatch(value: unknown): HexRolls {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       throw new Error('Expected a JSON object mapping hex numbers to rolls.');
@@ -257,5 +296,42 @@ export class HexPatchPage {
       ...this.parseFeaturePatch(value),
       factionRolls,
     };
+  }
+
+  private parseContentPatch(value: unknown): ContentPatchRolls {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      throw new Error('Expected a JSON object mapping hex numbers to content rolls.');
+    }
+
+    const result: ContentPatchRolls = {};
+    for (const [hex, entry] of Object.entries(value)) {
+      if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+        throw new Error(`Content rolls for hex ${hex} must be a JSON object.`);
+      }
+
+      const rolls = entry as Record<string, unknown>;
+      if (
+        !Array.isArray(rolls['pathRolls']) ||
+        !rolls['pathRolls'].every(
+          (roll) => typeof roll === 'number' && Number.isInteger(roll)
+        )
+      ) {
+        throw new Error(`Path rolls for hex ${hex} must be an array of integers.`);
+      }
+      if (
+        (typeof rolls['treasureRoll'] !== 'number' && rolls['treasureRoll'] !== null) ||
+        (typeof rolls['conveyRoll'] !== 'number' && rolls['conveyRoll'] !== null)
+      ) {
+        throw new Error(`Treasure and convey rolls for hex ${hex} must be numbers or null.`);
+      }
+      result[Number(hex)] = {
+        pathRolls: rolls['pathRolls'],
+        treasureRoll: rolls['treasureRoll'],
+        conveyRoll: rolls['conveyRoll'],
+      };
+    }
+
+    contentPatchFromRolls(result);
+    return result;
   }
 }

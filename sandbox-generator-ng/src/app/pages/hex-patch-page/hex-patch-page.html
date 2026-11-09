@@ -42,4 +42,18 @@
     <p role="alert">{{ error }}</p>
   }
 }
+@if (mode === 'content') {
+  <button type="button" (click)="exportContentPatch(patch)">Export JSON</button>
+  <label>
+    Import JSON
+    <input
+      type="file"
+      accept="application/json,.json"
+      (change)="importContentPatch($event, patch)"
+    />
+  </label>
+  @if (importError(); as error) {
+    <p role="alert">{{ error }}</p>
+  }
+}
 <app-hex-patch [mode]="mode" #patch />

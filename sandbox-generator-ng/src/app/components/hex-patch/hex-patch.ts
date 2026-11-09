@@ -7,7 +7,12 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import { calcContentWithPath, calcHexesDetailedContentWithDetails } from '../../../data/content';
+import {
+  calcContentWithPath,
+  calcHexesDetailedContentWithRolls,
+  contentPatchFromRolls,
+  type ContentPatchRolls,
+} from '../../../data/content';
 import {
   calcHexesBiomeWithRolls,
   calcHexesDetailedFeatureWithRolls,
@@ -88,6 +93,7 @@ export class HexPatch implements AfterViewInit {
   private featureRolls: HexRollSequences | null = null;
   private factionRolls: FactionRolls | null = null;
   private lairRolls: { [hex: number]: LairRolls } = {};
+  private contentRolls: ContentPatchRolls | null = null;
   private contentDetails: {
     [hexNum: number]: ReturnType<typeof calcContentWithPath>;
   } = {};
@@ -153,6 +159,17 @@ export class HexPatch implements AfterViewInit {
     }
 
     this.loadFeaturePatchData(factionPatch, factionPatch.factionRolls);
+    this.updateHexDetailList();
+  }
+
+  loadContentPatch(rolls: ContentPatchRolls) {
+    if (this.mode() !== 'content') {
+      throw new Error('Content patches can only be loaded in content mode.');
+    }
+
+    const generated = contentPatchFromRolls(rolls);
+    this.resetPatch();
+    this.drawContentHexPatch({ ...generated, rolls });
     this.updateHexDetailList();
   }
 
@@ -237,6 +254,22 @@ export class HexPatch implements AfterViewInit {
     };
   }
 
+  exportContentPatch(): ContentPatchRolls {
+    if (this.mode() !== 'content' || !this.contentRolls) {
+      throw new Error('No content patch is available to export.');
+    }
+    return Object.fromEntries(
+      Object.entries(this.contentRolls).map(([hex, rolls]) => [
+        hex,
+        {
+          pathRolls: [...rolls.pathRolls],
+          treasureRoll: rolls.treasureRoll,
+          conveyRoll: rolls.conveyRoll,
+        },
+      ])
+    );
+  }
+
   private drawBiomePatch(
     generated: { biomes: Hexes; rolls: HexRolls } = calcHexesBiomeWithRolls()
   ) {
@@ -312,14 +345,16 @@ export class HexPatch implements AfterViewInit {
     );
   }
 
-  private drawContentHexPatch() {
+  private drawContentHexPatch(
+    generated = calcHexesDetailedContentWithRolls()
+  ) {
     const svg = this.svgElement.nativeElement;
     const svgDrawer = new SvgDrawer(svg);
     const r = 50;
     const hexOps = new HexOps(r);
-    const { hexesDetailed, contents } = calcHexesDetailedContentWithDetails();
-    this.hexesDetailed = hexesDetailed;
-    this.contentDetails = contents;
+    this.hexesDetailed = generated.hexesDetailed;
+    this.contentDetails = generated.contents;
+    this.contentRolls = generated.rolls;
     const imagePathHexes = fromHexesDetailedToImagePathHexes(this.hexesDetailed);
     this.drawPatch(
       svgDrawer,
@@ -666,6 +701,7 @@ export class HexPatch implements AfterViewInit {
     this.featureRolls = null;
     this.factionRolls = null;
     this.lairRolls = {};
+    this.contentRolls = null;
     this.factionList.set([]);
     this.hexDetailList.set([]);
     const svg = this.svgElement.nativeElement;
