@@ -6,7 +6,7 @@ import {
 import {
   tableContentConvey,
   tableContentTreasureChance,
-} from './random-tables';
+} from './content-tables';
 
 function sequence(values: number[], fallback = 1) {
   let index = 0;
@@ -20,7 +20,7 @@ function seeded(seed: number) {
   };
 }
 
-describe('random-tables.ts content tables', () => {
+describe('content-tables.ts', () => {
   it('uses the 2023 treasure chances', () => {
     expect(tableContentTreasureChance.options['Hazard']).toBe(0.25);
     expect(tableContentTreasureChance.options['Empty']).toBe(0.15);

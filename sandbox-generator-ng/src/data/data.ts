@@ -1,6 +1,8 @@
 import { d } from '../dice/dice';
 import { Options, OptionWithFollowUp, type RandomTable } from '../domain/random-table';
-import { tableContent, tableNextHexBiome, tableNextHexFeature, tableStartingHexBiome, tableStartingHexFeature } from './random-tables';
+import { tableNextHexBiome, tableStartingHexBiome } from './biome-tables';
+import { tableContent } from './content-tables';
+import { tableNextHexFeature, tableStartingHexFeature } from './feature-tables';
 
 const optionAndImagePath: { [option: string]: string } = {
   // Biome

@@ -8,7 +8,8 @@ import {
   calcStartingHexBiome,
   calcStartingHexFeature,
 } from '../../../data/data';
-import { tableStartingHexBiome, tableStartingHexFeature } from '../../../data/random-tables';
+import { tableStartingHexBiome } from '../../../data/biome-tables';
+import { tableStartingHexFeature } from '../../../data/feature-tables';
 import { OptionWithFollowUp } from '../../../domain/random-table';
 
 @Component({

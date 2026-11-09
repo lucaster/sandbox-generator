@@ -5,7 +5,7 @@ import {
   tableContent,
   tableContentConvey,
   tableContentTreasureChance,
-} from './random-tables';
+} from './content-tables';
 
 /**
  * Follows a content table's nested tables and returns the whole path.
