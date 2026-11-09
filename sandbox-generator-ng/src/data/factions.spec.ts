@@ -3,6 +3,8 @@ import {
   calcFactionEvent,
   calcFactionRelationship,
   calcFactions,
+  calcFactionsFromRolls,
+  calcFactionsWithRolls,
   isIntelligentLair,
   tableFactionEventNature,
   tableFactionEventWhen,
@@ -159,6 +161,23 @@ describe('hex-grid.ts patch adjacency', () => {
 });
 
 describe('factions.ts calcFactions domains', () => {
+  it('replays a faction patch from its numeric roll sequence', () => {
+    let seed = 41;
+    const rollFn = (faces: number) => {
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      return (seed % faces) + 1;
+    };
+    const patch = features({ 1: 'Castle', 3: 'City', 5: 'Tower', 8: 'Abbey' });
+
+    const generated = calcFactionsWithRolls(patch, {}, rollFn);
+    const imported = calcFactionsFromRolls(patch, generated.rolls);
+
+    expect(imported).toEqual(generated.result);
+    expect(() => calcFactionsFromRolls(patch, [...generated.rolls, 1])).toThrowError(
+      'Unexpected extra faction rolls.'
+    );
+  });
+
   it('creates a seven-hex domain for a castle', () => {
     const result = calcFactions(features({ 1: 'Castle' }), {}, () => 2);
 

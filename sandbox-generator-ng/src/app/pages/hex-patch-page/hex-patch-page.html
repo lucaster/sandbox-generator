@@ -28,4 +28,18 @@
     <p role="alert">{{ error }}</p>
   }
 }
+@if (mode === 'faction') {
+  <button type="button" (click)="exportFactionPatch(patch)">Export JSON</button>
+  <label>
+    Import JSON
+    <input
+      type="file"
+      accept="application/json,.json"
+      (change)="importFactionPatch($event, patch)"
+    />
+  </label>
+  @if (importError(); as error) {
+    <p role="alert">{{ error }}</p>
+  }
+}
 <app-hex-patch [mode]="mode" #patch />

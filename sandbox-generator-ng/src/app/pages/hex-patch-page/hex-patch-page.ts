@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import {
   HexPatch,
   type FeaturePatchExport,
+  type FactionPatchExport,
   type HexPatchMode,
 } from '../../components/hex-patch/hex-patch';
 import type { HexRolls, HexRollSequences } from '../../../data/data';
@@ -107,6 +108,41 @@ export class HexPatchPage {
     }
   }
 
+  exportFactionPatch(patch: HexPatch) {
+    const data = JSON.stringify(patch.exportFactionPatch(), null, 2);
+    const file = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'faction-patch.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async importFactionPatch(event: Event, patch: HexPatch) {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error('Faction patch import requires a file input.');
+    }
+
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    this.importError.set(null);
+    try {
+      const imported = this.parseFactionPatch(JSON.parse(await file.text()));
+      patch.loadFactionPatch(imported);
+    } catch (error) {
+      this.importError.set(
+        `Unable to import faction patch: ${error instanceof Error ? error.message : String(error)}`
+      );
+    } finally {
+      input.value = '';
+    }
+  }
+
   private parseBiomePatch(value: unknown): HexRolls {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       throw new Error('Expected a JSON object mapping hex numbers to rolls.');
@@ -200,5 +236,26 @@ export class HexPatchPage {
       lairRolls[hexNumber] = rolls;
     }
     return { featureRolls: result, biomeRolls, lairRolls };
+  }
+
+  private parseFactionPatch(value: unknown): FactionPatchExport {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      throw new Error('Expected a JSON object containing faction rolls.');
+    }
+    const factionPatch = value as Record<string, unknown>;
+    if (!Array.isArray(factionPatch['factionRolls'])) {
+      throw new Error('Faction rolls must be an array of integers.');
+    }
+    const factionRolls: number[] = [];
+    for (const roll of factionPatch['factionRolls']) {
+      if (typeof roll !== 'number' || !Number.isInteger(roll)) {
+        throw new Error('Faction rolls must be an array of integers.');
+      }
+      factionRolls.push(roll);
+    }
+    return {
+      ...this.parseFeaturePatch(value),
+      factionRolls,
+    };
   }
 }

@@ -20,7 +20,13 @@ import {
   type HexRolls,
   type HexRollSequences,
 } from '../../../data/data';
-import { calcFactions, type Faction, type FactionResult } from '../../../data/factions';
+import {
+  calcFactionsFromRolls,
+  calcFactionsWithRolls,
+  type Faction,
+  type FactionResult,
+  type FactionRolls,
+} from '../../../data/factions';
 import { calcLair, calcLairFromRolls, calcLairWithRolls, type LairRolls } from '../../../data/lairs';
 import { SvgDrawer, type FactionShape } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
@@ -31,6 +37,9 @@ export type FeaturePatchExport = {
   featureRolls: HexRollSequences;
   biomeRolls: HexRolls | null;
   lairRolls: { [hex: number]: LairRolls };
+};
+export type FactionPatchExport = FeaturePatchExport & {
+  factionRolls: FactionRolls;
 };
 
 @Component({
@@ -77,6 +86,7 @@ export class HexPatch implements AfterViewInit {
   private biomes: Hexes | null = null;
   private biomeRolls: HexRolls | null = null;
   private featureRolls: HexRollSequences | null = null;
+  private factionRolls: FactionRolls | null = null;
   private lairRolls: { [hex: number]: LairRolls } = {};
   private contentDetails: {
     [hexNum: number]: ReturnType<typeof calcContentWithPath>;
@@ -133,6 +143,23 @@ export class HexPatch implements AfterViewInit {
       throw new Error('Feature patches can only be loaded in feature mode.');
     }
 
+    this.loadFeaturePatchData(featurePatch);
+    this.updateHexDetailList();
+  }
+
+  loadFactionPatch(factionPatch: FactionPatchExport) {
+    if (this.mode() !== 'faction') {
+      throw new Error('Faction patches can only be loaded in faction mode.');
+    }
+
+    this.loadFeaturePatchData(factionPatch, factionPatch.factionRolls);
+    this.updateHexDetailList();
+  }
+
+  private loadFeaturePatchData(
+    featurePatch: FeaturePatchExport,
+    factionRolls?: FactionRolls
+  ) {
     const hexesDetailed = hexesDetailedFeatureFromRolls(featurePatch.featureRolls);
     const lairHexes = Object.entries(hexesDetailed)
       .filter(([, details]) => details.includes('Lair'))
@@ -155,16 +182,27 @@ export class HexPatch implements AfterViewInit {
         throw new Error('Lair rolls must be provided for each lair hex and no others.');
       }
       const biomes = hexesBiomeFromRolls(featurePatch.biomeRolls!);
+      const lairInhabitants: { [hex: number]: string } = {};
       for (const hex of lairHexes) {
-        calcLairFromRolls(biomes[hex], featurePatch.lairRolls[hex]);
+        lairInhabitants[hex] = calcLairFromRolls(
+          biomes[hex],
+          featurePatch.lairRolls[hex]
+        ).inhabitants;
       }
+      if (factionRolls !== undefined) {
+        calcFactionsFromRolls(hexesDetailed, factionRolls, { lairInhabitants });
+      }
+    } else if (factionRolls !== undefined) {
+      calcFactionsFromRolls(hexesDetailed, factionRolls);
     }
     this.resetPatch();
     this.drawFeatureHexPatch(
       { hexesDetailed, rolls: featurePatch.featureRolls },
       featurePatch
     );
-    this.updateHexDetailList();
+    if (factionRolls) {
+      this.drawFactions(factionRolls);
+    }
   }
 
   exportBiomePatch(): HexRolls {
@@ -175,7 +213,7 @@ export class HexPatch implements AfterViewInit {
   }
 
   exportFeaturePatch(): FeaturePatchExport {
-    if (this.mode() !== 'feature' || !this.featureRolls) {
+    if ((this.mode() !== 'feature' && this.mode() !== 'faction') || !this.featureRolls) {
       throw new Error('No feature patch is available to export.');
     }
     return {
@@ -186,6 +224,16 @@ export class HexPatch implements AfterViewInit {
       lairRolls: Object.fromEntries(
         Object.entries(this.lairRolls).map(([hex, rolls]) => [hex, [...rolls]])
       ),
+    };
+  }
+
+  exportFactionPatch(): FactionPatchExport {
+    if (this.mode() !== 'faction' || !this.factionRolls) {
+      throw new Error('No faction patch is available to export.');
+    }
+    return {
+      ...this.exportFeaturePatch(),
+      factionRolls: [...this.factionRolls],
     };
   }
 
@@ -238,7 +286,7 @@ export class HexPatch implements AfterViewInit {
       this.biomeRolls = biomeData.rolls;
       for (const [hex, details] of Object.entries(this.hexesDetailed)) {
         const hexNum = Number(hex);
-        if (!details.includes('Lair') || this.mode() !== 'feature') {
+        if (!details.includes('Lair')) {
           continue;
         }
         if (importedRolls) {
@@ -283,24 +331,35 @@ export class HexPatch implements AfterViewInit {
   // Factions are downstream of features and lairs: features decide which
   // settlements create domains, and the lair inhabitants decide which lairs do.
   // drawFeatureHexPatch also prepares the biome map that drawFactions needs.
-  private drawFactions() {
+  private drawFactions(rolls?: FactionRolls) {
     if (!this.hexesDetailed) {
       return;
     }
 
     const lairInhabitants: { [hexNum: number]: string; } = {};
-    if (this.biomes) {
-      for (const key of Object.keys(this.hexesDetailed)) {
-        const hexNum = Number(key);
-        if (this.hexesDetailed[hexNum].includes('Lair')) {
-          const lair = calcLair(this.biomes[hexNum]);
-          this.lairs[hexNum] = lair;
-          lairInhabitants[hexNum] = lair.inhabitants;
-        }
+    for (const key of Object.keys(this.hexesDetailed)) {
+      const hexNum = Number(key);
+      const lair = this.lairs[hexNum];
+      if (lair) {
+        lairInhabitants[hexNum] = lair.inhabitants;
       }
     }
 
-    this.factionResult = calcFactions(this.hexesDetailed, { lairInhabitants });
+    if (rolls !== undefined) {
+      this.factionResult = calcFactionsFromRolls(
+        this.hexesDetailed,
+        rolls,
+        { lairInhabitants }
+      );
+      this.factionRolls = [...rolls];
+    } else {
+      const generated = calcFactionsWithRolls(
+        this.hexesDetailed,
+        { lairInhabitants }
+      );
+      this.factionResult = generated.result;
+      this.factionRolls = generated.rolls;
+    }
     this.factionList.set(this.factionResult.factions);
 
     const svgDrawer = new SvgDrawer(this.svgElement.nativeElement);
@@ -605,6 +664,7 @@ export class HexPatch implements AfterViewInit {
     this.factionResult = null;
     this.biomeRolls = null;
     this.featureRolls = null;
+    this.factionRolls = null;
     this.lairRolls = {};
     this.factionList.set([]);
     this.hexDetailList.set([]);

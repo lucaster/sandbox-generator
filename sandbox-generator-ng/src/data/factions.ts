@@ -44,6 +44,8 @@ type FactionResult = {
   contestedHexes: number[];
 };
 
+type FactionRolls = number[];
+
 const tableFactionRelationship: RandomTable = {
   id: 140,
   title: 'Faction Relationship',
@@ -425,10 +427,45 @@ function calcFactions(
   return { factions, hexFactions, contestedHexes };
 }
 
+function calcFactionsWithRolls(
+  features: HexesDetailed,
+  options: FactionOptions = {},
+  rollFn: (faces: number) => number = d
+): { result: FactionResult; rolls: FactionRolls } {
+  const rolls: FactionRolls = [];
+  const result = calcFactions(features, options, (faces) => {
+    const roll = rollFn(faces);
+    rolls.push(roll);
+    return roll;
+  });
+  return { result, rolls };
+}
+
+function calcFactionsFromRolls(
+  features: HexesDetailed,
+  rolls: FactionRolls,
+  options: FactionOptions = {}
+): FactionResult {
+  let index = 0;
+  const result = calcFactions(features, options, (faces) => {
+    const roll = rolls[index++];
+    if (!Number.isInteger(roll) || roll < 1 || roll > faces) {
+      throw new Error(`Invalid faction roll at position ${index}.`);
+    }
+    return roll;
+  });
+  if (index !== rolls.length) {
+    throw new Error('Unexpected extra faction rolls.');
+  }
+  return result;
+}
+
 export {
   calcFactionEvent,
   calcFactionRelationship,
   calcFactions,
+  calcFactionsFromRolls,
+  calcFactionsWithRolls,
   isIntelligentLair,
   tableFactionEventNature,
   tableFactionEventWhen,
@@ -436,6 +473,7 @@ export {
   type Faction,
   type FactionEvent,
   type FactionOptions,
+  type FactionRolls,
   type FactionRelationship,
   type FactionResult,
   type FactionSource,
