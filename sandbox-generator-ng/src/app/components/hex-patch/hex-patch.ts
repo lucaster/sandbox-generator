@@ -80,10 +80,10 @@ export class HexPatch implements AfterViewInit {
     '#4f6f3f',
   ];
   readonly contentColors: { [type: string]: string; } = {
-    Hazard: '#c0392b',
+    Hazard: '#f1c40f',
     Empty: '#7f8c8d',
     Special: '#8e44ad',
-    Monsters: '#d35400',
+    Monsters: '#c0392b',
   };
   hexDetailList = signal<{
     hexNum: number;
