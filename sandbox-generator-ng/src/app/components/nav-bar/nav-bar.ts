@@ -19,7 +19,7 @@ export class NavBar {
     { path: '/hex-draw-biome-patch', label: 'Biome Patch' },
     { path: '/hex-draw-feature-patch', label: 'Feature Patch' },
     { path: '/hex-draw-faction-patch', label: 'Faction Patch' },
-    { path: '/hex-draw-content-patch', label: 'Content Patch' },
+    { path: '/hex-draw-content-patch', label: 'Landmark Content Patch' },
     { path: '/hex-draw-patch', label: 'Sample Patch' },
     { path: '/settlements', label: 'Settlements' },
     { path: '/lairs', label: 'Lairs' },

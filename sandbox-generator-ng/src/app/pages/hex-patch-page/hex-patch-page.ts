@@ -16,7 +16,7 @@ const patchTitles: Record<Exclude<HexPatchMode, 'sample'>, string> = {
   biome: 'Biome',
   feature: 'Feature',
   faction: 'Faction',
-  content: 'Content',
+  content: 'Landmark Content',
 };
 
 function isPatchMode(mode: unknown): mode is keyof typeof patchTitles {
