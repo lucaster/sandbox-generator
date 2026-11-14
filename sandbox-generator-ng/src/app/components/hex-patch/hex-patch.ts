@@ -10,7 +10,6 @@ import {
 import {
   calcContentWithPath,
   calcHexesDetailedContentWithRolls,
-  calcLandmarkContentsWithRolls,
   contentPatchFromRolls,
   type ContentPatchRolls,
 } from '../../../data/content';
@@ -34,6 +33,12 @@ import {
   type FactionRolls,
 } from '../../../data/factions';
 import { calcLair, calcLairFromRolls, calcLairWithRolls, type LairRolls } from '../../../data/lairs';
+import {
+  calcOverallPatchWithRolls,
+  overallPatchFromRolls,
+  type OverallPatch,
+  type OverallPatchRolls,
+} from '../../../data/overall';
 import { SvgDrawer, type FactionShape } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
@@ -47,6 +52,7 @@ export type FeaturePatchExport = {
 export type FactionPatchExport = FeaturePatchExport & {
   factionRolls: FactionRolls;
 };
+export type OverallPatchExport = OverallPatchRolls;
 
 @Component({
   selector: 'app-hex-patch',
@@ -190,6 +196,21 @@ export class HexPatch implements AfterViewInit {
     this.updateHexDetailList();
   }
 
+  /**
+   * Replays an exported overall patch. The JSON is validated by
+   * overallPatchFromRolls before the current map is cleared.
+   */
+  loadOverallPatch(value: unknown) {
+    if (this.mode() !== 'overall') {
+      throw new Error('Overall patches can only be loaded in overall mode.');
+    }
+
+    const generated = overallPatchFromRolls(value);
+    this.resetPatch();
+    this.drawOverallPatch(generated);
+    this.updateHexDetailList();
+  }
+
   private loadFeaturePatchData(
     featurePatch: FeaturePatchExport,
     factionRolls?: FactionRolls
@@ -287,6 +308,38 @@ export class HexPatch implements AfterViewInit {
     );
   }
 
+  exportOverallPatch(): OverallPatchExport {
+    if (
+      this.mode() !== 'overall' ||
+      !this.biomeRolls ||
+      !this.featureRolls ||
+      !this.factionRolls ||
+      !this.contentRolls
+    ) {
+      throw new Error('No overall patch is available to export.');
+    }
+    return {
+      biomeRolls: { ...this.biomeRolls },
+      featureRolls: Object.fromEntries(
+        Object.entries(this.featureRolls).map(([hex, rolls]) => [hex, [...rolls]])
+      ),
+      lairRolls: Object.fromEntries(
+        Object.entries(this.lairRolls).map(([hex, rolls]) => [hex, [...rolls]])
+      ),
+      factionRolls: [...this.factionRolls],
+      contentRolls: Object.fromEntries(
+        Object.entries(this.contentRolls).map(([hex, rolls]) => [
+          hex,
+          {
+            pathRolls: [...rolls.pathRolls],
+            treasureRoll: rolls.treasureRoll,
+            conveyRoll: rolls.conveyRoll,
+          },
+        ])
+      ),
+    };
+  }
+
   private drawBiomePatch(
     generated: { biomes: Hexes; rolls: HexRolls } = calcHexesBiomeWithRolls()
   ) {
@@ -382,47 +435,27 @@ export class HexPatch implements AfterViewInit {
 
   // Unified view: biome as the background, feature as the icon, factions as
   // symbols and landmark content as a coloured outline, all on the same 19 hexes.
-  private drawOverallPatch() {
+  private drawOverallPatch(
+    generated: { patch: OverallPatch; rolls: OverallPatchRolls } =
+      calcOverallPatchWithRolls()
+  ) {
     const svgDrawer = new SvgDrawer(this.svgElement.nativeElement);
     const hexOps = new HexOps(50);
     const hexCenters = this.calcHexCenters(hexOps);
     const hexagons = hexCenters.map(center => hexOps.hexPoints(center));
 
-    const biomeData = calcHexesBiomeWithRolls();
-    const biomes = biomeData.biomes;
-    this.biomes = biomes;
-    this.biomeRolls = biomeData.rolls;
-
-    const featureData = calcHexesDetailedFeatureWithRolls();
-    const hexesDetailed = featureData.hexesDetailed;
-    this.hexesDetailed = hexesDetailed;
-    this.featureRolls = featureData.rolls;
-
-    for (const [hex, details] of Object.entries(hexesDetailed)) {
-      if (!details.includes('Lair')) {
-        continue;
-      }
-      const hexNum = Number(hex);
-      const result = calcLairWithRolls(biomes[hexNum]);
-      this.lairs[hexNum] = result.lair;
-      this.lairRolls[hexNum] = result.rolls;
-    }
-
-    const lairInhabitants: { [hex: number]: string } = {};
-    for (const [hex, lair] of Object.entries(this.lairs)) {
-      lairInhabitants[Number(hex)] = lair.inhabitants;
-    }
-    const generatedFactions = calcFactionsWithRolls(hexesDetailed, {
-      lairInhabitants,
-    });
-    const factionResult = generatedFactions.result;
-    this.factionResult = factionResult;
-    this.factionRolls = generatedFactions.rolls;
-    this.factionList.set(factionResult.factions);
-
-    const generatedContent = calcLandmarkContentsWithRolls(hexesDetailed);
-    this.contentDetails = generatedContent.contents;
-    this.contentRolls = generatedContent.rolls;
+    const { patch, rolls } = generated;
+    this.biomes = patch.biomes;
+    this.hexesDetailed = patch.hexesDetailed;
+    this.lairs = patch.lairs;
+    this.factionResult = patch.factionResult;
+    this.factionList.set(patch.factionResult.factions);
+    this.contentDetails = patch.contents;
+    this.biomeRolls = rolls.biomeRolls;
+    this.featureRolls = rolls.featureRolls;
+    this.lairRolls = rolls.lairRolls;
+    this.factionRolls = rolls.factionRolls;
+    this.contentRolls = rolls.contentRolls;
     this.contentLegend.set(
       Object.entries(this.contentColors).map(([type, color]) => ({ type, color }))
     );
@@ -430,7 +463,7 @@ export class HexPatch implements AfterViewInit {
     this.drawHexagons(svgDrawer, hexagons);
 
     const biomeImagePaths = fromHexesDetailedToImagePathHexes(
-      fromHexesToHexesDetailed(biomes)
+      fromHexesToHexesDetailed(patch.biomes)
     );
     const biomeOpts = { width: 2.45 * hexOps.h, height: 2.45 * hexOps.h };
     for (let i = 0; i < hexCenters.length; i++) {
@@ -441,7 +474,9 @@ export class HexPatch implements AfterViewInit {
       svgDrawer.drawPolygon(hexagon, { fill: 'none' });
     }
 
-    const featureImagePaths = fromHexesDetailedToImagePathHexes(hexesDetailed);
+    const featureImagePaths = fromHexesDetailedToImagePathHexes(
+      patch.hexesDetailed
+    );
     const featureOpts = { width: 50, height: 50 };
     for (let i = 0; i < hexCenters.length; i++) {
       svgDrawer.drawImageAtPoint(
@@ -451,7 +486,7 @@ export class HexPatch implements AfterViewInit {
       );
     }
 
-    for (const [hex, content] of Object.entries(this.contentDetails)) {
+    for (const [hex, content] of Object.entries(patch.contents)) {
       svgDrawer.drawPolygon(hexagons[Number(hex) - 1], {
         fill: 'none',
         stroke: this.contentColors[content.type],
@@ -459,7 +494,11 @@ export class HexPatch implements AfterViewInit {
       });
     }
 
-    this.drawFactionSymbols(svgDrawer, hexCenters, factionResult.hexFactions);
+    this.drawFactionSymbols(
+      svgDrawer,
+      hexCenters,
+      patch.factionResult.hexFactions
+    );
     this.drawHexNumbers(svgDrawer, hexCenters);
   }
 

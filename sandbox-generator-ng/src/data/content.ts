@@ -291,6 +291,7 @@ export {
   calcLandmarkContentsWithRolls,
   calcHexesDetailedContentWithRolls,
   calcHexesDetailedContentWithDetails,
+  contentFromRolls,
   contentPatchFromRolls,
   resolveContentDetail,
   resolveContentPath,
