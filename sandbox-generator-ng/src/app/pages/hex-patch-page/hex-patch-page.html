@@ -43,6 +43,12 @@
   }
 }
 @if (mode === 'content') {
+  <p>
+    Roll this table when the hex is a landmark (2023 edition, p. 17). The patch
+    rolls it independently for each hex, so the result depends only on the dice
+    and the tables: the biome, the landmark feature, and the factions around the
+    hex do not change it.
+  </p>
   <button type="button" (click)="exportContentPatch(patch)">Export JSON</button>
   <label>
     Import JSON
