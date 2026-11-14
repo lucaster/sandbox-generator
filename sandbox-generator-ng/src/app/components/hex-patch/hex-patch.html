@@ -25,6 +25,14 @@
                   }
                 }
                 @if (a.content) {
+                  @if (a.content.showType) {
+                    <div>
+                      Content: {{ a.content.type }}
+                      @if (a.content.detail) {
+                        <span> — {{ a.content.detail }}</span>
+                      }
+                    </div>
+                  }
                   <div>Treasure: {{ a.content.treasure }}</div>
                   @if (a.content.convey) {
                     <div>Information conveyed by: {{ a.content.convey }}</div>
@@ -87,6 +95,22 @@
               </ol>
               <p class="faction-note">
                 Contested hexes show more than one symbol and list every faction claiming them.
+              </p>
+            </section>
+          }
+          @if (contentLegend().length) {
+            <section class="content-legend">
+              <h3>Landmark content</h3>
+              <ul>
+                @for (entry of contentLegend(); track entry.type) {
+                  <li>
+                    <span class="content-swatch" [style.border-color]="entry.color"></span>
+                    {{ entry.type }}
+                  </li>
+                }
+              </ul>
+              <p class="content-note">
+                Content is rolled only for hexes containing a Landmark.
               </p>
             </section>
           }

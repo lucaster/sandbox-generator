@@ -137,6 +137,31 @@ function calcHexesDetailedContentWithRolls(
   return { hexesDetailed, contents, rolls };
 }
 
+/**
+ * Generates content only for the hexes whose feature path contains a Landmark.
+ * Content is the table rolled when a hex is a landmark (2023 edition, p. 17).
+ */
+function calcLandmarkContentsWithRolls(
+  hexesDetailed: HexesDetailed,
+  rollFn: (faces: number) => number = d
+): {
+  contents: { [hex: number]: ReturnType<typeof calcContentWithPath> };
+  rolls: ContentPatchRolls;
+} {
+  const contents: { [hex: number]: ReturnType<typeof calcContentWithPath> } = {};
+  const rolls: ContentPatchRolls = {};
+  for (const [hex, details] of Object.entries(hexesDetailed)) {
+    if (!details.includes('Landmark')) {
+      continue;
+    }
+    const hexNumber = Number(hex);
+    const generated = calcContentWithRolls(rollFn);
+    contents[hexNumber] = generated.content;
+    rolls[hexNumber] = generated.rolls;
+  }
+  return { contents, rolls };
+}
+
 function contentPatchFromRolls(rolls: ContentPatchRolls): {
   hexesDetailed: HexesDetailed;
   contents: { [key: number]: ReturnType<typeof calcContentWithPath> };
@@ -263,6 +288,7 @@ export {
   calcContent,
   calcContentWithPath,
   calcContentWithRolls,
+  calcLandmarkContentsWithRolls,
   calcHexesDetailedContentWithRolls,
   calcHexesDetailedContentWithDetails,
   contentPatchFromRolls,

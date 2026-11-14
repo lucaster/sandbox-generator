@@ -4,7 +4,6 @@ import {
   HexPatch,
   type FeaturePatchExport,
   type FactionPatchExport,
-  type HexPatchMode,
 } from '../../components/hex-patch/hex-patch';
 import type { HexRolls, HexRollSequences } from '../../../data/data';
 import {
@@ -12,7 +11,9 @@ import {
   type ContentPatchRolls,
 } from '../../../data/content';
 
-const patchTitles: Record<Exclude<HexPatchMode, 'sample'>, string> = {
+type PatchMode = 'biome' | 'feature' | 'faction' | 'content';
+
+const patchTitles: Record<PatchMode, string> = {
   biome: 'Biome',
   feature: 'Feature',
   faction: 'Faction',

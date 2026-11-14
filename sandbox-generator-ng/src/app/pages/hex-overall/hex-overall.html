@@ -1,0 +1,10 @@
+<h1>Hex Overall</h1>
+<p>
+  Generates one 19-hex patch with every layer on the same map: the biome as the
+  background, the feature as the icon, factions as symbols, and landmark content
+  as a coloured outline. Content is rolled only for hexes containing a Landmark.
+</p>
+<button type="button" (click)="patch.reset()">Reset SVG</button>
+<button type="button" (click)="patch.draw()">Draw Hex Overall</button>
+
+<app-hex-patch mode="overall" #patch />

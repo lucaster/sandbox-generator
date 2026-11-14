@@ -3,6 +3,7 @@ import {
   calcHexesDetailedContentWithRolls,
   calcContentWithPath,
   calcHexesDetailedContentWithDetails,
+  calcLandmarkContentsWithRolls,
   contentPatchFromRolls,
 } from './content';
 import {
@@ -218,5 +219,42 @@ describe('content.ts calcContent', () => {
     } else {
       expect(content.convey).toBeNull();
     }
+  });
+});
+
+describe('content.ts calcLandmarkContentsWithRolls', () => {
+  it('generates content only for hexes containing a landmark', () => {
+    const { contents, rolls } = calcLandmarkContentsWithRolls(
+      {
+        1: ['Village'],
+        2: ['Landmark', 'Natural', 'Fauna', 'Anthill'],
+        3: ['Settlement', 'City'],
+        4: ['Landmark', 'Magic', 'Place of Power', 'Mana well'],
+      },
+      sequence([5, 4, 4, 1, 2])
+    );
+
+    expect(Object.keys(contents).map(Number)).toEqual([2, 4]);
+    expect(contents[2].type).toBe('Monsters');
+    expect(contents[4].path).toEqual([
+      'Special',
+      'Arbitrate a dispute',
+      'Broken trade agreement',
+    ]);
+    expect(Object.keys(rolls).map(Number)).toEqual([2, 4]);
+  });
+
+  it('does not roll when there is no landmark', () => {
+    const noRoll = () => {
+      throw new Error('content should not be rolled without landmarks');
+    };
+
+    const { contents, rolls } = calcLandmarkContentsWithRolls(
+      { 1: ['Village'], 2: ['Dungeon'] },
+      noRoll
+    );
+
+    expect(contents).toEqual({});
+    expect(rolls).toEqual({});
   });
 });

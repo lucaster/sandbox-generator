@@ -10,6 +10,7 @@ import {
 import {
   calcContentWithPath,
   calcHexesDetailedContentWithRolls,
+  calcLandmarkContentsWithRolls,
   contentPatchFromRolls,
   type ContentPatchRolls,
 } from '../../../data/content';
@@ -37,7 +38,7 @@ import { SvgDrawer, type FactionShape } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
 
-export type HexPatchMode = 'biome' | 'feature' | 'faction' | 'content' | 'sample';
+export type HexPatchMode = 'biome' | 'feature' | 'faction' | 'content' | 'overall' | 'sample';
 export type FeaturePatchExport = {
   featureRolls: HexRollSequences;
   biomeRolls: HexRolls | null;
@@ -78,15 +79,28 @@ export class HexPatch implements AfterViewInit {
     '#8f3f4f',
     '#4f6f3f',
   ];
+  readonly contentColors: { [type: string]: string; } = {
+    Hazard: '#c0392b',
+    Empty: '#7f8c8d',
+    Special: '#8e44ad',
+    Monsters: '#d35400',
+  };
   hexDetailList = signal<{
     hexNum: number;
     details: string[] | null;
-    content: { treasure: string; convey: string | null; } | null;
+    content: {
+      type: string;
+      detail: string | null;
+      showType: boolean;
+      treasure: string;
+      convey: string | null;
+    } | null;
     lair: ReturnType<typeof calcLair> | null;
     factions: number[];
     contested: boolean;
   }[]>([]);
   factionList = signal<Faction[]>([]);
+  contentLegend = signal<{ type: string; color: string; }[]>([]);
   private hexesDetailed: HexesDetailed | null = null;
   private biomes: Hexes | null = null;
   private biomeRolls: HexRolls | null = null;
@@ -121,6 +135,9 @@ export class HexPatch implements AfterViewInit {
         break;
       case 'content':
         this.drawContentHexPatch();
+        break;
+      case 'overall':
+        this.drawOverallPatch();
         break;
       case 'sample':
         this.drawSampleHexPatch();
@@ -361,6 +378,89 @@ export class HexPatch implements AfterViewInit {
       hexOps,
       imagePathHexes,
     );
+  }
+
+  // Unified view: biome as the background, feature as the icon, factions as
+  // symbols and landmark content as a coloured outline, all on the same 19 hexes.
+  private drawOverallPatch() {
+    const svgDrawer = new SvgDrawer(this.svgElement.nativeElement);
+    const hexOps = new HexOps(50);
+    const hexCenters = this.calcHexCenters(hexOps);
+    const hexagons = hexCenters.map(center => hexOps.hexPoints(center));
+
+    const biomeData = calcHexesBiomeWithRolls();
+    const biomes = biomeData.biomes;
+    this.biomes = biomes;
+    this.biomeRolls = biomeData.rolls;
+
+    const featureData = calcHexesDetailedFeatureWithRolls();
+    const hexesDetailed = featureData.hexesDetailed;
+    this.hexesDetailed = hexesDetailed;
+    this.featureRolls = featureData.rolls;
+
+    for (const [hex, details] of Object.entries(hexesDetailed)) {
+      if (!details.includes('Lair')) {
+        continue;
+      }
+      const hexNum = Number(hex);
+      const result = calcLairWithRolls(biomes[hexNum]);
+      this.lairs[hexNum] = result.lair;
+      this.lairRolls[hexNum] = result.rolls;
+    }
+
+    const lairInhabitants: { [hex: number]: string } = {};
+    for (const [hex, lair] of Object.entries(this.lairs)) {
+      lairInhabitants[Number(hex)] = lair.inhabitants;
+    }
+    const generatedFactions = calcFactionsWithRolls(hexesDetailed, {
+      lairInhabitants,
+    });
+    const factionResult = generatedFactions.result;
+    this.factionResult = factionResult;
+    this.factionRolls = generatedFactions.rolls;
+    this.factionList.set(factionResult.factions);
+
+    const generatedContent = calcLandmarkContentsWithRolls(hexesDetailed);
+    this.contentDetails = generatedContent.contents;
+    this.contentRolls = generatedContent.rolls;
+    this.contentLegend.set(
+      Object.entries(this.contentColors).map(([type, color]) => ({ type, color }))
+    );
+
+    this.drawHexagons(svgDrawer, hexagons);
+
+    const biomeImagePaths = fromHexesDetailedToImagePathHexes(
+      fromHexesToHexesDetailed(biomes)
+    );
+    const biomeOpts = { width: 2.45 * hexOps.h, height: 2.45 * hexOps.h };
+    for (let i = 0; i < hexCenters.length; i++) {
+      svgDrawer.drawImageAtPoint(hexCenters[i], biomeImagePaths[i + 1], biomeOpts);
+    }
+
+    for (const hexagon of hexagons) {
+      svgDrawer.drawPolygon(hexagon, { fill: 'none' });
+    }
+
+    const featureImagePaths = fromHexesDetailedToImagePathHexes(hexesDetailed);
+    const featureOpts = { width: 50, height: 50 };
+    for (let i = 0; i < hexCenters.length; i++) {
+      svgDrawer.drawImageAtPoint(
+        hexCenters[i],
+        featureImagePaths[i + 1],
+        featureOpts
+      );
+    }
+
+    for (const [hex, content] of Object.entries(this.contentDetails)) {
+      svgDrawer.drawPolygon(hexagons[Number(hex) - 1], {
+        fill: 'none',
+        stroke: this.contentColors[content.type],
+        strokeWidth: '5',
+      });
+    }
+
+    this.drawFactionSymbols(svgDrawer, hexCenters, factionResult.hexFactions);
+    this.drawHexNumbers(svgDrawer, hexCenters);
   }
 
   // Factions are downstream of features and lairs: features decide which
@@ -703,6 +803,7 @@ export class HexPatch implements AfterViewInit {
     this.lairRolls = {};
     this.contentRolls = null;
     this.factionList.set([]);
+    this.contentLegend.set([]);
     this.hexDetailList.set([]);
     const svg = this.svgElement.nativeElement;
     while (svg.firstChild) {
@@ -730,6 +831,9 @@ export class HexPatch implements AfterViewInit {
         details,
         content: content
           ? {
+              type: content.type,
+              detail: content.detail,
+              showType: details?.[0] !== content.type,
               treasure:
                 content.treasure.chance === null
                   ? 'Variable (chosen by the DM)'

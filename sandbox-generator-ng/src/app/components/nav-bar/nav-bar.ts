@@ -15,6 +15,7 @@ interface NavLink {
 })
 export class NavBar {
   readonly links: NavLink[] = [
+    { path: '/hex-overall', label: 'Hex Overall' },
     { path: '/hex-draw', label: 'Hex Draw' },
     { path: '/hex-draw-biome-patch', label: 'Biome Patch' },
     { path: '/hex-draw-feature-patch', label: 'Feature Patch' },

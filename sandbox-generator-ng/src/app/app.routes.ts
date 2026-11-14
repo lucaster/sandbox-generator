@@ -7,6 +7,7 @@ import { CriminalOrganizationPage } from './pages/criminal-organization/criminal
 import { GuildPage } from './pages/guild/guild';
 import { TavernPage } from './pages/tavern/tavern';
 import { HexDrawPatch } from './pages/hex-draw-patch/hex-draw-patch';
+import { HexOverall } from './pages/hex-overall/hex-overall';
 import { HexPatchPage } from './pages/hex-patch-page/hex-patch-page';
 import { HexDraw } from './pages/hex-draw/hex-draw';
 import { Lairs } from './pages/lairs/lairs';
@@ -43,6 +44,10 @@ export const routes: Routes = [
   {
     path: 'hex-draw-patch',
     component: HexDrawPatch
+  },
+  {
+    path: 'hex-overall',
+    component: HexOverall
   },
   {
     path: 'hex-draw-biome-patch',
