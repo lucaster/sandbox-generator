@@ -53,6 +53,8 @@ type CrossSectionDiagram = {
 export class Dungeons implements OnInit {
 
   readonly areaCount = signal(1);
+  readonly levelCount = signal<number | null>(null);
+  readonly levelCounts = [1, 2, 3, 4, 5, 6];
   readonly maxDepth = signal<DungeonDepth | null>(null);
   readonly depths: DungeonDepth[] = [1, 2, 3, 4, 5, 6];
   readonly dungeon = signal<Dungeon | null>(null);
@@ -74,6 +76,18 @@ export class Dungeons implements OnInit {
     }
   }
 
+  onLevelCountChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'random') {
+      this.levelCount.set(null);
+      return;
+    }
+    const count = Number(value);
+    if (Number.isInteger(count) && count >= 1 && count <= 6) {
+      this.levelCount.set(count);
+    }
+  }
+
   onMaxDepthChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     if (value === 'random') {
@@ -90,6 +104,7 @@ export class Dungeons implements OnInit {
     this.dungeon.set(
       calcDungeon({
         areaCount: this.areaCount(),
+        levelCount: this.levelCount() ?? undefined,
         maxDepth: this.maxDepth() ?? undefined,
       }),
     );

@@ -368,6 +368,23 @@ describe('dungeon.ts calcDungeon', () => {
     }
   });
 
+  it('generates the requested number of levels in each area', () => {
+    const dungeon = calcDungeon({ areaCount: 2, levelCount: 3, rollFn: () => 1 });
+
+    for (const area of dungeon.areas) {
+      expect(area.levels).toHaveSize(3);
+    }
+  });
+
+  it('rejects a level count outside 1 to 6', () => {
+    for (const levelCount of [0, 7]) {
+      expect(() => calcDungeon({ levelCount, rollFn: () => 1 })).toThrowError(
+        RangeError,
+        'Dungeon levelCount must be an integer from 1 to 6.',
+      );
+    }
+  });
+
   it('generates corridor sections and excludes stairs to missing levels', () => {
     let endRoll = 0;
     const corridor = calcDungeonCorridor({

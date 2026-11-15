@@ -54,6 +54,7 @@ type DungeonRoomType = 'trap' | 'empty' | 'special' | 'monsters';
 
 type DungeonOptions = {
   areaCount?: number;
+  levelCount?: number;
   maxDepth?: DungeonDepth;
   includeRoomShapes?: boolean;
   percentInLairByMonsterResult?: { [monsterResult: string]: number };
@@ -594,7 +595,7 @@ function generateArea(
     result: prefix.result.replace('...', noun.result),
   };
   const theme = randomOptionEntry(tableDungeonAreaTheme, rollFn);
-  const levelCount = rollFn(6);
+  const levelCount = options.levelCount ?? rollFn(6);
   const maxDepth = options.maxDepth ?? 6;
   const depths = Array.from({ length: levelCount }, () => dungeonDepth(rollFn(maxDepth)))
     .sort((first, second) => first - second);
@@ -729,6 +730,12 @@ function calcDungeon(options: DungeonOptions = {}): Dungeon {
   const areaCount = options.areaCount ?? 1;
   if (!Number.isInteger(areaCount) || areaCount < 1) {
     throw new RangeError('Dungeon areaCount must be a positive integer.');
+  }
+  if (
+    options.levelCount !== undefined &&
+    (!Number.isInteger(options.levelCount) || options.levelCount < 1 || options.levelCount > 6)
+  ) {
+    throw new RangeError('Dungeon levelCount must be an integer from 1 to 6.');
   }
   if (
     options.maxDepth !== undefined &&

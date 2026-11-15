@@ -15,10 +15,19 @@
 </label>
 <label>
   Max depth
-  <select (change)="onMaxDepthChange($event)">
+  <select class="max-depth" (change)="onMaxDepthChange($event)">
     <option value="random" [selected]="maxDepth() === null">Random</option>
     @for (depth of depths; track depth) {
       <option [value]="depth" [selected]="depth === maxDepth()">{{ depthLabel(depth) }}</option>
+    }
+  </select>
+</label>
+<label>
+  Levels per area
+  <select class="level-count" (change)="onLevelCountChange($event)">
+    <option value="random" [selected]="levelCount() === null">Random</option>
+    @for (count of levelCounts; track count) {
+      <option [value]="count" [selected]="count === levelCount()">{{ count }}</option>
     }
   </select>
 </label>

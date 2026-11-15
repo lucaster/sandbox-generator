@@ -56,7 +56,7 @@ describe('Dungeons page', () => {
     const fixture = TestBed.createComponent(Dungeons);
     fixture.detectChanges();
     const component = fixture.componentInstance;
-    const select = fixture.nativeElement.querySelector('select') as HTMLSelectElement;
+    const select = fixture.nativeElement.querySelector('.max-depth') as HTMLSelectElement;
 
     expect(Array.from(select.options).map((option) => option.textContent?.trim())).toEqual([
       'Random',
@@ -86,5 +86,46 @@ describe('Dungeons page', () => {
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
     expect(component.maxDepth()).toBeNull();
+  });
+
+  it('offers random and fixed level counts per area', async () => {
+    await TestBed.configureTestingModule({
+      imports: [Dungeons],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(Dungeons);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const select = fixture.nativeElement.querySelector('.level-count') as HTMLSelectElement;
+
+    expect(Array.from(select.options).map((option) => option.textContent?.trim())).toEqual([
+      'Random',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+    ]);
+    expect(select.value).toBe('random');
+    expect(component.levelCount()).toBeNull();
+
+    select.value = '3';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(component.levelCount()).toBe(3);
+
+    component.onGenerateDungeon();
+    const dungeon = component.dungeon();
+    expect(dungeon).not.toBeNull();
+    for (const area of dungeon!.areas) {
+      expect(area.levels).toHaveSize(3);
+    }
+
+    select.value = 'random';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(component.levelCount()).toBeNull();
   });
 });
