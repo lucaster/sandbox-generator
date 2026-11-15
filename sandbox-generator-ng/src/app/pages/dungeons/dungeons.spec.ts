@@ -47,7 +47,7 @@ describe('Dungeons page', () => {
     expect(updatedDiagram.querySelectorAll('.cross-section-area').length).toBe(3);
   });
 
-  it('offers maximum depths I to VI and applies the selected cap', async () => {
+  it('offers random and fixed maximum depths and applies the selected cap', async () => {
     await TestBed.configureTestingModule({
       imports: [Dungeons],
       providers: [provideZonelessChangeDetection()],
@@ -59,6 +59,7 @@ describe('Dungeons page', () => {
     const select = fixture.nativeElement.querySelector('select') as HTMLSelectElement;
 
     expect(Array.from(select.options).map((option) => option.textContent?.trim())).toEqual([
+      'Random',
       'I',
       'II',
       'III',
@@ -66,7 +67,8 @@ describe('Dungeons page', () => {
       'V',
       'VI',
     ]);
-    expect(select.value).toBe('6');
+    expect(select.value).toBe('random');
+    expect(component.maxDepth()).toBeNull();
 
     select.value = '2';
     select.dispatchEvent(new Event('change'));
@@ -79,5 +81,10 @@ describe('Dungeons page', () => {
     for (const level of dungeon!.areas.flatMap((area) => area.levels)) {
       expect(level.depth).toBeLessThanOrEqual(2);
     }
+
+    select.value = 'random';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(component.maxDepth()).toBeNull();
   });
 });

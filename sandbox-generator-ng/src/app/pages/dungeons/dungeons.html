@@ -16,6 +16,7 @@
 <label>
   Max depth
   <select (change)="onMaxDepthChange($event)">
+    <option value="random" [selected]="maxDepth() === null">Random</option>
     @for (depth of depths; track depth) {
       <option [value]="depth" [selected]="depth === maxDepth()">{{ depthLabel(depth) }}</option>
     }

@@ -53,7 +53,7 @@ type CrossSectionDiagram = {
 export class Dungeons implements OnInit {
 
   readonly areaCount = signal(1);
-  readonly maxDepth = signal<DungeonDepth>(6);
+  readonly maxDepth = signal<DungeonDepth | null>(null);
   readonly depths: DungeonDepth[] = [1, 2, 3, 4, 5, 6];
   readonly dungeon = signal<Dungeon | null>(null);
   readonly corridorSamples = signal<{ [key: string]: DungeonCorridor }>({});
@@ -75,15 +75,23 @@ export class Dungeons implements OnInit {
   }
 
   onMaxDepthChange(event: Event): void {
-    const value = Number((event.target as HTMLSelectElement).value);
-    if (Number.isInteger(value) && value >= 1 && value <= 6) {
-      this.maxDepth.set(value as DungeonDepth);
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'random') {
+      this.maxDepth.set(null);
+      return;
+    }
+    const depth = Number(value);
+    if (Number.isInteger(depth) && depth >= 1 && depth <= 6) {
+      this.maxDepth.set(depth as DungeonDepth);
     }
   }
 
   onGenerateDungeon(): void {
     this.dungeon.set(
-      calcDungeon({ areaCount: this.areaCount(), maxDepth: this.maxDepth() }),
+      calcDungeon({
+        areaCount: this.areaCount(),
+        maxDepth: this.maxDepth() ?? undefined,
+      }),
     );
     this.corridorSamples.set({});
     this.specialRoomTableResults.set({});
