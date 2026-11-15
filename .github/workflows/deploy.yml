@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: sandbox-generator-ng
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: sandbox-generator-ng/package-lock.json
+      - run: npm ci
+      - run: npm run build -- --base-href /sandbox-generator/
+      # The app routes client-side, so Pages needs a fallback page for deep links.
+      - run: cp dist/sandbox-generator-ng/browser/index.html dist/sandbox-generator-ng/browser/404.html
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: sandbox-generator-ng/dist/sandbox-generator-ng/browser
+      - id: deployment
+        uses: actions/deploy-pages@v5
