@@ -46,4 +46,38 @@ describe('Dungeons page', () => {
     ) as SVGElement;
     expect(updatedDiagram.querySelectorAll('.cross-section-area').length).toBe(3);
   });
+
+  it('offers maximum depths I to VI and applies the selected cap', async () => {
+    await TestBed.configureTestingModule({
+      imports: [Dungeons],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(Dungeons);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const select = fixture.nativeElement.querySelector('select') as HTMLSelectElement;
+
+    expect(Array.from(select.options).map((option) => option.textContent?.trim())).toEqual([
+      'I',
+      'II',
+      'III',
+      'IV',
+      'V',
+      'VI',
+    ]);
+    expect(select.value).toBe('6');
+
+    select.value = '2';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(component.maxDepth()).toBe(2);
+
+    component.onGenerateDungeon();
+    const dungeon = component.dungeon();
+    expect(dungeon).not.toBeNull();
+    for (const level of dungeon!.areas.flatMap((area) => area.levels)) {
+      expect(level.depth).toBeLessThanOrEqual(2);
+    }
+  });
 });

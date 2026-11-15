@@ -3,6 +3,7 @@ import {
   calcDungeonCorridor,
   getDungeonSpecialRoomTableActions,
   rollDungeonSpecialRoomTable,
+  type DungeonDepth,
 } from './dungeon';
 import {
   dungeonRandomTables,
@@ -327,6 +328,29 @@ describe('dungeon.ts calcDungeon', () => {
       RangeError,
       'Dungeon areaCount must be a positive integer.',
     );
+  });
+
+  it('caps every level at the requested maximum depth', () => {
+    const dungeon = calcDungeon({
+      areaCount: 2,
+      maxDepth: 2,
+      rollFn: (faces) => faces,
+    });
+    const levels = dungeon.areas.flatMap((area) => area.levels);
+
+    expect(levels.length).toBeGreaterThan(0);
+    for (const level of levels) {
+      expect(level.depth).toBeLessThanOrEqual(2);
+    }
+    expect(levels.some((level) => level.depth === 2)).toBe(true);
+  });
+
+  it('rejects a maximum depth outside I to VI', () => {
+    for (const maxDepth of [0, 7]) {
+      expect(() =>
+        calcDungeon({ maxDepth: maxDepth as DungeonDepth, rollFn: () => 1 }),
+      ).toThrowError(RangeError, 'Dungeon maxDepth must be an integer from 1 to 6.');
+    }
   });
 
   it('generates corridor sections and excludes stairs to missing levels', () => {

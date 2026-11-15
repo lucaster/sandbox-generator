@@ -13,6 +13,14 @@
     (input)="onAreaCountInput($event)"
   />
 </label>
+<label>
+  Max depth
+  <select (change)="onMaxDepthChange($event)">
+    @for (depth of depths; track depth) {
+      <option [value]="depth" [selected]="depth === maxDepth()">{{ depthLabel(depth) }}</option>
+    }
+  </select>
+</label>
 <button type="button" (click)="onGenerateDungeon()">Generate Dungeon</button>
 
 @if (dungeon(); as generatedDungeon) {

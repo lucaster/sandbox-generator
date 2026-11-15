@@ -8,6 +8,7 @@ import {
   type Dungeon,
   type DungeonArea,
   type DungeonCorridor,
+  type DungeonDepth,
   type DungeonLink,
   type DungeonLevel,
   type DungeonSpecialRoomTableAction,
@@ -52,6 +53,8 @@ type CrossSectionDiagram = {
 export class Dungeons implements OnInit {
 
   readonly areaCount = signal(1);
+  readonly maxDepth = signal<DungeonDepth>(6);
+  readonly depths: DungeonDepth[] = [1, 2, 3, 4, 5, 6];
   readonly dungeon = signal<Dungeon | null>(null);
   readonly corridorSamples = signal<{ [key: string]: DungeonCorridor }>({});
   readonly specialRoomTableResults = signal<Record<string, DungeonSpecialRoomTableRoll[]>>({});
@@ -71,8 +74,17 @@ export class Dungeons implements OnInit {
     }
   }
 
+  onMaxDepthChange(event: Event): void {
+    const value = Number((event.target as HTMLSelectElement).value);
+    if (Number.isInteger(value) && value >= 1 && value <= 6) {
+      this.maxDepth.set(value as DungeonDepth);
+    }
+  }
+
   onGenerateDungeon(): void {
-    this.dungeon.set(calcDungeon({ areaCount: this.areaCount() }));
+    this.dungeon.set(
+      calcDungeon({ areaCount: this.areaCount(), maxDepth: this.maxDepth() }),
+    );
     this.corridorSamples.set({});
     this.specialRoomTableResults.set({});
   }
