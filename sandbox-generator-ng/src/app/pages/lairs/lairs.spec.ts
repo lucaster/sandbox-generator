@@ -28,8 +28,15 @@ describe('Lairs page', () => {
     expect(component.linked()).toBe(false);
   });
 
-  it('replays the linked lair from the biome and rolls', () => {
-    const fixture = createPage({ biome: 'Forest', rolls: '3,4,2,5,6' });
+  it('replays the linked lair from the named parameters', () => {
+    const fixture = createPage({
+      biome: 'Forest',
+      inhabitantsRoll1: '3',
+      inhabitantsRoll2: '4',
+      outsideRoll: '2',
+      outsideHexesRoll: '5',
+      layoutRoll: '6',
+    });
     const component = fixture.componentInstance;
 
     expect(component.lairs).toHaveSize(1);
@@ -53,7 +60,14 @@ describe('Lairs page', () => {
   });
 
   it('shows an error for invalid lair parameters', () => {
-    const fixture = createPage({ biome: 'Forest', rolls: '3,x' });
+    const fixture = createPage({
+      biome: 'Forest',
+      inhabitantsRoll1: '3',
+      inhabitantsRoll2: 'x',
+      outsideRoll: '2',
+      outsideHexesRoll: '5',
+      layoutRoll: '6',
+    });
     const component = fixture.componentInstance;
 
     expect(component.lairs).toHaveSize(0);
