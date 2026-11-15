@@ -40,8 +40,15 @@
                 }
                 @if (a.lair) {
                   <div>
-                    Lair: {{ a.lair.inhabitants }} · layout {{ a.lair.layout }}
-                    ({{ a.lair.percentages.join(' / ') }}%) · {{ a.lair.percOutsideLair }}% outside
+                    @if (overallLairUrl(a.hexNum); as url) {
+                      <a [href]="url" target="_blank" rel="noopener">
+                        Lair: {{ a.lair.inhabitants }} · layout {{ a.lair.layout }}
+                        ({{ a.lair.percentages.join(' / ') }}%) · {{ a.lair.percOutsideLair }}% outside
+                      </a>
+                    } @else {
+                      Lair: {{ a.lair.inhabitants }} · layout {{ a.lair.layout }}
+                      ({{ a.lair.percentages.join(' / ') }}%) · {{ a.lair.percOutsideLair }}% outside
+                    }
                   </div>
                   @if (a.lair.outsideHexes.length) {
                     <div>Outside hexes: {{ a.lair.outsideHexes.join(', ') }}</div>

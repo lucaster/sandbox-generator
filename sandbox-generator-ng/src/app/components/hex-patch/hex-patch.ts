@@ -42,6 +42,7 @@ import {
 import { SvgDrawer, type FactionShape } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
+import { lairUrl } from '../../lair-link';
 
 export type HexPatchMode = 'biome' | 'feature' | 'faction' | 'content' | 'overall' | 'sample';
 export type FeaturePatchExport = {
@@ -308,6 +309,18 @@ export class HexPatch implements AfterViewInit {
     );
   }
 
+  overallLairUrl(hexNum: number): string | null {
+    if (this.mode() !== 'overall') {
+      return null;
+    }
+    const biome = this.biomes?.[hexNum];
+    const rolls = this.lairRolls[hexNum];
+    if (!biome || !rolls) {
+      return null;
+    }
+    return lairUrl(biome, rolls);
+  }
+
   exportOverallPatch(): OverallPatchExport {
     if (
       this.mode() !== 'overall' ||
@@ -500,6 +513,24 @@ export class HexPatch implements AfterViewInit {
       patch.factionResult.hexFactions
     );
     this.drawHexNumbers(svgDrawer, hexCenters);
+    this.drawOverallLairLinks(svgDrawer, hexagons);
+  }
+
+  // Makes each lair hex open its /lairs page in a new tab, carrying the rolls
+  // that reproduce the same lair.
+  private drawOverallLairLinks(svgDrawer: SvgDrawer, hexagons: Point[][]) {
+    for (const hex of Object.keys(this.lairs)) {
+      const hexNum = Number(hex);
+      const url = this.overallLairUrl(hexNum);
+      if (!url) {
+        continue;
+      }
+      svgDrawer.drawLink(hexagons[hexNum - 1], url, {
+        target: '_blank',
+        rel: 'noopener',
+        title: 'Open this lair in a new tab',
+      });
+    }
   }
 
   // Factions are downstream of features and lairs: features decide which

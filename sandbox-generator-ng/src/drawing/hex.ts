@@ -80,6 +80,32 @@ export class SvgDrawer {
     this.svg.appendChild(text);
   }
 
+  drawLink(points: Point[], href: string, options: LinkOptions = {}) {
+    const link = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+    link.setAttribute('href', href);
+    if (options.target) {
+      link.setAttribute('target', options.target);
+    }
+    if (options.rel) {
+      link.setAttribute('rel', options.rel);
+    }
+
+    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    polygon.setAttribute('points', points.map((p) => [p.x, p.y].join(',')).join(' '));
+    polygon.setAttribute('fill', 'transparent');
+    polygon.setAttribute('stroke', 'none');
+    polygon.setAttribute('pointer-events', 'all');
+    polygon.style.cursor = 'pointer';
+    link.appendChild(polygon);
+
+    if (options.title) {
+      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      title.textContent = options.title;
+      link.appendChild(title);
+    }
+    this.svg.appendChild(link);
+  }
+
   drawSymbolAtPoint(point: Point, shape: FactionShape, options: SymbolOptions = {}) {
     const size = options.size ?? 12;
     const element = this.symbolElement(shape, point, size);
@@ -192,4 +218,10 @@ interface TextOptions {
   readonly fill?: string;
   readonly stroke?: string;
   readonly strokeWidth?: string;
+}
+
+interface LinkOptions {
+  readonly target?: string;
+  readonly rel?: string;
+  readonly title?: string;
 }

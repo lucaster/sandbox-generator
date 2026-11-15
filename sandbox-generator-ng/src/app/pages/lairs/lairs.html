@@ -1,3 +1,10 @@
+@if (linkError(); as error) {
+  <p role="alert">{{ error }}</p>
+}
+@if (linked()) {
+  <p>Showing the lair linked from the hex overall map.</p>
+}
+
 <table>
   <thead>
     <button (click)="onCalcLairs()">Calc Lairs</button>
