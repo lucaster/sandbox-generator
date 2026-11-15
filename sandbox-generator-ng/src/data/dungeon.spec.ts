@@ -330,7 +330,22 @@ describe('dungeon.ts calcDungeon', () => {
     );
   });
 
-  it('caps every level at the requested maximum depth', () => {
+  it('rolls the depth on a die with the requested number of faces', () => {
+    const dungeon = calcDungeon({
+      maxDepth: 3,
+      rollFn: (faces) => (faces === 3 ? 1 : faces),
+    });
+    const levels = dungeon.areas.flatMap((area) => area.levels);
+
+    expect(levels.length).toBe(6);
+    for (const level of levels) {
+      // A d3 depth roll returning 1 stays at I. Capping a d6 would have
+      // turned its maximum roll into III instead.
+      expect(level.depth).toBe(1);
+    }
+  });
+
+  it('keeps every level within the requested maximum depth', () => {
     const dungeon = calcDungeon({
       areaCount: 2,
       maxDepth: 2,

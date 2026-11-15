@@ -315,8 +315,8 @@ function rollDice(count: number, faces: number, rollFn: RollFunction): number {
   return total;
 }
 
-function dungeonDepth(roll: number, maxDepth: DungeonDepth = 6): DungeonDepth {
-  return Math.min(Math.max(roll, 1), maxDepth) as DungeonDepth;
+function dungeonDepth(roll: number): DungeonDepth {
+  return Math.min(Math.max(roll, 1), 6) as DungeonDepth;
 }
 
 function isDungeonMonsterLevel(level: number): level is DungeonMonsterLevel {
@@ -596,7 +596,7 @@ function generateArea(
   const theme = randomOptionEntry(tableDungeonAreaTheme, rollFn);
   const levelCount = rollFn(6);
   const maxDepth = options.maxDepth ?? 6;
-  const depths = Array.from({ length: levelCount }, () => dungeonDepth(rollFn(6), maxDepth))
+  const depths = Array.from({ length: levelCount }, () => dungeonDepth(rollFn(maxDepth)))
     .sort((first, second) => first - second);
   const depthCounts: { [depth: number]: number } = {};
   const levels = depths.map((depth, index) => {
