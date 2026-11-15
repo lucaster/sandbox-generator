@@ -194,6 +194,19 @@ describe('lairs.ts calcLair', () => {
     expect(requestedFaces).toEqual([6, 6, 8]);
   });
 
+  it('uses a supplied encounter roll without consuming a lair roll', () => {
+    const lair = calcLairFromRolls('Forest', [3, 4, 2, 5, 6], {
+      percentInLair: 50,
+      encounterRoll: 30,
+    });
+
+    // The d100 is not part of the saved rolls, so the lair replays unchanged.
+    expect(lair.encounter).toBe('lair');
+    expect(lair.inhabitants).toBe('Wolves');
+    expect(lair.outsideHexes).toEqual([5]);
+    expect(lair.layout).toBe(4);
+  });
+
   it('can skip the optional outside proportion', () => {
     const lair = calcLair(
       'Forest',

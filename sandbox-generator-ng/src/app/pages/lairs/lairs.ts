@@ -1,9 +1,11 @@
 import { JsonPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { d } from '../../../dice/dice';
 import {
   calcLair,
   calcLairFromRolls,
+  exampleLairBestiary,
   type LairTreasure,
 } from '../../../data/lairs';
 import { parseLairLink } from '../../lair-link';
@@ -26,7 +28,14 @@ export class Lairs implements OnInit {
     try {
       const link = parseLairLink(this.route.snapshot.queryParamMap);
       if (link) {
-        this.lairs = [calcLairFromRolls(link.biome, link.rolls)];
+        // The link only carries the lair's own rolls, so the bestiary values
+        // come from the example and the % in lair check is rolled now.
+        this.lairs = [
+          calcLairFromRolls(link.biome, link.rolls, {
+            ...exampleLairBestiary,
+            encounterRoll: d(100),
+          }),
+        ];
         this.linked.set(true);
         return;
       }
@@ -43,15 +52,7 @@ export class Lairs implements OnInit {
     this.linked.set(false);
     this.linkError.set(null);
     const biomes = ['Grassland', 'Hills', 'Marsh', 'Forest', 'Mountains'];
-    // The 2023 book delegates the total number of monsters and their treasure
-    // to an external bestiary. These are the book's worked-example values,
-    // used here to show the per-room distribution.
-    const exampleBestiary = {
-      totalMonsters: 200,
-      treasure: { sp: 4000, gems: 4 },
-      percentInLair: 50,
-    };
-    this.lairs = biomes.map((biome) => calcLair(biome, exampleBestiary));
+    this.lairs = biomes.map((biome) => calcLair(biome, exampleLairBestiary));
   }
 
   treasureLabel(treasure: LairTreasure | null): string {

@@ -40,6 +40,9 @@ type LairOptions = {
   treasure?: LairTreasure;
   // % in lair of the monster (20% by default, 0% if it does not live in lairs).
   percentInLair?: number;
+  // Pre-rolled d100 for the % in lair check. Used when the check is not part of
+  // the saved lair rolls, so replaying them does not consume an extra roll.
+  encounterRoll?: number;
   // Small groups (or alone) use 1d3 for the layout instead of 1d8.
   smallGroups?: boolean;
   // The book marks the outside-monster proportion as optional.
@@ -47,6 +50,15 @@ type LairOptions = {
 };
 
 type LairRolls = number[];
+
+// The 2023 book delegates the total number of monsters, their treasure and the
+// % in lair to an external bestiary. These are the book's worked-example
+// values, used by the demo pages to show the per-room distribution.
+const exampleLairBestiary: LairOptions = {
+  totalMonsters: 200,
+  treasure: { sp: 4000, gems: 4 },
+  percentInLair: 50,
+};
 
 /**
  * Splits an integer total across rooms using the largest remainder method, so
@@ -215,7 +227,7 @@ function calcLair(
   const encounter =
     percentInLair === null
       ? null
-      : rollFn(100) <= percentInLair
+      : (options.encounterRoll ?? rollFn(100)) <= percentInLair
         ? 'lair'
         : 'patrol';
 
@@ -320,6 +332,7 @@ export {
   calcLair,
   calcLairFromRolls,
   calcLairWithRolls,
+  exampleLairBestiary,
   lairLayout,
   lairLayoutPercentages,
   type LairRolls,

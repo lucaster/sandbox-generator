@@ -34,9 +34,19 @@ describe('Lairs page', () => {
 
     expect(component.lairs).toHaveSize(1);
     expect(component.linked()).toBe(true);
-    expect(component.lairs[0].biome).toBe('Forest');
-    expect(component.lairs[0].inhabitants).toBe('Wolves');
-    expect(component.lairs[0].layout).toBe(4);
+    const lair = component.lairs[0];
+    expect(lair.biome).toBe('Forest');
+    expect(lair.inhabitants).toBe('Wolves');
+    expect(lair.layout).toBe(4);
+    // The linked lair shows the same example bestiary as the five examples.
+    expect(lair.totalMonsters).toBe(200);
+    expect(lair.treasure).toEqual({ sp: 4000, gems: 4 });
+    expect(lair.percentInLair).toBe(50);
+    expect(lair.encounter === 'lair' || lair.encounter === 'patrol').toBe(true);
+    expect(lair.insideMonsters).toBe(160);
+    expect(lair.outsideMonsters).toBe(40);
+    expect(lair.rooms.map((room) => room.monsters)).toEqual([16, 32, 32, 80]);
+    expect(fixture.nativeElement.textContent).not.toContain('—');
     expect(fixture.nativeElement.textContent).toContain(
       'Showing the lair linked from the hex overall map.'
     );
