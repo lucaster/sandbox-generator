@@ -30,7 +30,7 @@ Coverage is concentrated in the first part of that pipeline.
 | Settlements | **Done** | Names, hamlets, villages, cities, castles, towers, and abbeys all match the 2023 edition. |
 | Lairs | **Done** | Inhabitants, optional outside percentage and hexes, layout, per-room monster/treasure distribution, and the `% in lair` patrol distinction match the 2023 edition. Total monsters and treasure are caller-supplied because the book delegates them to a bestiary. |
 | Dungeons | **Partial** | The main tables and printed nested special-room tables are modeled as explicit `RandomTable` definitions in book order. The demo exposes contextual, on-demand rolls for the nested tables it supports; other room procedures and their effects are not automated. Dungeon lair populations and treasure still need external bestiary data. |
-| Generators | **Partial** | Dragon, NPC, wizard, criminal-organization, guild, and tavern generators are implemented from the 2023 edition. Coat of arms and house are missing; Guild name templates still need possessive formatting corrected. |
+| Generators | **Partial** | Dragon, NPC, wizard, criminal-organization, guild, and tavern generators are implemented from the 2023 edition. Coat of arms and house are missing. |
 | Adventures at sea | **Not implemented** | No sea features or sea encounter tables. |
 
 Counting generation subsections (examples excluded): **27 of 31 have core
@@ -182,7 +182,7 @@ Divine Altar lookup are available as contextual demo actions.
 | Wizard | **Done** | `calcWizard` in `src/data/wizard.ts`: level, specialty (including elemental subtype), appearance, goal, and staff material/top/bottom/shape/detail match the 2023 edition. |
 | Coat of arms | **Not implemented** | Escutcheon, field, charges, and the rest of the heraldry tables are absent. |
 | Criminal organization | **Done** | `calcCriminalOrganization` in `src/data/criminal-organization.ts` rolls the name template, main activity, distinctive sign, recruits, initiation rite, internal structure, finances, optional special feature, hideout/front, special-room result, and boss backstory from the 2023 tables (pp. 117–120). A fitting name for the table's ellipses is caller-supplied; those blanks are not guessed. Faction-map integration is not implemented. |
-| Guild | **Partial** | `calcGuild` in `src/data/guild.ts` rolls the field and subfield, separate expertise, name structure, power, member initiation/appearance/quirk, and common or field-specific regular events and problems from the 2023 tables (pp. 125–128). Event/problem rolls 1–4 use the common table and 5–6 use the guild-field table. The name field phrase can be supplied by the caller; otherwise the rolled subfield fills the template. Possessive templates currently render the printed `('s)` notation literally or omit it, rather than producing the manual's possessive names. Guilds are not yet integrated into faction generation. |
+| Guild | **Partial** | `calcGuild` in `src/data/guild.ts` rolls the field and subfield, separate expertise, name structure, power, member initiation/appearance/quirk, and common or field-specific regular events and problems from the 2023 tables (pp. 125–128). Event/problem rolls 1–4 use the common table and 5–6 use the guild-field table. The name field phrase can be supplied by the caller; otherwise the rolled subfield fills the template. Possessive name templates keep the printed `('s)` notation for the DM, because the possessive fits nouns ("The Explorator's Circle") but not gerunds or adjectives ("The Baking's Guild" would be wrong). Guilds are not yet integrated into faction generation. |
 | House | **Not implemented** | House interiors and loot are absent. |
 | Tavern | **Done** | `calcTavern` in `src/data/tavern.ts` implements the 2023 procedures (pp. 136–145): name, 1d2 decorations, bartender, conditional server traits, patrons, entertainment and 1d3 activities, room quality and optional special room, 1d3 outside amenities, all three menu formats with nested dishes, rumor truthfulness, and the complete sign generation. The second server trait and drink roll are optional; the menu procedure does not specify a drink roll. |
 
@@ -199,7 +199,7 @@ Nothing is implemented:
 
 ## Remaining issues
 
-Apart from the Guild name-template possessive-formatting limitation above, the
+Apart from the Guild faction-map integration above, the
 implemented tables and generation rules match the 2023 edition.
 
 ## Suggested priority

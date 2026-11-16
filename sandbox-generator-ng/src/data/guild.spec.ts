@@ -182,4 +182,17 @@ describe('calcGuild', () => {
       result: 'The Sisters/Brothers of Demon Study',
     });
   });
+
+  it('keeps the possessive notation of name templates for the DM to resolve', () => {
+    const guild = calcGuild({
+      nameField: 'Baking',
+      rollFn: (faces) => (faces === 12 ? 1 : faces),
+    });
+    expect(guild.name).toEqual({
+      roll: 1,
+      template: "The ... ('s) Guild",
+      fieldName: 'Baking',
+      result: "The Baking ('s) Guild",
+    });
+  });
 });

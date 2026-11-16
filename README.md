@@ -35,7 +35,8 @@ as SVG entirely in the browser — no backend required.
   leave them unfilled for the DM.
 - **Guild generator** — field and specialty, separate expertise, name structure,
   power, member traits, and regular events and problems. Supply a fitting phrase
-  for the name template; possessive name-template formatting is a known limitation.
+  for the name template; possessive templates keep the book's `('s)` notation
+  for the DM, since the possessive fits nouns but not gerunds or adjectives.
 - **Tavern generator** — name, decor, staff, patrons, entertainment, rooms, outside
   amenities, all three menu formats, rumor, and sign, including conditional and
   nested rolls from the 2023 tables.
@@ -302,7 +303,6 @@ See `.github/copilot-instructions.md` for the full convention list.
 
 - Add bestiary input to generate dungeon lair populations and treasure.
 - Add the remaining detail generators: coat of arms and house.
-- Correct possessive formatting in Guild name templates.
 - Add adventures at sea.
 - Forward `rollFn` through the remaining generators, such as the name generator.
 - Extract the hex layout into a single shared helper.
