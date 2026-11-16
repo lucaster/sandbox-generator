@@ -656,7 +656,9 @@ function calcGuild(
   const expertise = rollEntry(tableGuildExpertise, rollFn);
   const nameEntry = rollEntry(tableGuildName, rollFn);
   const nameField = options.nameField?.trim() || fieldSpecialty.result;
-  const name = nameEntry.result.replaceAll('...', nameField);
+  const name = nameEntry.result
+    .replaceAll('...', nameField)
+    .replaceAll(" ('s)", "'s");
   const renown = rollEntry(tableGuildRenown, rollFn);
   const resources = rollEntry(tableGuildResources, rollFn);
   const guildhouses = rollEntry(tableGuildGuildhouses, rollFn);
