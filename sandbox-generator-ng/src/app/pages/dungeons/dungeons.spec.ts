@@ -177,6 +177,7 @@ describe('Dungeons page', () => {
     fixture.detectChanges();
     component.onGenerateDungeon();
     for (const level of component.dungeon()!.areas.flatMap((area) => area.levels)) {
+      expect(level.roomCount).toBeGreaterThanOrEqual(12);
       expect(level.roomCount).toBeLessThanOrEqual(15);
     }
 

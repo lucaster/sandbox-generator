@@ -396,18 +396,33 @@ describe('dungeon.ts calcDungeon', () => {
     }
   });
 
-  it('caps the rolled rooms at the requested maximum', () => {
-    // 2d20 -> 20 + 20, plus 10, so the unbounded roll would be 50 rooms.
-    const capped = calcDungeon({
-      levelCount: 1,
+  it('spreads a maximum below the base roll evenly instead of piling levels on the cap', () => {
+    let face = 0;
+    const dungeon = calcDungeon({
+      levelCount: 6,
       maxRoomCount: 20,
-      rollFn: (faces) => (faces === 20 ? 20 : 1),
+      // Maximum rolls 1d(20-11), so returning each face in turn walks the
+      // whole 12..17 range. Capping 2d20+10 would have put them all on 20.
+      rollFn: (faces) => {
+        if (faces === 9) {
+          face = (face % 9) + 1;
+          return face;
+        }
+        return 1;
+      },
     });
-    expect(capped.areas[0].levels[0].roomCount).toBe(20);
 
-    // 2d20 -> 2, plus 10, which stays below the cap.
-    const belowCap = calcDungeon({ levelCount: 1, maxRoomCount: 20, rollFn: () => 1 });
-    expect(belowCap.areas[0].levels[0].roomCount).toBe(12);
+    expect(dungeon.areas[0].levels.map((level) => level.roomCount)).toEqual([12, 13, 14, 15, 16, 17]);
+  });
+
+  it('keeps the 12-room floor of the base rule when a maximum is set', () => {
+    const dungeon = calcDungeon({ levelCount: 1, maxRoomCount: 20, rollFn: () => 1 });
+    expect(dungeon.areas[0].levels[0].roomCount).toBe(12);
+  });
+
+  it('uses a maximum below 12 as the room count', () => {
+    const dungeon = calcDungeon({ levelCount: 1, maxRoomCount: 5, rollFn: () => 1 });
+    expect(dungeon.areas[0].levels[0].roomCount).toBe(5);
   });
 
   it('rejects a room count that is not a positive integer', () => {

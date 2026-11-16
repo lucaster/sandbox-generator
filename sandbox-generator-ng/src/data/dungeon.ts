@@ -58,7 +58,7 @@ type DungeonOptions = {
   maxDepth?: DungeonDepth;
   /** Exact number of rooms on every level. */
   roomCount?: number;
-  /** Upper bound for the 2d20+10 rooms rolled on every level. */
+  /** Upper bound for the rooms rolled on every level, which stay at least 12. */
   maxRoomCount?: number;
   includeRoomShapes?: boolean;
   percentInLairByMonsterResult?: { [monsterResult: string]: number };
@@ -565,8 +565,13 @@ function resolveRoomCount(options: DungeonOptions, rollFn: RollFunction): number
   if (options.roomCount !== undefined) {
     return options.roomCount;
   }
-  const rolled = rollDice(2, 20, rollFn) + 10;
-  return options.maxRoomCount === undefined ? rolled : Math.min(rolled, options.maxRoomCount);
+  if (options.maxRoomCount !== undefined) {
+    const max = options.maxRoomCount;
+    // A flat 12..max keeps the book's floor of 12 rooms. Capping the 2d20+10
+    // roll instead would pile 91% of the results on max for a maximum of 20.
+    return max <= 12 ? max : 11 + rollFn(max - 11);
+  }
+  return rollDice(2, 20, rollFn) + 10;
 }
 
 function generateLevel(
