@@ -146,8 +146,8 @@ Implemented in `src/data/dungeon.ts` and the `/dungeons` page:
 - Area names and optional themes; caller-selected area count for megadungeons.
 - Random level counts, depths, sub-levels, surface and vertical links, same-depth
   links, and links between adjacent areas. Level count and maximum depth can be
-  fixed; each level's `2d20+10` rooms can be rolled, spread from 12 up to a
-  maximum, or fixed.
+  fixed; each level's room count follows the book's `2d20+10` or a custom
+  maximum/fixed value.
 - Per-level factions, monster levels by depth, faction relationships, and a
   six-in-six wandering-monster table.
 - Room counts, types, treasure chances, sizes, optional shapes, door types,

@@ -15,7 +15,8 @@ import {
   type DungeonSpecialRoomTableRoll,
 } from '../../../data/dungeon';
 
-type RoomCountMode = 'random' | 'max' | 'fixed';
+type RoomCountMode = 'book' | 'custom';
+type CustomRoomCountMode = 'max' | 'fixed';
 
 type CrossSectionNode = {
   area: number;
@@ -59,7 +60,8 @@ export class Dungeons implements OnInit {
   readonly levelCounts = [1, 2, 3, 4, 5, 6];
   readonly maxDepth = signal<DungeonDepth | null>(null);
   readonly depths: DungeonDepth[] = [1, 2, 3, 4, 5, 6];
-  readonly roomCountMode = signal<RoomCountMode>('random');
+  readonly roomCountMode = signal<RoomCountMode>('book');
+  readonly customRoomCountMode = signal<CustomRoomCountMode>('max');
   readonly roomCount = signal(20);
   readonly dungeon = signal<Dungeon | null>(null);
   readonly corridorSamples = signal<{ [key: string]: DungeonCorridor }>({});
@@ -106,8 +108,15 @@ export class Dungeons implements OnInit {
 
   onRoomCountModeChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value as RoomCountMode;
-    if (value === 'random' || value === 'max' || value === 'fixed') {
+    if (value === 'book' || value === 'custom') {
       this.roomCountMode.set(value);
+    }
+  }
+
+  onCustomRoomCountModeChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value as CustomRoomCountMode;
+    if (value === 'max' || value === 'fixed') {
+      this.customRoomCountMode.set(value);
     }
   }
 
@@ -119,13 +128,14 @@ export class Dungeons implements OnInit {
   }
 
   onGenerateDungeon(): void {
+    const custom = this.roomCountMode() === 'custom';
     this.dungeon.set(
       calcDungeon({
         areaCount: this.areaCount(),
         levelCount: this.levelCount() ?? undefined,
         maxDepth: this.maxDepth() ?? undefined,
-        roomCount: this.roomCountMode() === 'fixed' ? this.roomCount() : undefined,
-        maxRoomCount: this.roomCountMode() === 'max' ? this.roomCount() : undefined,
+        roomCount: custom && this.customRoomCountMode() === 'fixed' ? this.roomCount() : undefined,
+        maxRoomCount: custom && this.customRoomCountMode() === 'max' ? this.roomCount() : undefined,
       }),
     );
     this.corridorSamples.set({});

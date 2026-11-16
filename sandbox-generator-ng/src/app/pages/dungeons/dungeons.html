@@ -34,14 +34,20 @@
 <label>
   Rooms per level
   <select class="room-count-mode" (change)="onRoomCountModeChange($event)">
-    <option value="random" [selected]="roomCountMode() === 'random'">Random</option>
-    <option value="max" [selected]="roomCountMode() === 'max'">Maximum</option>
-    <option value="fixed" [selected]="roomCountMode() === 'fixed'">Fixed</option>
+    <option value="book" [selected]="roomCountMode() === 'book'">Book (2d20+10)</option>
+    <option value="custom" [selected]="roomCountMode() === 'custom'">Custom</option>
   </select>
 </label>
-@if (roomCountMode() !== 'random') {
+@if (roomCountMode() === 'custom') {
   <label>
-    {{ roomCountMode() === 'max' ? 'Max rooms' : 'Rooms' }}
+    Custom rooms
+    <select class="custom-room-count-mode" (change)="onCustomRoomCountModeChange($event)">
+      <option value="max" [selected]="customRoomCountMode() === 'max'">Maximum</option>
+      <option value="fixed" [selected]="customRoomCountMode() === 'fixed'">Fixed</option>
+    </select>
+  </label>
+  <label>
+    {{ customRoomCountMode() === 'max' ? 'Max rooms' : 'Rooms' }}
     <input
       class="room-count-value"
       type="number"

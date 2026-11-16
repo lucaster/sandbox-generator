@@ -129,7 +129,7 @@ describe('Dungeons page', () => {
     expect(component.levelCount()).toBeNull();
   });
 
-  it('offers random, maximum, and fixed room counts per level', async () => {
+  it('lets the room count follow the book or a custom maximum/fixed value', async () => {
     await TestBed.configureTestingModule({
       imports: [Dungeons],
       providers: [provideZonelessChangeDetection()],
@@ -141,50 +141,69 @@ describe('Dungeons page', () => {
     const select = fixture.nativeElement.querySelector('.room-count-mode') as HTMLSelectElement;
 
     expect(Array.from(select.options).map((option) => option.textContent?.trim())).toEqual([
-      'Random',
+      'Book (2d20+10)',
+      'Custom',
+    ]);
+    expect(select.value).toBe('book');
+    expect(fixture.nativeElement.querySelector('.custom-room-count-mode')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.room-count-value')).toBeNull();
+
+    // The book mode rolls 2d20+10, so levels stay within its 12..50 range.
+    component.onGenerateDungeon();
+    for (const level of component.dungeon()!.areas.flatMap((area) => area.levels)) {
+      expect(level.roomCount).toBeGreaterThanOrEqual(12);
+      expect(level.roomCount).toBeLessThanOrEqual(50);
+    }
+
+    select.value = 'custom';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    const customSelect = fixture.nativeElement.querySelector(
+      '.custom-room-count-mode',
+    ) as HTMLSelectElement;
+    expect(Array.from(customSelect.options).map((option) => option.textContent?.trim())).toEqual([
       'Maximum',
       'Fixed',
     ]);
-    expect(select.value).toBe('random');
-    expect(fixture.nativeElement.querySelector('.room-count-value')).toBeNull();
+    expect(customSelect.value).toBe('max');
 
-    select.value = 'fixed';
-    select.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-    const input = fixture.nativeElement.querySelector(
-      '.room-count-value',
-    ) as HTMLInputElement;
-    expect(input).not.toBeNull();
-
-    input.value = '7';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(component.roomCount()).toBe(7);
-
-    component.onGenerateDungeon();
-    for (const level of component.dungeon()!.areas.flatMap((area) => area.levels)) {
-      expect(level.roomCount).toBe(7);
-    }
-
-    select.value = 'max';
-    select.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
     const maxInput = fixture.nativeElement.querySelector(
       '.room-count-value',
     ) as HTMLInputElement;
     maxInput.value = '15';
     maxInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
+    expect(component.roomCount()).toBe(15);
+
     component.onGenerateDungeon();
     for (const level of component.dungeon()!.areas.flatMap((area) => area.levels)) {
       expect(level.roomCount).toBeGreaterThanOrEqual(12);
       expect(level.roomCount).toBeLessThanOrEqual(15);
     }
 
-    select.value = 'random';
+    customSelect.value = 'fixed';
+    customSelect.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(component.customRoomCountMode()).toBe('fixed');
+    expect(fixture.nativeElement.querySelector('.room-count-value').closest('label').textContent)
+      .toContain('Rooms');
+
+    const fixedInput = fixture.nativeElement.querySelector(
+      '.room-count-value',
+    ) as HTMLInputElement;
+    fixedInput.value = '7';
+    fixedInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    component.onGenerateDungeon();
+    for (const level of component.dungeon()!.areas.flatMap((area) => area.levels)) {
+      expect(level.roomCount).toBe(7);
+    }
+
+    select.value = 'book';
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-    expect(component.roomCountMode()).toBe('random');
+    expect(component.roomCountMode()).toBe('book');
+    expect(fixture.nativeElement.querySelector('.custom-room-count-mode')).toBeNull();
     expect(fixture.nativeElement.querySelector('.room-count-value')).toBeNull();
   });
 });
