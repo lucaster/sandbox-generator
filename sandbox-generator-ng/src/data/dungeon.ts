@@ -56,6 +56,10 @@ type DungeonOptions = {
   areaCount?: number;
   levelCount?: number;
   maxDepth?: DungeonDepth;
+  /** Exact number of rooms on every level. */
+  roomCount?: number;
+  /** Upper bound for the 2d20+10 rooms rolled on every level. */
+  maxRoomCount?: number;
   includeRoomShapes?: boolean;
   percentInLairByMonsterResult?: { [monsterResult: string]: number };
   rollFn?: RollFunction;
@@ -557,6 +561,14 @@ function generateRoom(
   };
 }
 
+function resolveRoomCount(options: DungeonOptions, rollFn: RollFunction): number {
+  if (options.roomCount !== undefined) {
+    return options.roomCount;
+  }
+  const rolled = rollDice(2, 20, rollFn) + 10;
+  return options.maxRoomCount === undefined ? rolled : Math.min(rolled, options.maxRoomCount);
+}
+
 function generateLevel(
   number: number,
   depth: DungeonDepth,
@@ -566,7 +578,7 @@ function generateLevel(
 ): DungeonLevel {
   const factions = generateFactions(depth, rollFn);
   const wanderingMonsters = generateWanderingMonsters(depth, factions, rollFn);
-  const roomCount = rollDice(2, 20, rollFn) + 10;
+  const roomCount = resolveRoomCount(options, rollFn);
   return {
     number,
     depth,
@@ -742,6 +754,18 @@ function calcDungeon(options: DungeonOptions = {}): Dungeon {
     (!Number.isInteger(options.maxDepth) || options.maxDepth < 1 || options.maxDepth > 6)
   ) {
     throw new RangeError('Dungeon maxDepth must be an integer from 1 to 6.');
+  }
+  if (options.roomCount !== undefined && (!Number.isInteger(options.roomCount) || options.roomCount < 1)) {
+    throw new RangeError('Dungeon roomCount must be a positive integer.');
+  }
+  if (
+    options.maxRoomCount !== undefined &&
+    (!Number.isInteger(options.maxRoomCount) || options.maxRoomCount < 1)
+  ) {
+    throw new RangeError('Dungeon maxRoomCount must be a positive integer.');
+  }
+  if (options.roomCount !== undefined && options.maxRoomCount !== undefined) {
+    throw new RangeError('Dungeon roomCount and maxRoomCount cannot be combined.');
   }
   for (const [monsterResult, percentage] of Object.entries(options.percentInLairByMonsterResult ?? {})) {
     if (!Number.isFinite(percentage) || percentage < 0 || percentage > 100) {

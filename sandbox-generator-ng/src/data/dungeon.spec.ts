@@ -385,6 +385,51 @@ describe('dungeon.ts calcDungeon', () => {
     }
   });
 
+  it('gives every level the requested fixed room count', () => {
+    const dungeon = calcDungeon({ areaCount: 2, levelCount: 2, roomCount: 7, rollFn: () => 1 });
+    const levels = dungeon.areas.flatMap((area) => area.levels);
+
+    expect(levels.length).toBe(4);
+    for (const level of levels) {
+      expect(level.roomCount).toBe(7);
+      expect(level.rooms).toHaveSize(7);
+    }
+  });
+
+  it('caps the rolled rooms at the requested maximum', () => {
+    // 2d20 -> 20 + 20, plus 10, so the unbounded roll would be 50 rooms.
+    const capped = calcDungeon({
+      levelCount: 1,
+      maxRoomCount: 20,
+      rollFn: (faces) => (faces === 20 ? 20 : 1),
+    });
+    expect(capped.areas[0].levels[0].roomCount).toBe(20);
+
+    // 2d20 -> 2, plus 10, which stays below the cap.
+    const belowCap = calcDungeon({ levelCount: 1, maxRoomCount: 20, rollFn: () => 1 });
+    expect(belowCap.areas[0].levels[0].roomCount).toBe(12);
+  });
+
+  it('rejects a room count that is not a positive integer', () => {
+    for (const roomCount of [0, 1.5]) {
+      expect(() => calcDungeon({ roomCount, rollFn: () => 1 })).toThrowError(
+        RangeError,
+        'Dungeon roomCount must be a positive integer.',
+      );
+      expect(() => calcDungeon({ maxRoomCount: roomCount, rollFn: () => 1 })).toThrowError(
+        RangeError,
+        'Dungeon maxRoomCount must be a positive integer.',
+      );
+    }
+  });
+
+  it('rejects a fixed room count combined with a maximum', () => {
+    expect(() => calcDungeon({ roomCount: 5, maxRoomCount: 10, rollFn: () => 1 })).toThrowError(
+      RangeError,
+      'Dungeon roomCount and maxRoomCount cannot be combined.',
+    );
+  });
+
   it('generates corridor sections and excludes stairs to missing levels', () => {
     let endRoll = 0;
     const corridor = calcDungeonCorridor({

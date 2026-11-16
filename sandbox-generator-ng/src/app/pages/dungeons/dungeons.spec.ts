@@ -128,4 +128,62 @@ describe('Dungeons page', () => {
     fixture.detectChanges();
     expect(component.levelCount()).toBeNull();
   });
+
+  it('offers random, maximum, and fixed room counts per level', async () => {
+    await TestBed.configureTestingModule({
+      imports: [Dungeons],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(Dungeons);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const select = fixture.nativeElement.querySelector('.room-count-mode') as HTMLSelectElement;
+
+    expect(Array.from(select.options).map((option) => option.textContent?.trim())).toEqual([
+      'Random',
+      'Maximum',
+      'Fixed',
+    ]);
+    expect(select.value).toBe('random');
+    expect(fixture.nativeElement.querySelector('.room-count-value')).toBeNull();
+
+    select.value = 'fixed';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector(
+      '.room-count-value',
+    ) as HTMLInputElement;
+    expect(input).not.toBeNull();
+
+    input.value = '7';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(component.roomCount()).toBe(7);
+
+    component.onGenerateDungeon();
+    for (const level of component.dungeon()!.areas.flatMap((area) => area.levels)) {
+      expect(level.roomCount).toBe(7);
+    }
+
+    select.value = 'max';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    const maxInput = fixture.nativeElement.querySelector(
+      '.room-count-value',
+    ) as HTMLInputElement;
+    maxInput.value = '15';
+    maxInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    component.onGenerateDungeon();
+    for (const level of component.dungeon()!.areas.flatMap((area) => area.levels)) {
+      expect(level.roomCount).toBeLessThanOrEqual(15);
+    }
+
+    select.value = 'random';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(component.roomCountMode()).toBe('random');
+    expect(fixture.nativeElement.querySelector('.room-count-value')).toBeNull();
+  });
 });

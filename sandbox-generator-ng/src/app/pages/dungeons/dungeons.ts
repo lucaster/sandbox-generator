@@ -15,6 +15,8 @@ import {
   type DungeonSpecialRoomTableRoll,
 } from '../../../data/dungeon';
 
+type RoomCountMode = 'random' | 'max' | 'fixed';
+
 type CrossSectionNode = {
   area: number;
   level: number;
@@ -57,6 +59,8 @@ export class Dungeons implements OnInit {
   readonly levelCounts = [1, 2, 3, 4, 5, 6];
   readonly maxDepth = signal<DungeonDepth | null>(null);
   readonly depths: DungeonDepth[] = [1, 2, 3, 4, 5, 6];
+  readonly roomCountMode = signal<RoomCountMode>('random');
+  readonly roomCount = signal(20);
   readonly dungeon = signal<Dungeon | null>(null);
   readonly corridorSamples = signal<{ [key: string]: DungeonCorridor }>({});
   readonly specialRoomTableResults = signal<Record<string, DungeonSpecialRoomTableRoll[]>>({});
@@ -100,12 +104,28 @@ export class Dungeons implements OnInit {
     }
   }
 
+  onRoomCountModeChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value as RoomCountMode;
+    if (value === 'random' || value === 'max' || value === 'fixed') {
+      this.roomCountMode.set(value);
+    }
+  }
+
+  onRoomCountInput(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value);
+    if (Number.isInteger(value) && value > 0) {
+      this.roomCount.set(value);
+    }
+  }
+
   onGenerateDungeon(): void {
     this.dungeon.set(
       calcDungeon({
         areaCount: this.areaCount(),
         levelCount: this.levelCount() ?? undefined,
         maxDepth: this.maxDepth() ?? undefined,
+        roomCount: this.roomCountMode() === 'fixed' ? this.roomCount() : undefined,
+        maxRoomCount: this.roomCountMode() === 'max' ? this.roomCount() : undefined,
       }),
     );
     this.corridorSamples.set({});

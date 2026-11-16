@@ -31,6 +31,26 @@
     }
   </select>
 </label>
+<label>
+  Rooms per level
+  <select class="room-count-mode" (change)="onRoomCountModeChange($event)">
+    <option value="random" [selected]="roomCountMode() === 'random'">Random</option>
+    <option value="max" [selected]="roomCountMode() === 'max'">Maximum</option>
+    <option value="fixed" [selected]="roomCountMode() === 'fixed'">Fixed</option>
+  </select>
+</label>
+@if (roomCountMode() !== 'random') {
+  <label>
+    {{ roomCountMode() === 'max' ? 'Max rooms' : 'Rooms' }}
+    <input
+      class="room-count-value"
+      type="number"
+      min="1"
+      [value]="roomCount()"
+      (input)="onRoomCountInput($event)"
+    />
+  </label>
+}
 <button type="button" (click)="onGenerateDungeon()">Generate Dungeon</button>
 
 @if (dungeon(); as generatedDungeon) {
