@@ -200,10 +200,7 @@ Nothing is implemented:
 ## Remaining issues
 
 Apart from the Guild name-template possessive-formatting limitation above, the
-implemented tables and generation rules match the 2023 edition. The remaining
-items are housekeeping:
-
-- `src/data/biomes.ts` is empty, and `@svgdotjs/svg.js` is declared but unused.
+implemented tables and generation rules match the 2023 edition.
 
 ## Suggested priority
 
