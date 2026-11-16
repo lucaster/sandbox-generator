@@ -16,7 +16,7 @@ import {
 } from '../../../data/dungeon';
 
 type RoomCountMode = 'book' | 'custom';
-type CustomRoomCountMode = 'max' | 'fixed';
+type CustomRoomCountMode = 'fixed' | 'range';
 
 type CrossSectionNode = {
   area: number;
@@ -61,8 +61,10 @@ export class Dungeons implements OnInit {
   readonly maxDepth = signal<DungeonDepth | null>(null);
   readonly depths: DungeonDepth[] = [1, 2, 3, 4, 5, 6];
   readonly roomCountMode = signal<RoomCountMode>('book');
-  readonly customRoomCountMode = signal<CustomRoomCountMode>('max');
+  readonly customRoomCountMode = signal<CustomRoomCountMode>('range');
   readonly roomCount = signal(20);
+  readonly minRoomCount = signal(12);
+  readonly maxRoomCount = signal(20);
   readonly dungeon = signal<Dungeon | null>(null);
   readonly corridorSamples = signal<{ [key: string]: DungeonCorridor }>({});
   readonly specialRoomTableResults = signal<Record<string, DungeonSpecialRoomTableRoll[]>>({});
@@ -115,7 +117,7 @@ export class Dungeons implements OnInit {
 
   onCustomRoomCountModeChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value as CustomRoomCountMode;
-    if (value === 'max' || value === 'fixed') {
+    if (value === 'fixed' || value === 'range') {
       this.customRoomCountMode.set(value);
     }
   }
@@ -127,15 +129,35 @@ export class Dungeons implements OnInit {
     }
   }
 
+  onMinRoomCountInput(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value);
+    if (Number.isInteger(value) && value > 0) {
+      this.minRoomCount.set(value);
+    }
+  }
+
+  onMaxRoomCountInput(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value);
+    if (Number.isInteger(value) && value > 0) {
+      this.maxRoomCount.set(value);
+    }
+  }
+
   onGenerateDungeon(): void {
     const custom = this.roomCountMode() === 'custom';
+    const range = custom && this.customRoomCountMode() === 'range';
+    // Sorting here keeps the generator from rejecting a range typed back to
+    // front, which would otherwise leave the page without a dungeon.
+    const minRoomCount = Math.min(this.minRoomCount(), this.maxRoomCount());
+    const maxRoomCount = Math.max(this.minRoomCount(), this.maxRoomCount());
     this.dungeon.set(
       calcDungeon({
         areaCount: this.areaCount(),
         levelCount: this.levelCount() ?? undefined,
         maxDepth: this.maxDepth() ?? undefined,
         roomCount: custom && this.customRoomCountMode() === 'fixed' ? this.roomCount() : undefined,
-        maxRoomCount: custom && this.customRoomCountMode() === 'max' ? this.roomCount() : undefined,
+        minRoomCount: range ? minRoomCount : undefined,
+        maxRoomCount: range ? maxRoomCount : undefined,
       }),
     );
     this.corridorSamples.set({});

@@ -42,20 +42,43 @@
   <label>
     Custom rooms
     <select class="custom-room-count-mode" (change)="onCustomRoomCountModeChange($event)">
-      <option value="max" [selected]="customRoomCountMode() === 'max'">Maximum</option>
       <option value="fixed" [selected]="customRoomCountMode() === 'fixed'">Fixed</option>
+      <option value="range" [selected]="customRoomCountMode() === 'range'">Minimum and maximum</option>
     </select>
   </label>
-  <label>
-    {{ customRoomCountMode() === 'max' ? 'Max rooms' : 'Rooms' }}
-    <input
-      class="room-count-value"
-      type="number"
-      min="1"
-      [value]="roomCount()"
-      (input)="onRoomCountInput($event)"
-    />
-  </label>
+  @if (customRoomCountMode() === 'fixed') {
+    <label>
+      Rooms
+      <input
+        class="room-count-value"
+        type="number"
+        min="1"
+        [value]="roomCount()"
+        (input)="onRoomCountInput($event)"
+      />
+    </label>
+  } @else {
+    <label>
+      Min rooms
+      <input
+        class="min-room-count-value"
+        type="number"
+        min="1"
+        [value]="minRoomCount()"
+        (input)="onMinRoomCountInput($event)"
+      />
+    </label>
+    <label>
+      Max rooms
+      <input
+        class="max-room-count-value"
+        type="number"
+        min="1"
+        [value]="maxRoomCount()"
+        (input)="onMaxRoomCountInput($event)"
+      />
+    </label>
+  }
 }
 <button type="button" (click)="onGenerateDungeon()">Generate Dungeon</button>
 

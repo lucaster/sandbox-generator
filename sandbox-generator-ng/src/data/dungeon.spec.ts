@@ -396,13 +396,14 @@ describe('dungeon.ts calcDungeon', () => {
     }
   });
 
-  it('spreads a maximum below the base roll evenly instead of piling levels on the cap', () => {
+  it('rolls a flat room count across the requested minimum and maximum', () => {
     let face = 0;
     const dungeon = calcDungeon({
       levelCount: 6,
+      minRoomCount: 12,
       maxRoomCount: 20,
-      // Maximum rolls 1d(20-11), so returning each face in turn walks the
-      // whole 12..17 range. Capping 2d20+10 would have put them all on 20.
+      // The 1d9 over 12..20 walks the whole range. Capping 2d20+10 would have
+      // put most levels on 20 instead.
       rollFn: (faces) => {
         if (faces === 9) {
           face = (face % 9) + 1;
@@ -415,34 +416,50 @@ describe('dungeon.ts calcDungeon', () => {
     expect(dungeon.areas[0].levels.map((level) => level.roomCount)).toEqual([12, 13, 14, 15, 16, 17]);
   });
 
-  it('keeps the 12-room floor of the base rule when a maximum is set', () => {
-    const dungeon = calcDungeon({ levelCount: 1, maxRoomCount: 20, rollFn: () => 1 });
-    expect(dungeon.areas[0].levels[0].roomCount).toBe(12);
+  it('accepts ranges outside the book default', () => {
+    const below = calcDungeon({
+      levelCount: 1,
+      minRoomCount: 3,
+      maxRoomCount: 4,
+      rollFn: (faces) => faces,
+    });
+    expect(below.areas[0].levels[0].roomCount).toBe(4);
+
+    const single = calcDungeon({ levelCount: 1, minRoomCount: 5, maxRoomCount: 5, rollFn: () => 1 });
+    expect(single.areas[0].levels[0].roomCount).toBe(5);
   });
 
-  it('uses a maximum below 12 as the room count', () => {
-    const dungeon = calcDungeon({ levelCount: 1, maxRoomCount: 5, rollFn: () => 1 });
-    expect(dungeon.areas[0].levels[0].roomCount).toBe(5);
-  });
-
-  it('rejects a room count that is not a positive integer', () => {
-    for (const roomCount of [0, 1.5]) {
-      expect(() => calcDungeon({ roomCount, rollFn: () => 1 })).toThrowError(
+  it('rejects room counts that are not positive integers', () => {
+    for (const value of [0, 1.5]) {
+      expect(() => calcDungeon({ roomCount: value, rollFn: () => 1 })).toThrowError(
         RangeError,
         'Dungeon roomCount must be a positive integer.',
       );
-      expect(() => calcDungeon({ maxRoomCount: roomCount, rollFn: () => 1 })).toThrowError(
-        RangeError,
-        'Dungeon maxRoomCount must be a positive integer.',
-      );
+      expect(() =>
+        calcDungeon({ minRoomCount: value, maxRoomCount: 20, rollFn: () => 1 }),
+      ).toThrowError(RangeError, 'Dungeon minRoomCount must be a positive integer.');
+      expect(() =>
+        calcDungeon({ minRoomCount: 10, maxRoomCount: value, rollFn: () => 1 }),
+      ).toThrowError(RangeError, 'Dungeon maxRoomCount must be a positive integer.');
     }
   });
 
-  it('rejects a fixed room count combined with a maximum', () => {
-    expect(() => calcDungeon({ roomCount: 5, maxRoomCount: 10, rollFn: () => 1 })).toThrowError(
-      RangeError,
-      'Dungeon roomCount and maxRoomCount cannot be combined.',
-    );
+  it('rejects a range with a missing bound or a minimum above the maximum', () => {
+    for (const options of [{ minRoomCount: 10 }, { maxRoomCount: 10 }]) {
+      expect(() => calcDungeon({ ...options, rollFn: () => 1 })).toThrowError(
+        RangeError,
+        'Dungeon minRoomCount and maxRoomCount must be given together.',
+      );
+    }
+    expect(() =>
+      calcDungeon({ minRoomCount: 20, maxRoomCount: 10, rollFn: () => 1 }),
+    ).toThrowError(RangeError, 'Dungeon minRoomCount cannot exceed maxRoomCount.');
+  });
+
+  it('rejects a fixed room count combined with a range', () => {
+    expect(() =>
+      calcDungeon({ roomCount: 5, minRoomCount: 10, maxRoomCount: 12, rollFn: () => 1 }),
+    ).toThrowError(RangeError, 'Dungeon roomCount and maxRoomCount cannot be combined.');
   });
 
   it('generates corridor sections and excludes stairs to missing levels', () => {

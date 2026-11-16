@@ -129,7 +129,7 @@ describe('Dungeons page', () => {
     expect(component.levelCount()).toBeNull();
   });
 
-  it('lets the room count follow the book or a custom maximum/fixed value', async () => {
+  it('lets the room count follow the book, a fixed value, or a minimum-maximum range', async () => {
     await TestBed.configureTestingModule({
       imports: [Dungeons],
       providers: [provideZonelessChangeDetection()],
@@ -146,7 +146,7 @@ describe('Dungeons page', () => {
     ]);
     expect(select.value).toBe('book');
     expect(fixture.nativeElement.querySelector('.custom-room-count-mode')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.room-count-value')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.min-room-count-value')).toBeNull();
 
     // The book mode rolls 2d20+10, so levels stay within its 12..50 range.
     component.onGenerateDungeon();
@@ -162,31 +162,51 @@ describe('Dungeons page', () => {
       '.custom-room-count-mode',
     ) as HTMLSelectElement;
     expect(Array.from(customSelect.options).map((option) => option.textContent?.trim())).toEqual([
-      'Maximum',
       'Fixed',
+      'Minimum and maximum',
     ]);
-    expect(customSelect.value).toBe('max');
+    expect(customSelect.value).toBe('range');
 
-    const maxInput = fixture.nativeElement.querySelector(
-      '.room-count-value',
+    const minInput = fixture.nativeElement.querySelector(
+      '.min-room-count-value',
     ) as HTMLInputElement;
-    maxInput.value = '15';
+    const maxInput = fixture.nativeElement.querySelector(
+      '.max-room-count-value',
+    ) as HTMLInputElement;
+    expect(minInput.value).toBe('12');
+    expect(maxInput.value).toBe('20');
+
+    minInput.value = '5';
+    minInput.dispatchEvent(new Event('input'));
+    maxInput.value = '9';
     maxInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(component.roomCount()).toBe(15);
+    expect(component.minRoomCount()).toBe(5);
+    expect(component.maxRoomCount()).toBe(9);
 
     component.onGenerateDungeon();
     for (const level of component.dungeon()!.areas.flatMap((area) => area.levels)) {
-      expect(level.roomCount).toBeGreaterThanOrEqual(12);
-      expect(level.roomCount).toBeLessThanOrEqual(15);
+      expect(level.roomCount).toBeGreaterThanOrEqual(5);
+      expect(level.roomCount).toBeLessThanOrEqual(9);
+    }
+
+    // A range typed back to front still generates instead of throwing.
+    minInput.value = '9';
+    minInput.dispatchEvent(new Event('input'));
+    maxInput.value = '5';
+    maxInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    component.onGenerateDungeon();
+    for (const level of component.dungeon()!.areas.flatMap((area) => area.levels)) {
+      expect(level.roomCount).toBeGreaterThanOrEqual(5);
+      expect(level.roomCount).toBeLessThanOrEqual(9);
     }
 
     customSelect.value = 'fixed';
     customSelect.dispatchEvent(new Event('change'));
     fixture.detectChanges();
     expect(component.customRoomCountMode()).toBe('fixed');
-    expect(fixture.nativeElement.querySelector('.room-count-value').closest('label').textContent)
-      .toContain('Rooms');
+    expect(fixture.nativeElement.querySelector('.min-room-count-value')).toBeNull();
 
     const fixedInput = fixture.nativeElement.querySelector(
       '.room-count-value',

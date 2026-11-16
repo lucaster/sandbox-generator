@@ -58,7 +58,9 @@ type DungeonOptions = {
   maxDepth?: DungeonDepth;
   /** Exact number of rooms on every level. */
   roomCount?: number;
-  /** Upper bound for the rooms rolled on every level, which stay at least 12. */
+  /** Lower bound of the rooms rolled on every level. Needs `maxRoomCount`. */
+  minRoomCount?: number;
+  /** Upper bound of the rooms rolled on every level. Needs `minRoomCount`. */
   maxRoomCount?: number;
   includeRoomShapes?: boolean;
   percentInLairByMonsterResult?: { [monsterResult: string]: number };
@@ -565,11 +567,10 @@ function resolveRoomCount(options: DungeonOptions, rollFn: RollFunction): number
   if (options.roomCount !== undefined) {
     return options.roomCount;
   }
-  if (options.maxRoomCount !== undefined) {
-    const max = options.maxRoomCount;
-    // A flat 12..max keeps the book's floor of 12 rooms. Capping the 2d20+10
-    // roll instead would pile 91% of the results on max for a maximum of 20.
-    return max <= 12 ? max : 11 + rollFn(max - 11);
+  if (options.minRoomCount !== undefined && options.maxRoomCount !== undefined) {
+    // A flat roll over the requested range: a capped 2d20+10 would pile most
+    // levels on the maximum instead.
+    return options.minRoomCount + rollFn(options.maxRoomCount - options.minRoomCount + 1) - 1;
   }
   return rollDice(2, 20, rollFn) + 10;
 }
@@ -764,10 +765,26 @@ function calcDungeon(options: DungeonOptions = {}): Dungeon {
     throw new RangeError('Dungeon roomCount must be a positive integer.');
   }
   if (
+    options.minRoomCount !== undefined &&
+    (!Number.isInteger(options.minRoomCount) || options.minRoomCount < 1)
+  ) {
+    throw new RangeError('Dungeon minRoomCount must be a positive integer.');
+  }
+  if (
     options.maxRoomCount !== undefined &&
     (!Number.isInteger(options.maxRoomCount) || options.maxRoomCount < 1)
   ) {
     throw new RangeError('Dungeon maxRoomCount must be a positive integer.');
+  }
+  if ((options.minRoomCount === undefined) !== (options.maxRoomCount === undefined)) {
+    throw new RangeError('Dungeon minRoomCount and maxRoomCount must be given together.');
+  }
+  if (
+    options.minRoomCount !== undefined &&
+    options.maxRoomCount !== undefined &&
+    options.minRoomCount > options.maxRoomCount
+  ) {
+    throw new RangeError('Dungeon minRoomCount cannot exceed maxRoomCount.');
   }
   if (options.roomCount !== undefined && options.maxRoomCount !== undefined) {
     throw new RangeError('Dungeon roomCount and maxRoomCount cannot be combined.');
