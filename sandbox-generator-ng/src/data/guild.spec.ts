@@ -183,7 +183,7 @@ describe('calcGuild', () => {
     });
   });
 
-  it('renders possessive templates with the possessive form of the filled word', () => {
+  it('keeps the possessive notation of name templates for the DM to resolve', () => {
     const guild = calcGuild({
       nameField: 'Baking',
       rollFn: (faces) => (faces === 12 ? 1 : faces),
@@ -192,20 +192,7 @@ describe('calcGuild', () => {
       roll: 1,
       template: "The ... ('s) Guild",
       fieldName: 'Baking',
-      result: "The Baking's Guild",
-    });
-  });
-
-  it('renders possessive templates without the supplied field as fallback', () => {
-    const guild = calcGuild({
-      rollFn: (faces) => (faces === 12 ? 7 : faces),
-    });
-    expect(guild.fieldSpecialty.result).toBe('Singing');
-    expect(guild.name).toEqual({
-      roll: 7,
-      template: "The ... ('s) Circle",
-      fieldName: 'Singing',
-      result: "The Singing's Circle",
+      result: "The Baking ('s) Guild",
     });
   });
 });

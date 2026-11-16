@@ -35,8 +35,8 @@ as SVG entirely in the browser — no backend required.
   leave them unfilled for the DM.
 - **Guild generator** — field and specialty, separate expertise, name structure,
   power, member traits, and regular events and problems. Supply a fitting phrase
-  for the name template; possessive templates render the possessive form
-  (`('s)` → `'s`).
+  for the name template; possessive templates keep the book's `('s)` notation
+  for the DM, since the possessive fits nouns but not gerunds or adjectives.
 - **Tavern generator** — name, decor, staff, patrons, entertainment, rooms, outside
   amenities, all three menu formats, rumor, and sign, including conditional and
   nested rolls from the 2023 tables.
