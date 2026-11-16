@@ -42,6 +42,7 @@ import {
 import { SvgDrawer, type FactionShape } from '../../../drawing/hex';
 import { HexOps } from '../../../drawing/hex-ops';
 import { Point } from '../../../drawing/point';
+import { baseRelative } from '../../../url';
 import { lairUrl } from '../../lair-link';
 
 export type HexPatchMode = 'biome' | 'feature' | 'faction' | 'content' | 'overall' | 'sample';
@@ -318,7 +319,7 @@ export class HexPatch implements AfterViewInit {
     if (!biome || !rolls) {
       return null;
     }
-    return lairUrl(biome, rolls);
+    return baseRelative(lairUrl(biome, rolls));
   }
 
   exportOverallPatch(): OverallPatchExport {

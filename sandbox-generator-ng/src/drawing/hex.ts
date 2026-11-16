@@ -1,3 +1,4 @@
+import { baseRelative } from '../url';
 import { Point } from './point';
 
 export type FactionShape =
@@ -44,7 +45,7 @@ export class SvgDrawer {
       y -= height;
     }
 
-    image.setAttribute('href', imageUrl);
+    image.setAttribute('href', baseRelative(imageUrl));
     image.setAttribute('x', '' + x);
     image.setAttribute('y', '' + y);
     image.setAttribute('width', '' + width);
