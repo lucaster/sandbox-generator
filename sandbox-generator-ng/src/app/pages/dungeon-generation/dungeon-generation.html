@@ -1,0 +1,159 @@
+<h1>Dungeon generation</h1>
+<p>
+  Generates the floor plan of a single level: an entrance corridor with at least one outlet,
+  a room on each outlet, then the doors of each room become new outlets, and so on.
+</p>
+
+<div class="controls">
+  <label>
+    Rooms
+    <input
+      type="number"
+      min="1"
+      [value]="roomCount()"
+      (input)="onRoomCountInput($event)"
+    />
+  </label>
+  <label>
+    Depth
+    <select (change)="onDepthChange($event)">
+      <option value="random" [selected]="depth() === null">Random</option>
+      @for (value of depths; track value) {
+        <option [value]="value" [selected]="depth() === value">{{ depthLabel(value) }}</option>
+      }
+    </select>
+  </label>
+  <label class="check">
+    <input
+      type="checkbox"
+      [checked]="includeRoomShapes()"
+      (change)="onIncludeRoomShapesChange($event)"
+    />
+    Include room shapes
+  </label>
+  <button type="button" (click)="onGenerate()">Generate level</button>
+</div>
+
+@if (floorPlan(); as plan) {
+  <section>
+    <h2>Level floor plan</h2>
+    <p>
+      Depth {{ depthLabel(plan.depth) }} — {{ plan.rooms.length }} of {{ plan.roomCount }} rooms —
+      {{ plan.corridors.length }} corridors — {{ plan.connections.length }} connections.
+    </p>
+    <p>Entrance corridor: {{ plan.entranceCorridorId }}</p>
+  </section>
+
+  <section>
+    <h2>Level diagram</h2>
+    <p>
+      Schematic layout: rooms, corridors and exits are placed by distance from the entrance.
+      Lines are connections, not walls; this is not a map to scale.
+    </p>
+    @if (diagram(); as diagram) {
+      <div class="floor-plan-scroll">
+        <svg
+          class="floor-plan-svg"
+          role="img"
+          aria-label="Schematic floor plan of the generated dungeon level"
+          [attr.viewBox]="'0 0 ' + diagram.width + ' ' + diagram.height"
+          [attr.width]="diagram.width"
+          [attr.height]="diagram.height"
+        >
+          @for (connection of diagram.connections; track connection.key) {
+            <path
+              [attr.class]="'floor-plan-connection floor-plan-connection--' + connection.style"
+              [attr.d]="connection.d"
+            >
+              <title>{{ connection.label }}</title>
+            </path>
+          }
+          @for (node of diagram.nodes; track node.key) {
+            <g
+              [attr.class]="'floor-plan-node floor-plan-node--' + node.shape"
+              [attr.transform]="'translate(' + node.x + ',' + node.y + ')'"
+            >
+              <title>{{ node.title }}</title>
+              <path [attr.d]="node.outline" />
+              <text class="floor-plan-label" x="0" [attr.y]="node.shape === 'entrance' ? 5 : -4">
+                {{ node.label }}
+              </text>
+              <text class="floor-plan-subtitle" x="0" y="12">{{ node.subtitle }}</text>
+            </g>
+          }
+        </svg>
+      </div>
+      <ul class="floor-plan-legend" aria-label="Connection types">
+        <li><span class="legend-line connector--ingresso"></span>Entrance</li>
+        <li><span class="legend-line connector--corridoio"></span>Corridor outlet</li>
+        <li><span class="legend-line connector--porta"></span>Door</li>
+        <li><span class="legend-line connector--segreta"></span>Secret door</li>
+        <li><span class="legend-line connector--scala"></span>Stairs</li>
+        <li><span class="legend-line connector--loop"></span>Loop to existing room</li>
+      </ul>
+    }
+  </section>
+
+  <section>
+    <h2>Corridors</h2>
+    <ol>
+      @for (corridor of plan.corridors; track corridor.id) {
+        <li>
+          <strong>{{ corridor.id }}</strong>
+          @if (corridor.id === plan.entranceCorridorId) {
+            <em> (entrance)</em>
+          }
+          — {{ corridor.sections.length }} section(s) of six squares; end: {{ corridor.end }}
+          <ul>
+            @for (section of corridor.sections; track section.number) {
+              <li>
+                Section {{ section.number }}:
+                {{ section.features.length ? section.features.join(', ') : 'no features' }}
+              </li>
+            }
+          </ul>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <section>
+    <h2>Rooms ({{ plan.rooms.length }})</h2>
+    <ol>
+      @for (room of plan.rooms; track room.number) {
+        <li>
+          <strong>Room {{ room.number }}</strong>
+          @if (room.eSegreta) {
+            <em> (secret)</em>
+          }
+          — {{ room.type | titlecase }}
+          @if (room.detail) {
+            — {{ room.detail.result }}
+          }
+          — {{ room.size.toLowerCase() }} ({{ room.length }} × {{ room.width }})
+          @if (room.shape) {
+            — {{ room.shape }}
+          }
+          @if (room.doors.length) {
+            <ul>
+              @for (door of room.doors; track $index) {
+                <li>
+                  {{ door.position }} {{ door.type }} to {{ door.destination.toLowerCase() }}
+                </li>
+              }
+            </ul>
+          }
+        </li>
+      }
+    </ol>
+  </section>
+
+  <section>
+    <h2>Connections</h2>
+    <ul>
+      @for (connection of plan.connections; track $index) {
+        <li>{{ connectionLabel(connection) }}</li>
+      }
+    </ul>
+  </section>
+}

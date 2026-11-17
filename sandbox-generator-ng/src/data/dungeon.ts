@@ -183,6 +183,62 @@ type DungeonCorridorOptions = {
   rollFn?: RollFunction;
 };
 
+type DungeonFloorNodeKind = 'Ingresso' | 'corridoio' | 'stanza' | 'uscita';
+
+type DungeonFloorNode = {
+  kind: DungeonFloorNodeKind;
+  id: string;
+  direction?: 'SU' | 'GIU';
+};
+
+type DungeonFloorOutletType =
+  | 'PORTA_STANZA'
+  | 'PORTA_SEGRETA'
+  | 'SBOCCO_CORRIDORIO'
+  | 'INCROCIO_X'
+  | 'INCROCIO_T'
+  | 'SVOLTA_SINISTRA'
+  | 'SVOLTA_DESTRA'
+  | 'SCALE';
+
+type DungeonFloorOutlet = {
+  type: DungeonFloorOutletType;
+  source: DungeonFloorNode;
+  side?: string;
+  direction?: 'SU' | 'GIU';
+  door?: DungeonDoor;
+  developed: boolean;
+};
+
+type DungeonFloorConnection = {
+  from: DungeonFloorNode;
+  to: DungeonFloorNode;
+  via: 'ingresso' | 'sbocco di corridoio' | DungeonDoor | DungeonFloorOutlet;
+  loop?: boolean;
+};
+
+type PlacedDungeonRoom = DungeonRoom & { eSegreta: boolean };
+type PlacedDungeonCorridor = DungeonCorridor & { id: string };
+
+type DungeonFloorPlan = {
+  depth: DungeonDepth;
+  roomCount: number;
+  rooms: PlacedDungeonRoom[];
+  corridors: PlacedDungeonCorridor[];
+  connections: DungeonFloorConnection[];
+  entranceCorridorId: string;
+};
+
+type DungeonFloorPlanOptions = {
+  roomCount?: number;
+  depth?: DungeonDepth;
+  hasDeeperLevel?: boolean;
+  hasHigherLevel?: boolean;
+  includeRoomShapes?: boolean;
+  percentInLairByMonsterResult?: { [monsterResult: string]: number };
+  rollFn?: RollFunction;
+};
+
 const dungeonSpecialRoomTableActions: Record<string, DungeonSpecialRoomTableAction[]> = {
   'Crying statues': [
     {
@@ -674,6 +730,280 @@ function calcDungeonCorridor(options: DungeonCorridorOptions = {}): DungeonCorri
   return { sections, end };
 }
 
+const maxCorridorEntranceAttempts = 20;
+const maxFloorPlanAttempts = 20;
+const maxFloorPlanRetries = 20;
+const maxConsecutiveCorridors = 3;
+
+function generateLevelFloorPlan(options: DungeonFloorPlanOptions = {}): DungeonFloorPlan {
+  const rollFn = options.rollFn ?? d;
+  const depth = options.depth ?? dungeonDepth(rollFn(6));
+  const roomCount = resolveRoomCount(options, rollFn);
+  const factions = generateFactions(depth, rollFn);
+  const wanderingMonsters = generateWanderingMonsters(depth, factions, rollFn);
+  const corridorOptions: DungeonCorridorOptions = {
+    hasDeeperLevel: options.hasDeeperLevel ?? depth < 6,
+    hasHigherLevel: options.hasHigherLevel ?? depth > 1,
+    rollFn,
+  };
+
+  const build = () =>
+    buildLevelFloorPlan(depth, roomCount, wanderingMonsters, options, corridorOptions, rollFn);
+  let plan = build();
+  let retries = 0;
+  while (plan.rooms.length < roomCount && retries < maxFloorPlanRetries) {
+    plan = build();
+    retries++;
+  }
+  return plan;
+}
+
+function buildLevelFloorPlan(
+  depth: DungeonDepth,
+  roomCount: number,
+  wanderingMonsters: DungeonEncounter[],
+  options: DungeonFloorPlanOptions,
+  corridorOptions: DungeonCorridorOptions,
+  rollFn: RollFunction,
+): DungeonFloorPlan {
+  const rooms: PlacedDungeonRoom[] = [];
+  const corridors: PlacedDungeonCorridor[] = [];
+  const connections: DungeonFloorConnection[] = [];
+  const queue: DungeonFloorOutlet[] = [];
+  const leftoverCorridorOutlets: DungeonFloorOutlet[] = [];
+  let nextRoomNumber = 1;
+  let nextCorridorNumber = 1;
+  let consecutiveWithoutRoom = 0;
+
+  const entranceNode: DungeonFloorNode = { kind: 'Ingresso', id: 'Ingresso' };
+
+  function corridorNode(corridor: PlacedDungeonCorridor): DungeonFloorNode {
+    return { kind: 'corridoio', id: corridor.id };
+  }
+
+  function roomNode(room: PlacedDungeonRoom): DungeonFloorNode {
+    return { kind: 'stanza', id: `${room.number}` };
+  }
+
+  function nodeKey(node: DungeonFloorNode): string {
+    return `${node.kind}:${node.id}`;
+  }
+
+  function corridorOutlets(
+    corridor: DungeonCorridor,
+    source: DungeonFloorNode,
+  ): DungeonFloorOutlet[] {
+    const outlets: DungeonFloorOutlet[] = [];
+    for (const section of corridor.sections) {
+      for (const feature of section.features) {
+        if (feature.startsWith('Door on ')) {
+          outlets.push({ type: 'PORTA_STANZA', source, side: feature, developed: false });
+        } else if (feature.startsWith('Secret door:')) {
+          outlets.push({ type: 'PORTA_SEGRETA', source, developed: false });
+        }
+      }
+    }
+    switch (corridor.end) {
+      case 'Door/Portcullis':
+        outlets.push({ type: 'PORTA_STANZA', source, developed: false });
+        break;
+      case 'X intersection':
+        outlets.push({ type: 'INCROCIO_X', source, developed: false });
+        break;
+      case 'T intersection':
+        outlets.push({ type: 'INCROCIO_T', source, developed: false });
+        break;
+      case 'Left turn':
+        outlets.push({ type: 'SVOLTA_SINISTRA', source, developed: false });
+        break;
+      case 'Right turn':
+        outlets.push({ type: 'SVOLTA_DESTRA', source, developed: false });
+        break;
+      case 'Stairs to a deeper level':
+        outlets.push({ type: 'SCALE', source, direction: 'GIU', developed: false });
+        break;
+      case 'Stairs to a higher level':
+        outlets.push({ type: 'SCALE', source, direction: 'SU', developed: false });
+        break;
+    }
+    return outlets;
+  }
+
+  function sideDoorFeature(): string {
+    const side = randomOptionEntry(tableDungeonCorridorDoorSide, rollFn).result.toLowerCase();
+    const door = generateDoor(rollFn, side);
+    return `Door on ${side}: ${door.type} (opens to a room)`;
+  }
+
+  function hasRoomOutlet(outlets: DungeonFloorOutlet[]): boolean {
+    return outlets.some(
+      (outlet) => outlet.type === 'PORTA_STANZA' || outlet.type === 'PORTA_SEGRETA',
+    );
+  }
+
+  function addCorridor(corridor: DungeonCorridor, source: DungeonFloorNode): PlacedDungeonCorridor {
+    const placed: PlacedDungeonCorridor = { ...corridor, id: `C${nextCorridorNumber++}` };
+    corridors.push(placed);
+    connections.push({
+      from: source,
+      to: corridorNode(placed),
+      via: source.kind === 'Ingresso' ? 'ingresso' : 'sbocco di corridoio',
+    });
+    return placed;
+  }
+
+  function generateConnectedRoom(outlet: DungeonFloorOutlet): void {
+    const room: PlacedDungeonRoom = {
+      ...generateRoom(nextRoomNumber++, depth, wanderingMonsters, options, rollFn),
+      eSegreta: outlet.type === 'PORTA_SEGRETA',
+    };
+    rooms.push(room);
+    connections.push({ from: outlet.source, to: roomNode(room), via: outlet });
+    outlet.developed = true;
+    const source = roomNode(room);
+    for (const door of room.doors) {
+      const type: DungeonFloorOutletType = door.type === 'Secret door'
+        ? 'PORTA_SEGRETA'
+        : door.destination === 'Corridor' ? 'SBOCCO_CORRIDORIO' : 'PORTA_STANZA';
+      queue.push({ type, source, side: door.position, door, developed: false });
+    }
+  }
+
+  function expand(): void {
+    while (queue.length > 0) {
+      const outlet = queue.shift()!;
+      if (rooms.length >= roomCount) {
+        if (outlet.source.kind === 'corridoio' && outlet.type !== 'SCALE') {
+          leftoverCorridorOutlets.push(outlet);
+        }
+        outlet.developed = false;
+        continue;
+      }
+      if (outlet.type === 'PORTA_STANZA' || outlet.type === 'PORTA_SEGRETA') {
+        generateConnectedRoom(outlet);
+        consecutiveWithoutRoom = 0;
+      } else if (outlet.type === 'SCALE') {
+        connections.push({
+          from: outlet.source,
+          to: { kind: 'uscita', id: `uscita-${outlet.direction}`, direction: outlet.direction },
+          via: outlet,
+        });
+        outlet.developed = true;
+        consecutiveWithoutRoom = 0;
+      } else if (consecutiveWithoutRoom >= maxConsecutiveCorridors) {
+        generateConnectedRoom({ ...outlet, type: 'PORTA_STANZA' });
+        consecutiveWithoutRoom = 0;
+      } else {
+        const corridor = addCorridor(calcDungeonCorridor(corridorOptions), outlet.source);
+        queue.push(...corridorOutlets(corridor, corridorNode(corridor)));
+        outlet.developed = true;
+        consecutiveWithoutRoom++;
+      }
+    }
+  }
+
+  function isOutlet(via: DungeonFloorConnection['via']): via is DungeonFloorOutlet {
+    return typeof via !== 'string' && 'developed' in via;
+  }
+
+  function chooseAnchor(): DungeonFloorNode | null {
+    const candidates = connections
+      .filter((connection) => isOutlet(connection.via) && !connection.via.developed)
+      .map((connection) => connection.from);
+    for (const corridor of corridors) {
+      if (corridor.end === 'Dead end (or reroll)') {
+        candidates.push(corridorNode(corridor));
+      }
+    }
+    if (candidates.length === 0) {
+      return null;
+    }
+    return candidates[rollFn(candidates.length) - 1];
+  }
+
+  function connectLeftoverCorridorOutlets(): void {
+    const branchingCorridors = new Set(
+      connections
+        .filter((connection) => connection.from.kind === 'corridoio' && !connection.loop)
+        .map((connection) => nodeKey(connection.from)),
+    );
+    for (const outlet of leftoverCorridorOutlets) {
+      if (
+        outlet.developed ||
+        outlet.source.kind !== 'corridoio' ||
+        outlet.type === 'SCALE' ||
+        branchingCorridors.has(nodeKey(outlet.source))
+      ) {
+        continue;
+      }
+      const sourceKey = nodeKey(outlet.source);
+      const targets = rooms.filter((room) => {
+        const targetKey = nodeKey(roomNode(room));
+        return !connections.some(
+          (connection) =>
+            (nodeKey(connection.from) === sourceKey && nodeKey(connection.to) === targetKey) ||
+            (nodeKey(connection.from) === targetKey && nodeKey(connection.to) === sourceKey),
+        );
+      });
+      if (targets.length === 0) {
+        continue;
+      }
+      const room = targets[rollFn(targets.length) - 1];
+      connections.push({
+        from: outlet.source,
+        to: roomNode(room),
+        via: outlet,
+        loop: true,
+      });
+      outlet.developed = true;
+    }
+  }
+
+  let entranceCorridor = calcDungeonCorridor(corridorOptions);
+  let outlets = corridorOutlets(entranceCorridor, entranceNode);
+  let attempts = 0;
+  while (!hasRoomOutlet(outlets) && attempts < maxCorridorEntranceAttempts) {
+    entranceCorridor = calcDungeonCorridor(corridorOptions);
+    outlets = corridorOutlets(entranceCorridor, entranceNode);
+    attempts++;
+  }
+  if (!hasRoomOutlet(outlets)) {
+    entranceCorridor.sections[0].features = [sideDoorFeature()];
+    outlets = corridorOutlets(entranceCorridor, entranceNode);
+  }
+  const entrance = addCorridor(entranceCorridor, entranceNode);
+  for (const outlet of outlets) {
+    outlet.source = corridorNode(entrance);
+    queue.push(outlet);
+  }
+
+  attempts = 0;
+  while (rooms.length < roomCount && attempts < maxFloorPlanAttempts) {
+    expand();
+    if (rooms.length >= roomCount) {
+      break;
+    }
+    const anchor = chooseAnchor();
+    if (!anchor) {
+      break;
+    }
+    const corridor = addCorridor(calcDungeonCorridor(corridorOptions), anchor);
+    queue.push(...corridorOutlets(corridor, corridorNode(corridor)));
+    attempts++;
+  }
+
+  connectLeftoverCorridorOutlets();
+
+  return {
+    depth,
+    roomCount,
+    rooms,
+    corridors,
+    connections,
+    entranceCorridorId: entrance.id,
+  };
+}
+
 function generateCrossSectionLinks(areas: DungeonArea[], rollFn: RollFunction): DungeonLink[] {
   const links: DungeonLink[] = [];
   for (const area of areas) {
@@ -830,6 +1160,7 @@ function calcDungeon(options: DungeonOptions = {}): Dungeon {
 export {
   calcDungeon,
   calcDungeonCorridor,
+  generateLevelFloorPlan,
   getDungeonSpecialRoomTableActions,
   rollDungeonSpecialRoomTable,
 };
@@ -843,10 +1174,17 @@ export type {
   DungeonDepth,
   DungeonEncounter,
   DungeonFaction,
+  DungeonFloorConnection,
+  DungeonFloorNode,
+  DungeonFloorOutlet,
+  DungeonFloorPlan,
+  DungeonFloorPlanOptions,
   DungeonLevel,
   DungeonLink,
   DungeonMonsterResult,
   DungeonOptions,
   DungeonRoom,
   DungeonTableResult,
+  PlacedDungeonCorridor,
+  PlacedDungeonRoom,
 };
