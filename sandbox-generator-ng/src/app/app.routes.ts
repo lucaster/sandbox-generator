@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { HelloAngular } from './components/hello-angular/hello-angular';
 import { LandmarkContent } from './pages/content/content';
 import { Encounters } from './pages/encounters/encounters';
-import { Dungeons } from './pages/dungeons/dungeons';
 import { CriminalOrganizationPage } from './pages/criminal-organization/criminal-organization';
 import { GuildPage } from './pages/guild/guild';
 import { TavernPage } from './pages/tavern/tavern';
@@ -83,7 +82,12 @@ export const routes: Routes = [
   },
   {
     path: 'dungeons',
-    component: Dungeons
+    loadComponent: () => import('./pages/dungeons/dungeons').then((m) => m.Dungeons),
+  },
+  {
+    path: 'dungeon-generation',
+    loadComponent: () =>
+      import('./pages/dungeon-generation/dungeon-generation').then((m) => m.DungeonGeneration),
   },
   {
     path: 'criminal-organization',

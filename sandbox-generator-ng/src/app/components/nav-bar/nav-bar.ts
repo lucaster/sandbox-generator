@@ -25,6 +25,7 @@ export class NavBar {
     { path: '/settlements', label: 'Settlements' },
     { path: '/lairs', label: 'Lairs' },
     { path: '/dungeons', label: 'Dungeons' },
+    { path: '/dungeon-generation', label: 'Dungeon Generation' },
     { path: '/criminal-organization', label: 'Criminal Orgs' },
     { path: '/guild', label: 'Guilds' },
     { path: '/tavern', label: 'Taverns' },
