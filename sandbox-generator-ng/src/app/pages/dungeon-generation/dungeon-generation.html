@@ -31,6 +31,47 @@
     />
     Include room shapes
   </label>
+  <label class="check">
+    <input
+      id="show-loops"
+      type="checkbox"
+      [checked]="showLoops()"
+      (change)="onShowLoopsChange($event)"
+    />
+    Show loops
+  </label>
+  <label class="check">
+    <input
+      id="hand-drawn"
+      type="checkbox"
+      [checked]="handDrawn()"
+      (change)="onHandDrawnChange($event)"
+    />
+    Hand-drawn
+  </label>
+  <fieldset class="view-toggle">
+    <legend>View</legend>
+    <label>
+      <input
+        type="radio"
+        name="dungeon-view"
+        value="map"
+        [checked]="view() === 'map'"
+        (change)="onViewChange($event)"
+      />
+      Map
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="dungeon-view"
+        value="diagram"
+        [checked]="view() === 'diagram'"
+        (change)="onViewChange($event)"
+      />
+      Diagram
+    </label>
+  </fieldset>
   <button type="button" (click)="onGenerate()">Generate level</button>
 </div>
 
@@ -44,13 +85,215 @@
     <p>Entrance corridor: {{ plan.entranceCorridorId }}</p>
   </section>
 
-  <section>
+  <section class="map-section" [class.is-hidden]="view() !== 'map'">
+    <h2>Dungeon map</h2>
+    <p>
+      Classic floor plan: rooms and passages drawn on a square grid, with walls, doors and stairs.
+      Hover the symbols for details.
+    </p>
+    @if (visibleMap(); as map) {
+      <div class="dungeon-map-scroll">
+        <svg
+          class="dungeon-map-svg"
+          role="img"
+          aria-label="Dungeon floor plan map of the generated level"
+          [attr.viewBox]="'0 0 ' + map.width + ' ' + map.height"
+          [attr.width]="map.width"
+          [attr.height]="map.height"
+        >
+          <defs>
+            <pattern
+              id="map-grid-pattern"
+              [attr.width]="map.tileSize"
+              [attr.height]="map.tileSize"
+              patternUnits="userSpaceOnUse"
+            >
+              <circle class="map-grid-dot" cx="1" cy="1" r="0.7" />
+            </pattern>
+          </defs>
+          <rect class="map-background" x="0" y="0" [attr.width]="map.width" [attr.height]="map.height" />
+          <rect
+            class="map-grid"
+            x="0"
+            y="0"
+            [attr.width]="map.width"
+            [attr.height]="map.height"
+            fill="url(#map-grid-pattern)"
+          />
+          <rect class="map-frame" x="4" y="4" [attr.width]="map.width - 8" [attr.height]="map.height - 8" />
+          <rect class="map-frame" x="9" y="9" [attr.width]="map.width - 18" [attr.height]="map.height - 18" />
+
+          @for (passage of map.passages; track passage.key) {
+            <g [attr.class]="'map-passage map-passage--' + passage.style">
+              <title>{{ passage.label }}</title>
+              @if (passage.direct) {
+                <path
+                  class="map-room-link"
+                  fill="none"
+                  stroke="#3b2e20"
+                  stroke-width="2"
+                  stroke-dasharray="6 4"
+                  [attr.d]="passagePath(map, passage)"
+                />
+              } @else {
+                <path class="map-passage-wall" [attr.d]="passagePath(map, passage)" />
+                <path class="map-passage-floor" [attr.d]="passagePath(map, passage)" />
+              }
+            </g>
+          }
+
+          @for (room of map.rooms; track room.number) {
+            <g
+              [attr.class]="'map-room' + (room.secret ? ' map-room--secret' : '')"
+              [attr.transform]="roomTransform(map, room)"
+            >
+              <title>Room {{ room.number }} — {{ room.subtitle }}</title>
+              <path class="map-room-floor" [attr.d]="roomOutline(map, room)" />
+              <path class="map-room-wall" [attr.d]="roomOutline(map, room)" />
+              <text class="map-room-label" y="-3">{{ room.label }}</text>
+              <text class="map-room-subtitle" y="12">{{ room.subtitle }}</text>
+            </g>
+          }
+
+          @for (corridor of map.corridors; track corridor.key) {
+            <text
+              class="map-corridor-label"
+              [attr.x]="corridor.x * map.tileSize"
+              [attr.y]="corridor.y * map.tileSize"
+            >
+              {{ corridor.label }}
+            </text>
+          }
+
+          @for (door of map.doors; track door.key) {
+            <g
+              [attr.class]="
+                'map-door map-door--' + door.orientation + (door.secret ? ' map-door--secret' : '')
+              "
+            >
+              <title>{{ door.label }}</title>
+              @if (door.orientation === 'horizontal') {
+                <line
+                  class="map-door-gap"
+                  [attr.x1]="door.x * map.tileSize - map.tileSize / 2"
+                  [attr.y1]="door.y * map.tileSize"
+                  [attr.x2]="door.x * map.tileSize + map.tileSize / 2"
+                  [attr.y2]="door.y * map.tileSize"
+                />
+                <line
+                  class="map-door-leaf"
+                  [attr.x1]="door.x * map.tileSize - map.tileSize / 2"
+                  [attr.y1]="door.y * map.tileSize"
+                  [attr.x2]="door.x * map.tileSize + map.tileSize / 2"
+                  [attr.y2]="door.y * map.tileSize"
+                />
+              } @else {
+                <line
+                  class="map-door-gap"
+                  [attr.x1]="door.x * map.tileSize"
+                  [attr.y1]="door.y * map.tileSize - map.tileSize / 2"
+                  [attr.x2]="door.x * map.tileSize"
+                  [attr.y2]="door.y * map.tileSize + map.tileSize / 2"
+                />
+                <line
+                  class="map-door-leaf"
+                  [attr.x1]="door.x * map.tileSize"
+                  [attr.y1]="door.y * map.tileSize - map.tileSize / 2"
+                  [attr.x2]="door.x * map.tileSize"
+                  [attr.y2]="door.y * map.tileSize + map.tileSize / 2"
+                />
+              }
+              @if (door.secret) {
+                <text
+                  class="map-door-secret-mark"
+                  [attr.x]="door.x * map.tileSize + map.tileSize / 2"
+                  [attr.y]="door.y * map.tileSize - map.tileSize / 2"
+                >
+                  S
+                </text>
+              }
+            </g>
+          }
+
+          @for (stair of map.stairs; track stair.key) {
+            <g
+              class="map-stair"
+              [attr.transform]="
+                'translate(' + stair.x * map.tileSize + ' ' + stair.y * map.tileSize + ')'
+              "
+            >
+              <title>{{ stair.label }}</title>
+              <rect
+                class="map-stair-box"
+                [attr.x]="-map.tileSize / 2"
+                [attr.y]="-map.tileSize / 2"
+                [attr.width]="map.tileSize"
+                [attr.height]="map.tileSize"
+              />
+              @for (step of [1, 2, 3]; track step) {
+                <line
+                  class="map-stair-step"
+                  [attr.x1]="-map.tileSize / 2 + (step * map.tileSize) / 4"
+                  [attr.y1]="-map.tileSize / 2"
+                  [attr.x2]="-map.tileSize / 2 + (step * map.tileSize) / 4"
+                  [attr.y2]="map.tileSize / 2"
+                />
+              }
+              <text class="map-stair-label" [attr.y]="map.tileSize + 10">
+                {{ stair.direction === 'SU' ? 'Up' : 'Down' }}
+              </text>
+            </g>
+          }
+
+          @if (map.entrance; as entrance) {
+            <g
+              class="map-entrance"
+              [attr.transform]="
+                'translate(' + entrance.x * map.tileSize + ' ' + entrance.y * map.tileSize + ')'
+              "
+            >
+              <title>Entrance to the dungeon</title>
+              <line
+                class="map-entrance-line"
+                [attr.x1]="-map.tileSize * 3"
+                [attr.y1]="0"
+                [attr.x2]="-map.tileSize"
+                [attr.y2]="0"
+              />
+              <polygon
+                class="map-entrance-head"
+                [attr.points]="
+                  -map.tileSize + ',' + -map.tileSize / 4 + ' ' +
+                  (-map.tileSize + map.tileSize / 2) + ',0 ' +
+                  -map.tileSize + ',' + map.tileSize / 4
+                "
+              />
+              <text class="map-entrance-label" [attr.y]="-map.tileSize">Ingresso</text>
+            </g>
+          }
+
+          <text class="map-title" [attr.x]="map.width / 2" y="26">
+            DUNGEON — LEVEL {{ depthLabel(plan.depth) }}
+          </text>
+        </svg>
+      </div>
+      <ul class="map-legend" aria-label="Map symbols">
+        <li><span class="map-symbol map-symbol--wall"></span>Wall</li>
+        <li><span class="map-symbol map-symbol--door"></span>Door</li>
+        <li><span class="map-symbol map-symbol--secret"></span>Secret door</li>
+        <li><span class="map-symbol map-symbol--stairs"></span>Stairs</li>
+        <li><span class="map-symbol map-symbol--entrance">→</span>Entrance</li>
+      </ul>
+    }
+  </section>
+
+  <section class="diagram-section" [class.is-hidden]="view() !== 'diagram'">
     <h2>Level diagram</h2>
     <p>
       Schematic layout: rooms, corridors and exits are placed by distance from the entrance.
       Lines are connections, not walls; this is not a map to scale.
     </p>
-    @if (diagram(); as diagram) {
+    @if (visibleDiagram(); as diagram) {
       <div class="floor-plan-scroll">
         <svg
           class="floor-plan-svg"
@@ -89,7 +332,9 @@
         <li><span class="legend-line connector--porta"></span>Door</li>
         <li><span class="legend-line connector--segreta"></span>Secret door</li>
         <li><span class="legend-line connector--scala"></span>Stairs</li>
-        <li><span class="legend-line connector--loop"></span>Loop to existing room</li>
+        @if (showLoops()) {
+          <li><span class="legend-line connector--loop"></span>Loop to existing room</li>
+        }
       </ul>
     }
   </section>

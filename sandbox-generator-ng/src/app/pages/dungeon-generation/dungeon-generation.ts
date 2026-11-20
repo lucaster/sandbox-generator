@@ -9,6 +9,13 @@ import {
   type PlacedDungeonCorridor,
   type PlacedDungeonRoom,
 } from '../../../data/dungeon';
+import {
+  buildDungeonMap,
+  type DungeonMap,
+  type DungeonMapPassage,
+  type DungeonMapRoom,
+} from '../../../data/dungeon-map';
+import { sketchPath } from '../../../data/sketch';
 
 type FloorPlanNodeShape = 'entrance' | 'corridor' | 'room' | 'exit';
 type FloorPlanConnectionStyle =
@@ -140,10 +147,35 @@ export class DungeonGeneration implements OnInit {
   readonly roomCount = signal(12);
   readonly depth = signal<DungeonDepth | null>(null);
   readonly includeRoomShapes = signal(false);
+  readonly showLoops = signal(true);
+  readonly handDrawn = signal(true);
+  readonly view = signal<'map' | 'diagram'>('map');
   readonly floorPlan = signal<DungeonFloorPlan | null>(null);
   readonly diagram = computed(() => {
     const plan = this.floorPlan();
     return plan ? this.createFloorPlanDiagram(plan) : null;
+  });
+  readonly visibleDiagram = computed(() => {
+    const diagram = this.diagram();
+    return diagram && !this.showLoops()
+      ? { ...diagram, connections: diagram.connections.filter((c) => c.style !== 'loop') }
+      : diagram;
+  });
+  readonly map = computed(() => {
+    const plan = this.floorPlan();
+    return plan ? buildDungeonMap(plan) : null;
+  });
+  readonly visibleMap = computed(() => {
+    const map = this.map();
+    if (!map || this.showLoops()) {
+      return map;
+    }
+    return {
+      ...map,
+      passages: map.passages.filter((passage) => passage.style !== 'loop'),
+      corridors: map.corridors.filter((corridor) => !corridor.loop),
+      doors: map.doors.filter((door) => !door.loop),
+    };
   });
 
   ngOnInit(): void {
@@ -171,6 +203,14 @@ export class DungeonGeneration implements OnInit {
 
   onIncludeRoomShapesChange(event: Event): void {
     this.includeRoomShapes.set((event.target as HTMLInputElement).checked);
+  }
+
+  onShowLoopsChange(event: Event): void {
+    this.showLoops.set((event.target as HTMLInputElement).checked);
+  }
+
+  onHandDrawnChange(event: Event): void {
+    this.handDrawn.set((event.target as HTMLInputElement).checked);
   }
 
   onGenerate(): void {
@@ -215,6 +255,34 @@ export class DungeonGeneration implements OnInit {
     return `${this.nodeLabel(connection.from)} → ${this.nodeLabel(connection.to)} (${via})${connection.loop ? ' [loop]' : ''}`;
   }
 
+  onViewChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    if (value === 'map' || value === 'diagram') {
+      this.view.set(value);
+    }
+  }
+
+  passagePath(map: DungeonMap, passage: DungeonMapPassage): string {
+    const path = passage.points
+      .map(
+        (point, index) =>
+          `${index === 0 ? 'M' : 'L'} ${point.x * map.tileSize} ${point.y * map.tileSize}`,
+      )
+      .join(' ');
+    return this.handDrawn() ? sketchPath(path, `passage:${passage.key}`) : path;
+  }
+
+  roomOutline(map: DungeonMap, room: DungeonMapRoom): string {
+    const outline = floorPlanOutline(room.shape, room.width * map.tileSize, room.height * map.tileSize);
+    return this.handDrawn() ? sketchPath(outline, `room:${room.number}`) : outline;
+  }
+
+  roomTransform(map: DungeonMap, room: DungeonMapRoom): string {
+    const x = (room.x + room.width / 2) * map.tileSize;
+    const y = (room.y + room.height / 2) * map.tileSize;
+    return `translate(${x} ${y})`;
+  }
+
   private createFloorPlanDiagram(plan: DungeonFloorPlan): FloorPlanDiagram {
     const roomByNumber = new Map(plan.rooms.map((room) => [room.number, room]));
     const corridorById = new Map(plan.corridors.map((corridor) => [corridor.id, corridor]));
@@ -257,9 +325,12 @@ export class DungeonGeneration implements OnInit {
     for (const [level, group] of nodesByLevel) {
       maxLevel = Math.max(maxLevel, level);
       maxPerLevel = Math.max(maxPerLevel, group.length);
+    }
+    for (const [level, group] of nodesByLevel) {
+      const offset = ((maxPerLevel - group.length) * floorPlanRowGap) / 2;
       group.forEach((node, index) => {
         node.x = floorPlanLeft + level * floorPlanColumnGap;
-        node.y = floorPlanTop + index * floorPlanRowGap;
+        node.y = floorPlanTop + offset + index * floorPlanRowGap;
       });
     }
 

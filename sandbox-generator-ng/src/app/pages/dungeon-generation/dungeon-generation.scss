@@ -20,6 +20,194 @@ section {
   margin-block: 1.5rem;
 }
 
+.view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.15rem 0.6rem 0.35rem;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+}
+
+.view-toggle legend {
+  padding-inline: 0.25rem;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.is-hidden {
+  display: none;
+}
+
+.dungeon-map-scroll {
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid #8a775c;
+  box-shadow: inset 0 0 24px rgba(74, 54, 28, 0.25);
+}
+
+.dungeon-map-svg {
+  display: block;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.map-background {
+  fill: #e9d9b4;
+}
+
+.map-grid-dot {
+  fill: rgba(90, 70, 40, 0.16);
+}
+
+.map-frame {
+  fill: none;
+  stroke: #6b5434;
+  stroke-width: 1.5;
+}
+
+.map-title {
+  fill: #5a4327;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-anchor: middle;
+}
+
+.map-passage-wall {
+  fill: none;
+  stroke: #3b2e20;
+  stroke-width: 20;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.map-passage-floor {
+  fill: none;
+  stroke: #f6ecd2;
+  stroke-width: 16;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.map-room-floor {
+  fill: #fbf3dd;
+}
+
+.map-room-wall {
+  fill: none;
+  stroke: #3b2e20;
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+
+.map-room--secret .map-room-wall {
+  stroke: #7c3b2c;
+  stroke-dasharray: 7 4;
+}
+
+.map-room-label {
+  fill: #3b2e20;
+  font-size: 12px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.map-room-subtitle {
+  fill: #7a6647;
+  font-size: 9px;
+  text-anchor: middle;
+}
+
+.map-door-gap {
+  stroke: #fbf3dd;
+  stroke-width: 8;
+}
+
+.map-door-leaf {
+  stroke: #3b2e20;
+  stroke-width: 2.5;
+}
+
+.map-door--secret .map-door-leaf {
+  stroke: #7c3b2c;
+  stroke-dasharray: 3 2;
+}
+
+.map-door-secret-mark {
+  fill: #7c3b2c;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.map-stair-box {
+  fill: #f6ecd2;
+  stroke: #3b2e20;
+  stroke-width: 2;
+}
+
+.map-stair-step {
+  stroke: #3b2e20;
+  stroke-width: 1.5;
+}
+
+.map-stair-label,
+.map-entrance-label,
+.map-corridor-label {
+  fill: #3b2e20;
+  font-size: 11px;
+  text-anchor: middle;
+  font-weight: 700;
+}
+
+.map-entrance-line {
+  stroke: #3b2e20;
+  stroke-width: 2;
+}
+
+.map-entrance-head {
+  fill: #3b2e20;
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.map-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.map-symbol {
+  display: inline-block;
+  width: 1.5rem;
+  height: 0.85rem;
+  border: 2px solid #3b2e20;
+  background: #fbf3dd;
+}
+
+.map-symbol--secret {
+  border-color: #7c3b2c;
+  border-style: dashed;
+}
+
+.map-symbol--stairs {
+  border-style: double;
+  border-width: 4px;
+}
+
+.map-symbol--entrance {
+  border-color: transparent;
+  background: none;
+  color: #3b2e20;
+  text-align: center;
+}
+
 .floor-plan-scroll {
   max-width: 100%;
   overflow-x: auto;
